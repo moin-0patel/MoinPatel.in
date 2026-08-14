@@ -7,6 +7,7 @@ import { AuthProvider } from '@/app/AuthProvider'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
 import { RouteErrorBoundary } from '@/app/RouteErrorBoundary'
 import { ScrollToTop } from '@/app/ScrollToTop'
+import { ToastProvider } from '@/app/ToastProvider'
 import { createQueryClient } from '@/lib/queryClient'
 import { PublicLayout } from '@/layouts/PublicLayout'
 
@@ -71,62 +72,67 @@ export function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <AuthProvider>
-            <ScrollToTop />
-            <RouteErrorBoundary
-              context="root"
-              fallback={(_error, reset) => (
+          {/* FR-NAV-07 — inside the router so a toast can outlive a route
+              change ("Published" should still be readable after the redirect),
+              and outside the boundary so an error toast survives a crash. */}
+          <ToastProvider>
+            <AuthProvider>
+              <ScrollToTop />
+              <RouteErrorBoundary
+                context="root"
+                fallback={(_error, reset) => (
+                  <Suspense fallback={<RouteFallback />}>
+                    <ServerErrorPage onReload={reset} />
+                  </Suspense>
+                )}
+              >
                 <Suspense fallback={<RouteFallback />}>
-                  <ServerErrorPage onReload={reset} />
-                </Suspense>
-              )}
-            >
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
-                  {/* --- Public --- */}
-                  <Route element={<PublicLayout />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="about" element={<AboutPage />} />
-                    <Route path="experience" element={<ExperiencePage />} />
-                    <Route path="projects" element={<ProjectsPage />} />
-                    <Route path="projects/:slug" element={<ProjectDetailPage />} />
-                    <Route path="skills" element={<SkillsPage />} />
-                    <Route path="contact" element={<ContactPage />} />
-                    <Route path="resume" element={<ResumePage />} />
-                    <Route path="500" element={<ServerErrorPage />} />
-                    {/* FR-NAV-08 — unknown routes render 404, not a blank page. */}
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Route>
+                  <Routes>
+                    {/* --- Public --- */}
+                    <Route element={<PublicLayout />}>
+                      <Route index element={<HomePage />} />
+                      <Route path="about" element={<AboutPage />} />
+                      <Route path="experience" element={<ExperiencePage />} />
+                      <Route path="projects" element={<ProjectsPage />} />
+                      <Route path="projects/:slug" element={<ProjectDetailPage />} />
+                      <Route path="skills" element={<SkillsPage />} />
+                      <Route path="contact" element={<ContactPage />} />
+                      <Route path="resume" element={<ResumePage />} />
+                      <Route path="500" element={<ServerErrorPage />} />
+                      {/* FR-NAV-08 — unknown routes render 404, not a blank page. */}
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Route>
 
-                  {/* --- Admin ---
+                    {/* --- Admin ---
                       Login sits OUTSIDE the protected tree: guarding it would
                       redirect to itself forever. */}
-                  <Route path="/admin/login" element={<AdminLoginPage />} />
-                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="/admin/login" element={<AdminLoginPage />} />
+                    <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedRoute>
-                        <AdminLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="dashboard" element={<DashboardPage />} />
-                    <Route path="projects" element={<AdminProjectsPage />} />
-                    <Route path="experience" element={<AdminExperiencePage />} />
-                    <Route path="skills" element={<AdminSkillsPage />} />
-                    <Route path="education" element={<AdminEducationPage />} />
-                    <Route path="social-links" element={<AdminSocialLinksPage />} />
-                    <Route path="messages" element={<AdminMessagesPage />} />
-                    <Route path="media" element={<AdminMediaPage />} />
-                    <Route path="resume" element={<AdminResumePage />} />
-                    <Route path="settings" element={<AdminSettingsPage />} />
-                  </Route>
-                </Routes>
-              </Suspense>
-            </RouteErrorBoundary>
-          </AuthProvider>
+                    <Route
+                      path="/admin"
+                      element={
+                        <ProtectedRoute>
+                          <AdminLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route path="dashboard" element={<DashboardPage />} />
+                      <Route path="projects" element={<AdminProjectsPage />} />
+                      <Route path="experience" element={<AdminExperiencePage />} />
+                      <Route path="skills" element={<AdminSkillsPage />} />
+                      <Route path="education" element={<AdminEducationPage />} />
+                      <Route path="social-links" element={<AdminSocialLinksPage />} />
+                      <Route path="messages" element={<AdminMessagesPage />} />
+                      <Route path="media" element={<AdminMediaPage />} />
+                      <Route path="resume" element={<AdminResumePage />} />
+                      <Route path="settings" element={<AdminSettingsPage />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
+              </RouteErrorBoundary>
+            </AuthProvider>
+          </ToastProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </HelmetProvider>

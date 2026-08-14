@@ -25,9 +25,10 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 | 8 | Homepage — all nine content sections, database-driven footer | ✅ Done |
 | 9 | Project index with filters; case study with pipeline diagram, gallery, sticky nav | ✅ Done |
 | 10 | `/experience`, `/skills`, `/about` | ✅ Done |
-| 11 | Contact form with validation and spam controls | ⬜ Not started |
-| 12 | Supabase Auth — login page and route guard done; password reset pending | 🟡 Partial |
-| 13–17 | Admin CMS, storage, SEO/prerender, testing, deployment | ⬜ Not started |
+| 11 | Contact form with validation and spam controls | ✅ Done |
+| 12 | Supabase Auth — login, route guard, admin membership check | 🟡 Password reset pending |
+| 13 | Admin CMS | 🟡 Dashboard, projects list + publish control, messages inbox, toasts done. Project editor and the other six resources pending |
+| 14–17 | Storage, SEO/prerender, testing, deployment | ⬜ Not started |
 
 The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
 against a real PostgreSQL engine with no Docker (see below). `supabase gen types` still cannot run,
