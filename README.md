@@ -17,16 +17,16 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 |---|---|---|
 | 1 | Vite + React + TS scaffold, Tailwind + tokens, ESLint/Prettier, `.env.example` | ✅ Done |
 | 2 | Supabase config, `lib/env.ts`, typed client | ✅ Done |
-| 3 | Enums, tables, constraints, indexes, functions, triggers as migrations | ✅ Written — **not yet applied** |
-| 4 | Seed files for all nine resources | ✅ Written — **not yet applied** |
-| 5 | RLS everywhere, `is_admin()`, all policies, storage buckets + policies | ✅ Written — **not yet applied** |
+| 3 | Enums, tables, constraints, indexes, functions, triggers as migrations | ✅ Done — verified by `db:verify` |
+| 4 | Seed files for all nine resources | ✅ Done — verified by `db:verify` |
+| 5 | RLS everywhere, `is_admin()`, all policies, storage buckets + policies | ✅ Done — RLS behaviour verified as `anon` |
 | 6 | Router, providers, layouts, services, hooks, query keys, error boundaries | ✅ Done |
 | 7 | Tokens, typography, primitives, skeletons, empty/error states | 🟡 Core done; Dialog/Sheet/Toast/Tabs pending |
 | 8–17 | Homepage, projects, CV pages, contact, auth, admin CMS, storage, SEO, testing, deployment | ⬜ Not started |
 
-**No migration has been executed against a database.** Docker is not installed on this machine, so
-`supabase start` and `supabase db reset` cannot run, and `supabase gen types` cannot be executed
-either. The SQL is written and reviewed but **unverified** — see [Verifying the database](#verifying-the-database).
+The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
+against a real PostgreSQL engine with no Docker (see below). `supabase gen types` still cannot run,
+so `src/types/database.types.ts` remains hand-written — that is the one outstanding database caveat.
 
 ---
 
@@ -41,14 +41,44 @@ npm run dev
 `src/lib/env.ts` validates the environment at startup and fails loudly with a specific message if a
 variable is missing or malformed, rather than letting `undefined` propagate into a fetch.
 
-### Verifying the database
+### Verifying the database — no Docker required
 
-Requires **Docker Desktop**, which is a prerequisite of the Supabase local stack.
+```bash
+npm run db:verify
+```
+
+Executes every migration and every seed file against a real PostgreSQL engine
+(**PGlite** — Postgres 18 compiled to WebAssembly, in-process, no daemon), then runs 87 assertions.
+`scripts/db/supabase-shim.sql` supplies the platform objects a Supabase project would already have:
+the `anon`/`authenticated` roles, the `extensions` schema, `auth.users` + `auth.uid()`, and the
+`storage` tables.
+
+Because PGlite is real Postgres with real roles, the harness can `SET ROLE anon` and prove that RLS
+actually hides drafts, private projects and `contact_messages` — which is the core of the PRD's
+release-blocking security suite (41.3).
+
+**What it proves:** the SQL parses and executes in dependency order; every constraint, index, trigger
+and function is created; the CHECK constraints reject what they should; the seed satisfies them and
+is idempotent; and RLS behaves correctly for `anon` and for an authenticated non-admin.
+
+**What it does not prove:** anything about the Supabase platform itself — PostgREST behaviour,
+Storage's own MIME/size enforcement, or Auth. Those are shimmed. This is a fast, honest first gate,
+not a replacement for `supabase db reset`.
+
+<details>
+<summary>With Docker, if you ever add it</summary>
 
 ```bash
 npx supabase start        # boots Postgres, Auth, Storage, Studio
 npm run db:reset          # applies every migration, then the seed files in order
-npm run db:types          # regenerates src/types/database.types.ts — see the warning below
+npm run db:types          # regenerates src/types/database.types.ts
+```
+</details>
+
+### Run everything
+
+```bash
+npm run check             # typecheck + lint + db:verify
 ```
 
 > ⚠️ `src/types/database.types.ts` is currently **hand-written** to match the migrations, because the
@@ -76,7 +106,9 @@ npx supabase gen types typescript --linked > src/types/database.types.ts
 | `npm run lint` | ESLint, including the PRD layering rules |
 | `npm run typecheck` | `tsc -b --noEmit` |
 | `npm run format` | Prettier write |
-| `npm run db:reset` | Rebuild the local database from migrations + seed |
+| `npm run check` | typecheck + lint + db:verify |
+| `npm run db:verify` | Execute all migrations + seed against PGlite and assert 87 checks |
+| `npm run db:reset` | Rebuild the local database from migrations + seed (needs Docker) |
 | `npm run db:types` | Regenerate the database types |
 | `npm run db:diff` | Capture schema drift (MIG-06) |
 

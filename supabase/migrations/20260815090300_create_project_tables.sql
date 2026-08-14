@@ -64,8 +64,14 @@ create table public.projects (
   updated_at           timestamptz not null default now(),
 
   -- --- Shape constraints (23.2) -----------------------------------------
+  -- The ::text cast is load-bearing. `slug` is citext, and citext's ~ operator
+  -- is CASE-INSENSITIVE — so `slug ~ '^[a-z0-9...]'` happily accepts
+  -- 'Not-A-Slug', and the uppercase would then appear in canonical URLs, the
+  -- sitemap and every shared link. Casting to text restores case sensitivity
+  -- while keeping citext's case-insensitive UNIQUE, which is what we actually
+  -- want from the type.
   constraint projects_slug_check
-    check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 3 and 80),
+    check (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 3 and 80),
   constraint projects_title_check   check (length(title) between 1 and 120),
   constraint projects_summary_check check (length(summary) between 1 and 200),
   constraint projects_seo_title_check

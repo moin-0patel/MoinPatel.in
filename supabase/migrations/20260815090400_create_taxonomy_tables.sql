@@ -19,8 +19,10 @@ create table public.technologies (
   sort_order  integer not null default 0,
   published   boolean not null default true,
 
+  -- ::text because citext's ~ is case-insensitive and would accept uppercase.
+  -- See the note on projects_slug_check.
   constraint technologies_slug_check
-    check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60),
+    check (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60),
   constraint technologies_color_check
     check (color_hex is null or color_hex ~ '^#[0-9A-Fa-f]{6}$'),
   constraint technologies_website_check

@@ -82,8 +82,9 @@ create table public.skill_categories (
   sort_order  integer not null default 0,
   published   boolean not null default true,
 
+  -- ::text because citext's ~ is case-insensitive (see projects_slug_check).
   constraint skill_categories_slug_check
-    check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60)
+    check (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60)
 );
 
 -- -------------------------------------------------------------------------
@@ -108,8 +109,9 @@ create table public.skills (
   created_at  timestamptz not null default now(),
 
   constraint skills_unique_in_category unique (category_id, name),
+  -- ::text because citext's ~ is case-insensitive (see projects_slug_check).
   constraint skills_slug_check
-    check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60)
+    check (slug::text ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and length(slug) between 1 and 60)
 );
 
 -- -------------------------------------------------------------------------
