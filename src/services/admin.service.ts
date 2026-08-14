@@ -119,7 +119,10 @@ export async function setProjectPublicationState(
 ): Promise<void> {
   const context = 'admin.setProjectPublicationState'
   try {
-    const { error } = await supabase.from('projects').update({ publication_state: state }).eq('id', id)
+    const { error } = await supabase
+      .from('projects')
+      .update({ publication_state: state })
+      .eq('id', id)
     if (error) throw error
   } catch (cause) {
     throw reportError(cause, context)

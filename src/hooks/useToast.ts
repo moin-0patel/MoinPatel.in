@@ -25,11 +25,7 @@ export function useToast() {
       info: (message: string, description?: string) => show(message, 'info', description),
       /** Pass the caught value; only AppError.userMessage is ever displayed. */
       error: (message: string, cause?: unknown) =>
-        show(
-          message,
-          'error',
-          cause instanceof AppError ? cause.userMessage : undefined,
-        ),
+        show(message, 'error', cause instanceof AppError ? cause.userMessage : undefined),
       dismiss,
     }),
     [show, dismiss],
