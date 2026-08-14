@@ -6,7 +6,7 @@
   "description": "Moin Patel — Personal Portfolio & Project Case Study Platform",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -19,7 +19,8 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
     "db:diff": "supabase db diff",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run db:verify"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run db:verify",
+    "build:only": "tsc -b && vite build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.8.0",

@@ -28,9 +28,10 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 | 11 | Contact form with validation and spam controls | ✅ Done |
 | 12 | Supabase Auth — login, route guard, admin membership check | 🟡 Password reset pending |
 | 13 | Admin CMS | 🟡 Dashboard, projects list + publish control, messages inbox, toasts done. Project editor and the other six resources pending |
-| 14–15 | Storage, SEO/prerender | ⬜ Not started |
+| 14 | Storage — upload, resize, resume versions | ⬜ Not started |
+| 15 | SEO — prerender, sitemap, robots, security headers | ✅ Done (needs a live DB for project routes) |
 | 16 | Testing | 🟡 122 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending |
-| 17 | Deployment | ⬜ Not started |
+| 17 | Deployment | 🟡 vercel.json + docs/deployment.md written; not yet deployed |
 
 The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
 against a real PostgreSQL engine with no Docker (see below). `supabase gen types` still cannot run,
@@ -109,7 +110,7 @@ npx supabase gen types typescript --linked > src/types/database.types.ts
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Vite dev server |
-| `npm run build` | Typecheck, then production build to `dist/` |
+| `npm run build` | Typecheck, Vite build, then prerender + sitemap |
 | `npm run preview` | Serve the built output |
 | `npm run lint` | ESLint, including the PRD layering rules |
 | `npm run typecheck` | `tsc -b --noEmit` |
