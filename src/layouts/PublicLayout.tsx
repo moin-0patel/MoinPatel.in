@@ -1,7 +1,17 @@
+import { Mail } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 
+import { BRAND_ICONS } from '@/components/ui/brandIcons'
+import { useProfile, useSocialLinks } from '@/hooks/useSiteContent'
 import { cn } from '@/lib/cn'
 import { currentYear } from '@/lib/dates'
+
+const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  ...BRAND_ICONS,
+  mail: Mail,
+  email: Mail,
+}
 
 /**
  * PublicLayout — PRD 9.3, FR-NAV-01…08.
@@ -99,20 +109,37 @@ function Header() {
   )
 }
 
+/**
+ * FR-NAV-03 — name, positioning line, quick links, database-driven social
+ * links, email, a dynamic copyright year, and the build credit.
+ */
 function Footer() {
+  const { data: profile } = useProfile()
+  const { data: socialLinks } = useSocialLinks()
+
+  // 12.11 — only links flagged for the footer, and only published ones (the
+  // service already applies the publication filter).
+  const footerSocials = (socialLinks ?? []).filter((link) => link.showInFooter)
+
   return (
     <footer className="border-subtle mt-24 border-t" role="contentinfo">
-      <div className="container-page flex flex-col gap-8 py-12 md:flex-row md:justify-between">
+      <div className="container-page grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-3">
         <div>
-          <p className="text-primary font-display text-lg font-semibold">Moin Patel</p>
+          <p className="text-primary font-display text-lg font-semibold">
+            {profile?.fullName ?? 'Moin Patel'}
+          </p>
           {/* The approved positioning line (PRD 2). */}
           <p className="text-secondary measure mt-2 text-sm">
-            Building AI-powered systems that automate work, save time, and reduce business costs.
+            {profile?.positioningLine ??
+              'Building AI-powered systems that automate work, save time, and reduce business costs.'}
           </p>
         </div>
 
         <nav aria-label="Footer">
-          <ul className="flex flex-col gap-2 md:items-end">
+          <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
+            Pages
+          </h2>
+          <ul className="flex flex-col gap-2">
             {NAV_ITEMS.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} className="text-secondary hover:text-primary text-sm">
@@ -122,6 +149,36 @@ function Footer() {
             ))}
           </ul>
         </nav>
+
+        {/* 12.11 "Empty": the whole column is hidden when nothing is published.
+            That is the state today — LinkedIn and GitHub are unpublished
+            placeholders pending Q-02/Q-03. */}
+        {(footerSocials.length > 0 || profile?.emailPublic) && (
+          <div>
+            <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
+              Elsewhere
+            </h2>
+            <ul className="flex flex-col gap-2">
+              {footerSocials.map((link) => {
+                const Icon = SOCIAL_ICONS[link.iconKey] ?? Mail
+                const isExternal = link.url.startsWith('http')
+                return (
+                  <li key={link.id}>
+                    <a
+                      href={link.url}
+                      {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
+                    >
+                      <Icon className="size-4" />
+                      {link.label}
+                      {isExternal && <span className="visually-hidden">(opens in a new tab)</span>}
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
       </div>
 
       <div className="container-page border-subtle text-muted flex flex-col gap-2 border-t py-6 text-xs md:flex-row md:justify-between">
