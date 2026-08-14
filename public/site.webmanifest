@@ -1,0 +1,17 @@
+{
+  "name": "Moin Patel — AI Developer & AI Automation Executive",
+  "short_name": "Moin Patel",
+  "description": "Building AI-powered systems that automate work, save time, and reduce business costs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090C",
+  "theme_color": "#08090C",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

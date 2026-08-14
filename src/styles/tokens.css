@@ -1,0 +1,131 @@
+/* ---------------------------------------------------------------------------
+ * Design tokens — PRD Section 32.
+ *
+ * Dark-first. This is the single place design values are defined: `@theme`
+ * both emits them as CSS custom properties on :root (inspectable, themeable)
+ * and teaches Tailwind the matching utilities. A component writes
+ * `bg-surface` / `text-secondary`; a raw hex literal in a component is a defect.
+ *
+ * A light theme is P3. It is added by redefining these variables under a
+ * selector — no component changes (32.1).
+ * ------------------------------------------------------------------------- */
+
+@theme {
+  /* --- 32.1 Colour ------------------------------------------------------- */
+  /* Surfaces */
+  --color-base: #08090c; /* page background */
+  --color-surface: #0e1015; /* cards, header on scroll */
+  --color-surface-raised: #14171f; /* modals, popovers, admin sidebar */
+
+  /* Borders */
+  --color-subtle: #1e222c; /* default */
+  --color-strong: #2c3240; /* hover / focus */
+
+  /* Text */
+  --color-primary: #f2f4f8; /* headings, body     — >= 7:1 on base */
+  --color-secondary: #a8b0c0; /* supporting copy    — >= 4.5:1 on base */
+  --color-muted: #6e7688; /* captions, meta */
+
+  /* Accent — exactly one hue family. A second accent is a design regression. */
+  --color-accent: #4f7df3;
+  --color-accent-strong: #3b62d9;
+  --color-accent-soft: oklch(from #4f7df3 l c h / 0.12);
+  --color-indigo-deep: #1b1f4b; /* CTA band gradient anchor only */
+
+  /* Status — always paired with text, never colour alone (A11Y-09) */
+  --color-success: #3fbf87;
+  --color-warning: #e0a32e;
+  --color-danger: #e5484d;
+  --color-success-soft: oklch(from #3fbf87 l c h / 0.12);
+  --color-warning-soft: oklch(from #e0a32e l c h / 0.12);
+  --color-danger-soft: oklch(from #e5484d l c h / 0.12);
+
+  --color-focus-ring: #8aa9ff;
+
+  /* --- 32.2 Type families ------------------------------------------------ */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- 32.2 Type scale ---------------------------------------------------
+   * Fluid, interpolating between the 375px and 1440px viewports, so sizes
+   * never jump at a breakpoint. Declared in rem so A11Y-14 (200% zoom) holds.
+   */
+  --text-xs: clamp(0.75rem, 0.73rem + 0.08vw, 0.8125rem);
+  --text-sm: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.97rem + 0.12vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.08rem + 0.19vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.18rem + 0.28vw, 1.4375rem);
+  --text-2xl: clamp(1.5rem, 1.39rem + 0.47vw, 1.8125rem);
+  --text-3xl: clamp(1.875rem, 1.69rem + 0.79vw, 2.375rem);
+  --text-4xl: clamp(2.25rem, 1.96rem + 1.23vw, 3rem);
+  --text-5xl: clamp(3rem, 2.5rem + 2.13vw, 4.25rem);
+  --text-6xl: clamp(3.75rem, 3.02rem + 3.11vw, 5.625rem);
+
+  --leading-display: 1.15;
+  --leading-body: 1.6;
+  --leading-ui: 1.5;
+
+  --tracking-display: -0.02em;
+  --tracking-mono: 0.02em;
+
+  /* --- 32.3 Radius ------------------------------------------------------- */
+  --radius-sm: 6px; /* chips, inputs */
+  --radius-md: 10px; /* buttons */
+  --radius-lg: 16px; /* cards */
+  --radius-xl: 24px; /* modals, hero photo frame */
+
+  /* --- 32.3 Elevation — three levels only; no hard drop shadows ---------- */
+  --shadow-raised: 0 8px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 0.65);
+
+  /* --- 32.5 Motion ------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* --- 33.1 Breakpoints — replaces Tailwind's defaults -------------------- */
+  --breakpoint-sm: 430px; /* large phones */
+  --breakpoint-md: 768px; /* tablets portrait */
+  --breakpoint-lg: 1024px; /* tablets landscape, small laptops */
+  --breakpoint-xl: 1280px; /* laptops */
+  --breakpoint-2xl: 1440px; /* desktops */
+}
+
+/* Values that are not Tailwind utility namespaces but are still tokens. */
+:root {
+  --duration-hover: 140ms;
+  --duration-entry: 200ms;
+  --duration-page: 150ms;
+  --duration-modal-in: 200ms;
+  --duration-modal-out: 150ms;
+  --duration-process-line: 600ms;
+
+  --content-max: 1280px; /* 33.1 */
+  --prose-measure: 72ch; /* FR-CASE-10 */
+  --gutter: 24px;
+  --header-height: 64px;
+
+  /* Glass: sticky header and mobile nav sheet ONLY (32.3). Nowhere else. */
+  --glass-blur: 12px;
+  --glass-bg: rgb(8 9 12 / 0.72);
+}
+
+@media (max-width: 429px) {
+  :root {
+    --gutter: 16px;
+  }
+}
+
+/*
+ * A11Y-10 / 32.5 — the site must be fully usable and visually complete with
+ * all animation disabled. Motion collapses to zero; nothing else changes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-hover: 0ms;
+    --duration-entry: 0ms;
+    --duration-page: 0ms;
+    --duration-modal-in: 0ms;
+    --duration-modal-out: 0ms;
+    --duration-process-line: 0ms;
+  }
+}

@@ -1,0 +1,104 @@
+/* ---------------------------------------------------------------------------
+ * Typography — PRD Section 32.2.
+ *
+ * Three families carry the personality:
+ *   display  large sizes, tight tracking  — h1, positioning line, section and
+ *                                           project titles
+ *   body     everything else
+ *   mono     small structural roles only  — step numbers, dates, tech labels
+ *
+ * The families and the fluid scale are declared in tokens.css so Tailwind
+ * generates matching utilities. This file owns font loading and the element
+ * defaults that keep unstyled markup correct.
+ *
+ * Fonts are self-hosted WOFF2, subset to Latin, `font-display: swap`, with no
+ * render-blocking third-party request (PERF-08). The @font-face blocks are
+ * written but commented out: the files are not in the repo yet because Q-25
+ * asks Moin to confirm the display/body/mono trio before ~200 KB of binaries
+ * are committed. Until then the stacks fall through to close system
+ * equivalents — the site renders correctly, only the personality is
+ * provisional. Uncomment together with dropping the files into /public/fonts.
+ * ------------------------------------------------------------------------- */
+
+/*
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk-latin-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk-latin-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-latin-variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono-latin-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
+}
+*/
+
+/* --- Element defaults ---------------------------------------------------- */
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-5xl);
+}
+h2 {
+  font-size: var(--text-3xl);
+}
+h3 {
+  font-size: var(--text-xl);
+}
+h4 {
+  font-size: var(--text-lg);
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* A11Y-14 — text resizes to 200% without loss of content or function, so there
+   are no fixed-height text containers and no px line-heights in this file. */

@@ -1,0 +1,15 @@
+# SEO-07 — allow the public site, disallow /admin, point to the sitemap.
+#
+# This is a crawler courtesy, not a security control. /admin is additionally
+# noindex,nofollow (SEO-09) and, more to the point, every admin operation is
+# authorised by RLS regardless of who finds the URL (SEC-02).
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+# Absolute URL required by the spec. Regenerated at build time from
+# VITE_SITE_URL by the sitemap step (SEO-06, Phase 15) — the placeholder host
+# below is replaced there, and Q-11 must be answered before launch.
+Sitemap: https://REQUIRES-USER-INPUT-DOMAIN/sitemap.xml

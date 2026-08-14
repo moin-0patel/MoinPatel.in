@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- A11Y-15: language is declared. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#08090C" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!--
+      apple-touch-icon.png is intentionally not linked yet: a <link> to a file
+      that does not exist is a guaranteed 404 on every iOS visit. It goes in
+      with the real favicon set, which needs the final brand mark (Q-04).
+      Pre-launch checklist item: "favicon and manifest present" (41.8).
+    -->
+
+    <!-- Fallback metadata only. Every route renders its own via <SEO> (SEO-01). -->
+    <title>Moin Patel — AI Developer &amp; AI Automation Executive</title>
+    <meta
+      name="description"
+      content="Building AI-powered systems that automate work, save time, and reduce business costs."
+    />
+
+    <!--
+      PERF-08: fonts are self-hosted, so there is nothing to preconnect to.
+      When the WOFF2 files land (see src/styles/typography.css and Q-25), add
+      a single <link rel="preload" as="font" type="font/woff2" crossorigin>
+      for the DISPLAY face only — preloading all three costs more than it saves.
+    -->
+
+    <style>
+      /*
+       * PRD 39 — initial app load: a minimal inline shell painted before any
+       * JavaScript runs, replaced on hydration. No full-screen branded splash.
+       * Inlined deliberately so it costs zero extra requests.
+       */
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #08090c;
+        color: #f2f4f8;
+      }
+      #root {
+        min-height: 100dvh;
+      }
+      .boot-shell {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+      }
+      .boot-shell__mark {
+        font:
+          600 1.125rem/1 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        letter-spacing: 0.18em;
+        color: #6e7688;
+      }
+      /* A11Y-10 / PRD 32.5 — no motion when the user has asked for none. */
+      @media (prefers-reduced-motion: no-preference) {
+        .boot-shell__mark {
+          animation: boot-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes boot-pulse {
+          0%,
+          100% {
+            opacity: 0.45;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot-shell">
+        <p class="boot-shell__mark">MP</p>
+      </div>
+    </div>
+    <noscript>
+      <p style="padding: 24px; font-family: system-ui, sans-serif">
+        This site needs JavaScript to load its content. You can still reach Moin Patel by email.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+# Normalise line endings so a Windows checkout and a CI Linux runner produce
+# identical diffs. Without this, every file shows as fully modified when the
+# repo moves between the two.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.avif binary
+*.pdf binary
+*.woff2 binary

@@ -1,0 +1,161 @@
+/* ---------------------------------------------------------------------------
+ * Global stylesheet — the only entry point imported by main.tsx.
+ *
+ * Order matters: Tailwind first, then tokens (which extend Tailwind's theme),
+ * then typography, then the small set of global rules below.
+ * ------------------------------------------------------------------------- */
+
+@import 'tailwindcss';
+@import './tokens.css';
+@import './typography.css';
+
+/* --- Reset / base -------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* FR-CASE-06: sticky in-page nav must not cover the target heading. */
+  scroll-padding-top: calc(var(--header-height) + 24px);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* A11Y-10 — honour the OS setting for the smooth-scroll behaviour too. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--color-base);
+  color: var(--color-primary);
+}
+
+/* Media never overflows its container (33.1: no horizontal scroll, any width). */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/* Inputs inherit type rather than falling back to the browser's default. */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Long unbroken strings (URLs in case-study prose) must not blow out layout. */
+p,
+li,
+h1,
+h2,
+h3,
+h4 {
+  overflow-wrap: break-word;
+}
+
+/* --- Focus (A11Y-04) -----------------------------------------------------
+ * A visible indicator on every focusable element. `outline: none` without a
+ * replacement is prohibited — so the ring is defined once, globally, rather
+ * than per component where it can be forgotten.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Pointer users do not get a ring; keyboard users always do. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Selection ----------------------------------------------------------- */
+::selection {
+  background-color: var(--color-accent);
+  color: #ffffff;
+}
+
+/* --- Scrollbar ----------------------------------------------------------- */
+@supports (scrollbar-color: auto) {
+  html {
+    scrollbar-color: var(--color-strong) var(--color-base);
+    scrollbar-width: thin;
+  }
+}
+
+/* --- Utilities ----------------------------------------------------------- */
+
+/*
+ * RES-05 / 13.2 — technology chip rows scroll horizontally with momentum and
+ * no visible scrollbar; they never wrap into four lines.
+ */
+@utility scroll-row {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Page gutters and max width, applied by every layout (33.1). */
+@utility container-page {
+  inline-size: 100%;
+  max-inline-size: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* FR-CASE-10 — prose is capped at 72ch for readability. */
+@utility measure {
+  max-inline-size: var(--prose-measure);
+}
+
+/*
+ * A11Y-05 — the skip link is the first focusable element on every page. It is
+ * off-screen until focused, never `display: none` (which would remove it from
+ * the tab order entirely).
+ */
+@utility visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 32.3 — glass is permitted on the sticky header and the mobile nav sheet
+   only, and always with a hairline border so the edge stays legible. */
+@utility glass {
+  background-color: var(--glass-bg);
+  border-bottom: 1px solid var(--color-subtle);
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: blur(var(--glass-blur));
+  }
+}
