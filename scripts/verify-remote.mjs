@@ -18,6 +18,7 @@
  */
 
 import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -189,12 +190,73 @@ if (missing.length > 0) {
   console.log(`\n${'─'.repeat(68)}`)
   console.log('ABORTED — the schema is not applied to this project.\n')
   console.log(`  Missing: ${missing.join(', ')}\n`)
-  console.log('  Apply it first:')
-  console.log('    npx supabase link --project-ref <ref>')
-  console.log('    npx supabase db push --include-seed\n')
+  console.log('  Apply it first — either:')
+  console.log('    a) Dashboard → SQL Editor → paste supabase/apply-all.sql → Run')
+  console.log('       (regenerate it with `npm run db:build-apply-all`)')
+  console.log(
+    '    b) npx supabase link --project-ref <ref> && npx supabase db push --include-seed\n',
+  )
   console.log('  Not continuing: with no tables, the RLS checks below would pass')
   console.log('  because nothing exists to refuse — which would be misleading.\n')
   process.exit(1)
+}
+
+/* --- 1b. The hand-written types, checked against the live schema ------------
+ *
+ * `src/types/database.types.ts` is transcribed by hand, which contradicts
+ * MIG-08. `supabase gen types` needs a CLI login we are deliberately not
+ * setting up, so generation is unavailable — but "unavailable" is not the same
+ * as "unverifiable".
+ *
+ * This parses the Row block of every table out of the type file and asks
+ * PostgREST for exactly those columns. PostgREST rejects an unknown column, so
+ * a name I got wrong fails here loudly. The type file is PARSED rather than
+ * duplicated: a third hand-maintained copy of the schema would be one more
+ * thing to drift.
+ *
+ * What this proves: table and column NAMES match the live database.
+ * What it does not: nullability, defaults, or enum membership. Those still
+ * need the generator, and the README says so.
+ */
+
+section('Hand-written types vs the live schema')
+
+const typeSource = await readFile(join(ROOT, 'src', 'types', 'database.types.ts'), 'utf8')
+
+/** Pull `{ table: [column, ...] }` out of the generated-format type file. */
+function parseRowColumns(source) {
+  const result = {}
+  // Each entry looks like:  <indent>tableName: {\n<indent>  Row: {\n ... \n<indent>  }
+  const tableBlock = /^ {6}(\w+): \{\n {8}Row: \{\n([\s\S]*?)\n {8}\}/gm
+  let match
+  while ((match = tableBlock.exec(source)) !== null) {
+    const [, table, body] = match
+    const columns = []
+    for (const line of body.split('\n')) {
+      const column = /^ {10}(\w+)\??:/.exec(line)
+      if (column) columns.push(column[1])
+    }
+    if (columns.length > 0) result[table] = columns
+  }
+  return result
+}
+
+const declared = parseRowColumns(typeSource)
+const declaredTables = Object.keys(declared)
+
+check(
+  `parsed column lists for ${TABLES.length} tables from the type file`,
+  TABLES.every((t) => declaredTables.includes(t)),
+  `not parsed: ${TABLES.filter((t) => !declaredTables.includes(t)).join(', ')}`,
+)
+
+for (const table of TABLES) {
+  const columns = declared[table]
+  if (!columns) continue
+  const { error } = await supabase.from(table).select(columns.join(',')).limit(1)
+  // A table with no SELECT policy returns zero rows without error, so this
+  // isolates "that column does not exist" from "you may not read this".
+  check(`${table}: all ${columns.length} declared columns exist`, !error, error?.message)
 }
 
 /* --- 2. RLS as a real anonymous caller ------------------------------------- */

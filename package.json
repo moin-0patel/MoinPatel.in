@@ -19,6 +19,7 @@
     "check": "npm run typecheck && npm run lint && npm run test && npm run db:verify",
     "db:verify": "node scripts/verify-schema.mjs",
     "db:verify:remote": "node scripts/verify-remote.mjs",
+    "db:build-apply-all": "node scripts/build-apply-all.mjs",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --linked > src/types/database.types.ts",
     "db:types:local": "supabase gen types typescript --local > src/types/database.types.ts",

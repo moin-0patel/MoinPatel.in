@@ -13,25 +13,25 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 
 ## Current state
 
-| Phase | Scope | Status |
-|---|---|---|
-| 1 | Vite + React + TS scaffold, Tailwind + tokens, ESLint/Prettier, `.env.example` | ✅ Done |
-| 2 | Supabase config, `lib/env.ts`, typed client | ✅ Done |
-| 3 | Enums, tables, constraints, indexes, functions, triggers as migrations | ✅ Done — verified by `db:verify` |
-| 4 | Seed files for all nine resources | ✅ Done — verified by `db:verify` |
-| 5 | RLS everywhere, `is_admin()`, all policies, storage buckets + policies | ✅ Done — RLS behaviour verified as `anon` |
-| 6 | Router, providers, layouts, services, hooks, query keys, error boundaries | ✅ Done |
-| 7 | Tokens, typography, primitives, skeletons, empty/error states | 🟡 Core done; Sheet/Toast/Tabs pending |
-| 8 | Homepage — all nine content sections, database-driven footer | ✅ Done |
-| 9 | Project index with filters; case study with pipeline diagram, gallery, sticky nav | ✅ Done |
-| 10 | `/experience`, `/skills`, `/about` | ✅ Done |
-| 11 | Contact form with validation and spam controls | ✅ Done |
-| 12 | Supabase Auth — login, route guard, admin membership check | 🟡 Password reset pending |
-| 13 | Admin CMS | ✅ All nine resources: dashboard, projects + editor, experience, skills, education, social links, messages, settings. Media/resume await Phase 14 |
-| 14 | Storage — upload, resize, resume versions | ⬜ Not started |
-| 15 | SEO — prerender, sitemap, robots, security headers | ✅ Done (needs a live DB for project routes) |
-| 16 | Testing | 🟡 150 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending |
-| 17 | Deployment | 🟡 vercel.json + docs/deployment.md written; not yet deployed |
+| Phase | Scope                                                                             | Status                                                                                                                                            |
+| ----- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Vite + React + TS scaffold, Tailwind + tokens, ESLint/Prettier, `.env.example`    | ✅ Done                                                                                                                                           |
+| 2     | Supabase config, `lib/env.ts`, typed client                                       | ✅ Done                                                                                                                                           |
+| 3     | Enums, tables, constraints, indexes, functions, triggers as migrations            | ✅ Done — verified by `db:verify`                                                                                                                 |
+| 4     | Seed files for all nine resources                                                 | ✅ Done — verified by `db:verify`                                                                                                                 |
+| 5     | RLS everywhere, `is_admin()`, all policies, storage buckets + policies            | ✅ Done — RLS behaviour verified as `anon`                                                                                                        |
+| 6     | Router, providers, layouts, services, hooks, query keys, error boundaries         | ✅ Done                                                                                                                                           |
+| 7     | Tokens, typography, primitives, skeletons, empty/error states                     | 🟡 Core done; Sheet/Toast/Tabs pending                                                                                                            |
+| 8     | Homepage — all nine content sections, database-driven footer                      | ✅ Done                                                                                                                                           |
+| 9     | Project index with filters; case study with pipeline diagram, gallery, sticky nav | ✅ Done                                                                                                                                           |
+| 10    | `/experience`, `/skills`, `/about`                                                | ✅ Done                                                                                                                                           |
+| 11    | Contact form with validation and spam controls                                    | ✅ Done                                                                                                                                           |
+| 12    | Supabase Auth — login, route guard, admin membership check                        | 🟡 Password reset pending                                                                                                                         |
+| 13    | Admin CMS                                                                         | ✅ All nine resources: dashboard, projects + editor, experience, skills, education, social links, messages, settings. Media/resume await Phase 14 |
+| 14    | Storage — upload, resize, resume versions                                         | ⬜ Not started                                                                                                                                    |
+| 15    | SEO — prerender, sitemap, robots, security headers                                | ✅ Done (needs a live DB for project routes)                                                                                                      |
+| 16    | Testing                                                                           | 🟡 150 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending                                                             |
+| 17    | Deployment                                                                        | 🟡 vercel.json + docs/deployment.md written; not yet deployed                                                                                     |
 
 The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
 against a real PostgreSQL engine with no Docker (see below). `supabase gen types` still cannot run,
@@ -74,26 +74,67 @@ is idempotent; and RLS behaves correctly for `anon` and for an authenticated non
 Storage's own MIME/size enforcement, or Auth. Those are shimmed. This is a fast, honest first gate,
 not a replacement for `supabase db reset`.
 
+### Verifying against a live project
+
+```bash
+npm run db:verify:remote            # read-only
+npm run db:verify:remote --writes   # adds the contact-form trigger tests
+```
+
+Runs the same class of assertions against a real Supabase project using **only the
+publishable key** — the privilege level a hostile visitor has. That is the point: the key
+is safe to ship only because RLS is correct, and this measures it rather than assuming it.
+It covers PostgREST, Storage and Auth, which the PGlite shim cannot.
+
+It aborts rather than reporting partial results if the schema is absent — with no tables,
+"anon cannot insert" would pass because there is nothing to insert into, and a wall of
+green ticks that proves nothing is worse than no result at all.
+
+### Bringing up a new Supabase project
+
+Preferred (PRD DEP-07), and required for every migration after the first:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <ref>
+npx supabase db push --include-seed
+```
+
+For the **one-time initial bootstrap**, if you would rather not set up CLI auth: paste
+`supabase/apply-all.sql` into the dashboard SQL Editor and run it. That file is generated
+by `npm run db:build-apply-all`, which executes it through PGlite before writing it — so
+it is proven to run before it reaches a real database. It also writes the
+`supabase_migrations.schema_migrations` rows, so a later `db push` behaves correctly
+instead of trying to re-apply everything (R-10).
+
+Never hand-edit `apply-all.sql`. Regenerate it.
+
 <details>
 <summary>With Docker, if you ever add it</summary>
 
 ```bash
 npx supabase start        # boots Postgres, Auth, Storage, Studio
 npm run db:reset          # applies every migration, then the seed files in order
-npm run db:types          # regenerates src/types/database.types.ts
+npm run db:types:local    # regenerates src/types/database.types.ts
 ```
+
 </details>
 
 ### Run everything
 
 ```bash
-npm run check             # typecheck + lint + db:verify
+npm run check             # typecheck + lint + test + db:verify
 ```
 
-> ⚠️ `src/types/database.types.ts` is currently **hand-written** to match the migrations, because the
-> generator needs a running database. PRD MIG-08 says that file is generated and never hand-edited.
-> Run `npm run db:types` the moment a database is reachable; treat any difference the generator
-> produces as the hand-written file being wrong.
+> ⚠️ `src/types/database.types.ts` is **hand-written** to match the migrations, because
+> `supabase gen types` needs CLI auth. PRD MIG-08 says that file is generated and never
+> hand-edited, so this is a known deviation.
+>
+> `db:verify:remote` narrows it: it parses every column out of the type file and asks
+> PostgREST for exactly those, so **table and column names are confirmed against the live
+> schema**. Nullability, defaults and enum membership are still unverified. Run
+> `npm run db:types` once a CLI link exists and treat any difference as the hand-written
+> file being wrong.
 
 Against a hosted project instead of a local stack:
 
@@ -107,20 +148,22 @@ npx supabase gen types typescript --linked > src/types/database.types.ts
 
 ## Scripts
 
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Vite dev server |
-| `npm run build` | Typecheck, Vite build, then prerender + sitemap |
-| `npm run preview` | Serve the built output |
-| `npm run lint` | ESLint, including the PRD layering rules |
-| `npm run typecheck` | `tsc -b --noEmit` |
-| `npm run format` | Prettier write |
-| `npm run test` | 150 unit tests (Vitest) |
-| `npm run check` | typecheck + lint + test + db:verify |
-| `npm run db:verify` | Execute all migrations + seed against PGlite and assert 87 checks |
-| `npm run db:reset` | Rebuild the local database from migrations + seed (needs Docker) |
-| `npm run db:types` | Regenerate the database types |
-| `npm run db:diff` | Capture schema drift (MIG-06) |
+| Command                      | Purpose                                                           |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `npm run dev`                | Vite dev server                                                   |
+| `npm run build`              | Typecheck, Vite build, then prerender + sitemap                   |
+| `npm run preview`            | Serve the built output                                            |
+| `npm run lint`               | ESLint, including the PRD layering rules                          |
+| `npm run typecheck`          | `tsc -b --noEmit`                                                 |
+| `npm run format`             | Prettier write                                                    |
+| `npm run test`               | 150 unit tests (Vitest)                                           |
+| `npm run check`              | typecheck + lint + test + db:verify                               |
+| `npm run db:verify`          | Execute all migrations + seed against PGlite and assert 87 checks |
+| `npm run db:verify:remote`   | Same guarantees against the LIVE project, anon key only           |
+| `npm run db:build-apply-all` | Regenerate `supabase/apply-all.sql`, the one-paste bootstrap      |
+| `npm run db:reset`           | Rebuild the local database from migrations + seed (needs Docker)  |
+| `npm run db:types`           | Regenerate the database types                                     |
+| `npm run db:diff`            | Capture schema drift (MIG-06)                                     |
 
 ---
 
@@ -196,13 +239,13 @@ Authorisation lives in the database, not in components (Principle 6).
 Content and launch questions are tracked in **PRD Section 49** (Q-01 … Q-25). The ones that block
 work rather than polish:
 
-| ID | Question | Blocks |
-|---|---|---|
-| Q-01 | The resume PDF itself, so every seeded fact can be verified | Seed content — all of it is UNVERIFIED |
-| Q-04 | Final profile photo + alt text | Hero (Phase 8) |
+| ID          | Question                                                          | Blocks                                                                             |
+| ----------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Q-01        | The resume PDF itself, so every seeded fact can be verified       | Seed content — all of it is UNVERIFIED                                             |
+| Q-04        | Final profile photo + alt text                                    | Hero (Phase 8)                                                                     |
 | Q-06 / Q-07 | May the three projects be published, and may the client be named? | **All three projects are seeded as draft**, so `/projects` is empty until answered |
-| Q-11 | Domain name | Canonical URLs, sitemap, OG, auth redirects |
-| Q-12 | Short and long About copy, in Moin's own words | About section |
-| Q-16 | Exam Build Platform: what is genuinely built vs planned | That case study |
+| Q-11        | Domain name                                                       | Canonical URLs, sitemap, OG, auth redirects                                        |
+| Q-12        | Short and long About copy, in Moin's own words                    | About section                                                                      |
+| Q-16        | Exam Build Platform: what is genuinely built vs planned           | That case study                                                                    |
 
 Plus one environment blocker: **Docker is not installed**, so no migration has been executed.
