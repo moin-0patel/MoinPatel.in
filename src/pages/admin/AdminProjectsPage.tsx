@@ -1,4 +1,4 @@
-import { ExternalLink, Star, Trash2 } from 'lucide-react'
+import { ExternalLink, Pencil, Plus, Star, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -52,6 +52,12 @@ export default function AdminProjectsPage() {
             {projects ? `${projects.length} total` : 'Loading…'}
           </p>
         </div>
+        <Button asChild>
+          <Link to="/admin/projects/new">
+            <Plus className="size-4" aria-hidden="true" />
+            New project
+          </Link>
+        </Button>
       </div>
 
       {/* FR-ADM-03 — search and state filter on every list view. */}
@@ -104,6 +110,13 @@ export default function AdminProjectsPage() {
               projects.length === 0
                 ? 'A project becomes a case study: the problem, the mechanism, and what changed.'
                 : 'Try a different search or state filter.'
+            }
+            action={
+              projects.length === 0 ? (
+                <Button asChild>
+                  <Link to="/admin/projects/new">Add your first project</Link>
+                </Button>
+              ) : undefined
             }
           />
         ) : (
@@ -168,6 +181,14 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
+          <Button variant="secondary" size="sm" asChild>
+            <Link to={`/admin/projects/${project.id}/edit`}>
+              <Pencil className="size-3.5" aria-hidden="true" />
+              Edit
+              <span className="visually-hidden">{project.title}</span>
+            </Link>
+          </Button>
+
           {project.publication_state === 'published' && (
             <Button variant="ghost" size="sm" asChild>
               <Link to={`/projects/${project.slug}`} target="_blank" rel="noopener noreferrer">

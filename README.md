@@ -27,10 +27,10 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 | 10 | `/experience`, `/skills`, `/about` | ✅ Done |
 | 11 | Contact form with validation and spam controls | ✅ Done |
 | 12 | Supabase Auth — login, route guard, admin membership check | 🟡 Password reset pending |
-| 13 | Admin CMS | 🟡 Dashboard, projects list + publish control, messages inbox, toasts done. Project editor and the other six resources pending |
+| 13 | Admin CMS | 🟡 Dashboard, projects list, project editor, messages inbox, toasts done. Experience/skills/education/social/settings editors pending |
 | 14 | Storage — upload, resize, resume versions | ⬜ Not started |
 | 15 | SEO — prerender, sitemap, robots, security headers | ✅ Done (needs a live DB for project routes) |
-| 16 | Testing | 🟡 122 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending |
+| 16 | Testing | 🟡 150 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending |
 | 17 | Deployment | 🟡 vercel.json + docs/deployment.md written; not yet deployed |
 
 The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
@@ -115,7 +115,7 @@ npx supabase gen types typescript --linked > src/types/database.types.ts
 | `npm run lint` | ESLint, including the PRD layering rules |
 | `npm run typecheck` | `tsc -b --noEmit` |
 | `npm run format` | Prettier write |
-| `npm run test` | 122 unit tests (Vitest) |
+| `npm run test` | 150 unit tests (Vitest) |
 | `npm run check` | typecheck + lint + test + db:verify |
 | `npm run db:verify` | Execute all migrations + seed against PGlite and assert 87 checks |
 | `npm run db:reset` | Rebuild the local database from migrations + seed (needs Docker) |

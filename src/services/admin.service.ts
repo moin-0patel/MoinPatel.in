@@ -1,6 +1,6 @@
 import { reportError } from '@/lib/errors'
 import { supabase } from '@/lib/supabaseClient'
-import type { TablesUpdate } from '@/types/database.types'
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/database.types'
 import type {
   AdminProjectRow,
   ContactMessage,
@@ -220,6 +220,177 @@ export async function deleteMessage(id: string): Promise<void> {
   try {
     const { error } = await supabase.from('contact_messages').delete().eq('id', id)
     if (error) throw error
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+/* --- Project editor ------------------------------------------------------- */
+
+/** Every column the editor needs, drafts included. Admin-only fields present. */
+const EDITOR_COLUMNS = `
+  id, slug, title, subtitle, summary,
+  description_md, problem_md, solution_md, how_it_works_md, architecture_md,
+  business_impact_md, challenges_md, lessons_md, role_description,
+  status, category, publication_state, visibility_mode,
+  is_featured, sort_order, started_on, completed_on,
+  cover_image_path, cover_image_alt,
+  github_url, live_url, video_url,
+  client_name, client_disclosed, confidentiality_note,
+  seo_title, seo_description, og_image_path
+` as const
+
+export type EditorProject = {
+  project: Tables<'projects'>
+  technologyIds: string[]
+  pipelineSteps: Tables<'project_pipeline_steps'>[]
+  images: Tables<'project_images'>[]
+}
+
+export async function getProjectForEdit(id: string): Promise<EditorProject | null> {
+  const context = 'admin.getProjectForEdit'
+  try {
+    const [project, techs, steps, images] = await Promise.all([
+      supabase.from('projects').select(EDITOR_COLUMNS).eq('id', id).maybeSingle(),
+      supabase.from('project_technologies').select('technology_id').eq('project_id', id),
+      supabase
+        .from('project_pipeline_steps')
+        .select('*')
+        .eq('project_id', id)
+        .order('step_number', { ascending: true }),
+      supabase
+        .from('project_images')
+        .select('*')
+        .eq('project_id', id)
+        .order('sort_order', { ascending: true }),
+    ])
+
+    for (const result of [project, techs, steps, images]) {
+      if (result.error) throw result.error
+    }
+    if (!project.data) return null
+
+    return {
+      project: project.data as Tables<'projects'>,
+      technologyIds: techs.data?.map((row) => row.technology_id) ?? [],
+      pipelineSteps: steps.data ?? [],
+      images: images.data ?? [],
+    }
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+/** AC-PROJ-2 — uniqueness is checked before save, not discovered by a 23505. */
+export async function isSlugAvailable(slug: string, excludeId?: string): Promise<boolean> {
+  const context = 'admin.isSlugAvailable'
+  try {
+    let query = supabase.from('projects').select('id').eq('slug', slug).limit(1)
+    if (excludeId) query = query.neq('id', excludeId)
+    const { data, error } = await query
+    if (error) throw error
+    return (data?.length ?? 0) === 0
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+export async function createProject(values: TablesInsert<'projects'>): Promise<string> {
+  const context = 'admin.createProject'
+  try {
+    // The id is needed to attach technologies and pipeline steps next, so this
+    // is the one place a select-after-insert is worth the round trip.
+    const { data, error } = await supabase.from('projects').insert(values).select('id').single()
+    if (error) throw error
+    return data.id
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+/**
+ * Replace a project's technology links.
+ *
+ * Delete-then-insert rather than a diff: the join table has no data of its own
+ * beyond `tech_role` and `sort_order`, both of which are being rewritten
+ * anyway, so a diff would be more code for an identical result.
+ */
+export async function setProjectTechnologies(
+  projectId: string,
+  technologyIds: string[],
+): Promise<void> {
+  const context = 'admin.setProjectTechnologies'
+  try {
+    const { error: deleteError } = await supabase
+      .from('project_technologies')
+      .delete()
+      .eq('project_id', projectId)
+    if (deleteError) throw deleteError
+
+    if (technologyIds.length === 0) return
+
+    const { error } = await supabase.from('project_technologies').insert(
+      technologyIds.map((technology_id, index) => ({
+        project_id: projectId,
+        technology_id,
+        sort_order: index,
+      })),
+    )
+    if (error) throw error
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+/**
+ * Replace a project's pipeline steps.
+ *
+ * `step_number` is reassigned from the array index, so reordering in the UI is
+ * just reordering the array — and the (project_id, step_number) UNIQUE
+ * constraint can never be violated by a partial swap.
+ */
+export async function setPipelineSteps(
+  projectId: string,
+  steps: { label: string; description: string | null; techNote: string | null }[],
+): Promise<void> {
+  const context = 'admin.setPipelineSteps'
+  try {
+    const { error: deleteError } = await supabase
+      .from('project_pipeline_steps')
+      .delete()
+      .eq('project_id', projectId)
+    if (deleteError) throw deleteError
+
+    const populated = steps.filter((step) => step.label.trim() !== '')
+    if (populated.length === 0) return
+
+    const { error } = await supabase.from('project_pipeline_steps').insert(
+      populated.map((step, index) => ({
+        project_id: projectId,
+        step_number: index + 1,
+        label: step.label.trim(),
+        description: step.description?.trim() || null,
+        tech_note: step.techNote?.trim() || null,
+      })),
+    )
+    if (error) throw error
+  } catch (cause) {
+    throw reportError(cause, context)
+  }
+}
+
+/** The technology picker's options, including unpublished ones (admin view). */
+export async function listAllTechnologies(): Promise<Tables<'technologies'>[]> {
+  const context = 'admin.listAllTechnologies'
+  try {
+    const { data, error } = await supabase
+      .from('technologies')
+      .select('*')
+      .order('category', { ascending: true })
+      .order('name', { ascending: true })
+      .limit(200)
+    if (error) throw error
+    return data
   } catch (cause) {
     throw reportError(cause, context)
   }

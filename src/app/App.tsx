@@ -45,6 +45,7 @@ const AdminLayout = lazy(() =>
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage'))
 const AdminProjectsPage = lazy(() => import('@/pages/admin/AdminProjectsPage'))
+const ProjectEditorPage = lazy(() => import('@/pages/admin/ProjectEditorPage'))
 const AdminExperiencePage = lazy(() => import('@/pages/admin/AdminExperiencePage'))
 const AdminSkillsPage = lazy(() => import('@/pages/admin/AdminSkillsPage'))
 const AdminEducationPage = lazy(() => import('@/pages/admin/AdminEducationPage'))
@@ -119,6 +120,8 @@ export function App() {
                     >
                       <Route path="dashboard" element={<DashboardPage />} />
                       <Route path="projects" element={<AdminProjectsPage />} />
+                      <Route path="projects/new" element={<ProjectEditorPage />} />
+                      <Route path="projects/:id/edit" element={<ProjectEditorPage />} />
                       <Route path="experience" element={<AdminExperiencePage />} />
                       <Route path="skills" element={<AdminSkillsPage />} />
                       <Route path="education" element={<AdminEducationPage />} />
