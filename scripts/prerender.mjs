@@ -223,8 +223,7 @@ function buildHtml(shell, { title, description, canonical, image, type = 'websit
 async function writeRoute(routePath, html) {
   // '/' -> dist/index.html; '/about' -> dist/about/index.html. Static hosts
   // serve the latter for /about without any rewrite rule.
-  const target =
-    routePath === '/' ? join(DIST, 'index.html') : join(DIST, routePath, 'index.html')
+  const target = routePath === '/' ? join(DIST, 'index.html') : join(DIST, routePath, 'index.html')
   await mkdir(dirname(target), { recursive: true })
   await writeFile(target, html, 'utf8')
 }

@@ -154,17 +154,28 @@ for (const file of seedFiles) {
 console.log('\nStructure')
 
 const EXPECTED_TABLES = [
-  'admin_users', 'analytics_events', 'contact_messages', 'education',
-  'experience', 'experience_items', 'experience_technologies', 'project_images',
-  'project_pipeline_steps', 'project_technologies', 'projects', 'profiles',
-  'resume_versions', 'site_settings', 'skill_categories', 'skills',
-  'social_links', 'technologies',
+  'admin_users',
+  'analytics_events',
+  'contact_messages',
+  'education',
+  'experience',
+  'experience_items',
+  'experience_technologies',
+  'project_images',
+  'project_pipeline_steps',
+  'project_technologies',
+  'projects',
+  'profiles',
+  'resume_versions',
+  'site_settings',
+  'skill_categories',
+  'skills',
+  'social_links',
+  'technologies',
 ]
 
 const tables = (
-  await db.query(
-    `select tablename from pg_tables where schemaname = 'public' order by tablename`,
-  )
+  await db.query(`select tablename from pg_tables where schemaname = 'public' order by tablename`)
 ).rows.map((r) => r.tablename)
 
 check(
@@ -181,53 +192,103 @@ const rlsOff = (
      where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity`,
   )
 ).rows.map((r) => r.relname)
-check('AC-RLS-1: RLS enabled on every public table', rlsOff.length === 0, `off: ${rlsOff.join(', ')}`)
+check(
+  'AC-RLS-1: RLS enabled on every public table',
+  rlsOff.length === 0,
+  `off: ${rlsOff.join(', ')}`,
+)
 
-check('12 enum types created', (await scalar(db,
-  `select count(*)::int from pg_type t join pg_namespace n on n.oid = t.typnamespace
-   where n.nspname = 'public' and t.typtype = 'e'`)) === 12)
+check(
+  '12 enum types created',
+  (await scalar(
+    db,
+    `select count(*)::int from pg_type t join pg_namespace n on n.oid = t.typnamespace
+   where n.nspname = 'public' and t.typtype = 'e'`,
+  )) === 12,
+)
 
-check('v_public_projects view exists', (await scalar(db,
-  `select count(*)::int from pg_views where schemaname='public' and viewname='v_public_projects'`)) === 1)
+check(
+  'v_public_projects view exists',
+  (await scalar(
+    db,
+    `select count(*)::int from pg_views where schemaname='public' and viewname='v_public_projects'`,
+  )) === 1,
+)
 
 // 23.20 — without security_invoker the view runs as its owner and bypasses the
 // RLS of its underlying tables. That would silently expose drafts.
-check('v_public_projects has security_invoker = on', String(await scalar(db,
-  `select coalesce((select option_value from pg_options_to_table(c.reloptions)
+check(
+  'v_public_projects has security_invoker = on',
+  String(
+    await scalar(
+      db,
+      `select coalesce((select option_value from pg_options_to_table(c.reloptions)
       where option_name = 'security_invoker'), 'off')
    from pg_class c join pg_namespace n on n.oid=c.relnamespace
-   where n.nspname='public' and c.relname='v_public_projects'`)) === 'on')
+   where n.nspname='public' and c.relname='v_public_projects'`,
+    ),
+  ) === 'on',
+)
 
-check('FR-RES-02: partial unique index on one published resume', (await scalar(db,
-  `select count(*)::int from pg_indexes
-   where schemaname='public' and indexname='resume_versions_one_published'`)) === 1)
+check(
+  'FR-RES-02: partial unique index on one published resume',
+  (await scalar(
+    db,
+    `select count(*)::int from pg_indexes
+   where schemaname='public' and indexname='resume_versions_one_published'`,
+  )) === 1,
+)
 
 // AC-SKILL-3 — the absence of this column is a product decision (FR-SKILL-03).
-check('AC-SKILL-3: skills has NO proficiency column', (await scalar(db,
-  `select count(*)::int from information_schema.columns
+check(
+  'AC-SKILL-3: skills has NO proficiency column',
+  (await scalar(
+    db,
+    `select count(*)::int from information_schema.columns
    where table_schema='public' and table_name='skills'
-     and column_name in ('proficiency','level','rating','percentage')`)) === 0)
+     and column_name in ('proficiency','level','rating','percentage')`,
+  )) === 0,
+)
 
-check('is_admin() exists and is SECURITY DEFINER', (await scalar(db,
-  `select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-   where n.nspname='public' and p.proname='is_admin' and p.prosecdef`)) === 1)
+check(
+  'is_admin() exists and is SECURITY DEFINER',
+  (await scalar(
+    db,
+    `select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+   where n.nspname='public' and p.proname='is_admin' and p.prosecdef`,
+  )) === 1,
+)
 
 // An unpinned search_path on a SECURITY DEFINER function is an escalation path.
-check('all SECURITY DEFINER functions pin search_path', (await scalar(db,
-  `select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+check(
+  'all SECURITY DEFINER functions pin search_path',
+  (await scalar(
+    db,
+    `select count(*)::int from pg_proc p join pg_namespace n on n.oid=p.pronamespace
    where n.nspname='public' and p.prosecdef
      and (p.proconfig is null or not exists (
-       select 1 from unnest(p.proconfig) cfg where cfg like 'search\\_path=%'))`)) === 0)
+       select 1 from unnest(p.proconfig) cfg where cfg like 'search\\_path=%'))`,
+  )) === 0,
+)
 
-check('3 storage buckets created', (await scalar(db,
-  `select count(*)::int from storage.buckets`)) === 3)
+check(
+  '3 storage buckets created',
+  (await scalar(db, `select count(*)::int from storage.buckets`)) === 3,
+)
 
-check('TD-08: resume bucket is private', (await scalar(db,
-  `select public from storage.buckets where id='resume'`)) === false)
+check(
+  'TD-08: resume bucket is private',
+  (await scalar(db, `select public from storage.buckets where id='resume'`)) === false,
+)
 
 // MED-06 / SEC-06 — unsanitised SVG served same-origin is an XSS vector.
-check('MED-06: no bucket allows image/svg+xml', (await scalar(db,
-  `select count(*)::int from storage.buckets where 'image/svg+xml' = any(allowed_mime_types)`)) === 0)
+check(
+  'MED-06: no bucket allows image/svg+xml',
+  (await scalar(
+    db,
+    `select count(*)::int from storage.buckets where 'image/svg+xml' = any(allowed_mime_types)`,
+  )) === 0,
+)
 
 // --- 5. Grants (25.1 "Defence in depth") -----------------------------------
 console.log('\nGrants')
@@ -255,14 +316,21 @@ check(
   'anon can insert contact_messages',
   anonWrites.some((r) => r.table_name === 'contact_messages' && r.privilege_type === 'INSERT'),
 )
-check('anon has no write grant on admin_users', !anonWrites.some((r) => r.table_name === 'admin_users'))
+check(
+  'anon has no write grant on admin_users',
+  !anonWrites.some((r) => r.table_name === 'admin_users'),
+)
 
 // --- 6. Constraints --------------------------------------------------------
 console.log('\nConstraints')
 
-await checkRejects(db, 'profiles is a singleton',
+await checkRejects(
+  db,
+  'profiles is a singleton',
   `insert into public.profiles (full_name, role_title, positioning_line)
-   values ('Second Person','x','y')`, 'profiles_singleton')
+   values ('Second Person','x','y')`,
+  'profiles_singleton',
+)
 
 /*
  * Regression guard. These four columns are `citext`, whose ~ operator is
@@ -271,63 +339,114 @@ await checkRejects(db, 'profiles is a singleton',
  * and every shared link. The constraints cast to ::text. Do not remove the
  * cast; these tests exist to catch its removal.
  */
-await checkRejects(db, 'projects_slug_check rejects uppercase (citext ~ is case-insensitive)',
+await checkRejects(
+  db,
+  'projects_slug_check rejects uppercase (citext ~ is case-insensitive)',
   `insert into public.projects (slug,title,summary,category)
-   values ('Not-A-Slug','t','s','other')`, 'slug_check')
+   values ('Not-A-Slug','t','s','other')`,
+  'slug_check',
+)
 
-await checkRejects(db, 'projects_slug_check rejects a leading hyphen',
+await checkRejects(
+  db,
+  'projects_slug_check rejects a leading hyphen',
   `insert into public.projects (slug,title,summary,category)
-   values ('-bad-slug','t','s','other')`, 'slug_check')
+   values ('-bad-slug','t','s','other')`,
+  'slug_check',
+)
 
-await checkRejects(db, 'technologies_slug_check rejects uppercase',
+await checkRejects(
+  db,
+  'technologies_slug_check rejects uppercase',
   `insert into public.technologies (name,slug,category) values ('X','Upper-Case','other')`,
-  'slug_check')
+  'slug_check',
+)
 
-await checkRejects(db, 'skill_categories_slug_check rejects uppercase',
-  `insert into public.skill_categories (name,slug) values ('X','Upper-Case')`, 'slug_check')
+await checkRejects(
+  db,
+  'skill_categories_slug_check rejects uppercase',
+  `insert into public.skill_categories (name,slug) values ('X','Upper-Case')`,
+  'slug_check',
+)
 
-await checkRejects(db, 'skills_slug_check rejects uppercase',
+await checkRejects(
+  db,
+  'skills_slug_check rejects uppercase',
   `insert into public.skills (category_id,name,slug)
-   values ('00000000-0000-4000-c000-000000000001','X','Upper-Case')`, 'slug_check')
+   values ('00000000-0000-4000-c000-000000000001','X','Upper-Case')`,
+  'slug_check',
+)
 
 // citext must still give case-insensitive UNIQUE — that is why the type is
 // used at all, and the ::text cast above must not have cost us it.
-await checkRejects(db, 'citext still gives case-insensitive slug uniqueness',
+await checkRejects(
+  db,
+  'citext still gives case-insensitive slug uniqueness',
   `insert into public.projects (slug,title,summary,category)
-   values ('EXAM-BUILD-PLATFORM','t','s','other')`, 'slug_check')
+   values ('EXAM-BUILD-PLATFORM','t','s','other')`,
+  'slug_check',
+)
 
-await checkRejects(db, 'FR-ADM-11 publish gate rejects an empty published project',
+await checkRejects(
+  db,
+  'FR-ADM-11 publish gate rejects an empty published project',
   `insert into public.projects (slug,title,summary,category,publication_state)
-   values ('empty-shell','t','s','other','published')`, 'publish_gate')
+   values ('empty-shell','t','s','other','published')`,
+  'publish_gate',
+)
 
-await checkRejects(db, '13.2: github_only requires github_url',
+await checkRejects(
+  db,
+  '13.2: github_only requires github_url',
   `insert into public.projects (slug,title,summary,category,visibility_mode)
-   values ('gh-only','t','s','other','github_only')`, 'github_only_requires_url')
+   values ('gh-only','t','s','other','github_only')`,
+  'github_only_requires_url',
+)
 
-await checkRejects(db, 'A11Y-06: cover image without alt text is rejected',
+await checkRejects(
+  db,
+  'A11Y-06: cover image without alt text is rejected',
   `insert into public.projects (slug,title,summary,category,cover_image_path)
-   values ('no-alt','t','s','other','projects/x.webp')`, 'cover_alt_check')
+   values ('no-alt','t','s','other','projects/x.webp')`,
+  'cover_alt_check',
+)
 
-await checkRejects(db, 'AC-EXP-3: is_current cannot carry an end_date',
+await checkRejects(
+  db,
+  'AC-EXP-3: is_current cannot carry an end_date',
   `insert into public.experience (company,role_title,start_date,end_date,is_current)
-   values ('X','Y','2024-01-01','2025-01-01',true)`, 'current_check')
+   values ('X','Y','2024-01-01','2025-01-01',true)`,
+  'current_check',
+)
 
 // form_rendered_at must be supplied, otherwise the FR-CONT-08 timing trigger
 // rejects the row first and this would pass without testing the length at all.
-await checkRejects(db, 'contact_messages rejects a message under 20 chars',
+await checkRejects(
+  db,
+  'contact_messages rejects a message under 20 chars',
   `insert into public.contact_messages (name,email,subject,message,form_rendered_at)
-   values ('Ada','a@b.co','Hello','too short', now() - interval '10 seconds')`, 'message_check')
+   values ('Ada','a@b.co','Hello','too short', now() - interval '10 seconds')`,
+  'message_check',
+)
 
-await checkRejects(db, 'FR-RES-01: resume_versions rejects a non-PDF',
+await checkRejects(
+  db,
+  'FR-RES-01: resume_versions rejects a non-PDF',
   `insert into public.resume_versions (storage_path,file_name,mime_type,is_published)
-   values ('resume/a.docx','a.docx','application/msword',false)`, 'mime_check')
+   values ('resume/a.docx','a.docx','application/msword',false)`,
+  'mime_check',
+)
 
 // FR-RES-02 / AC-RES-2 — at most one published version, enforced by the index.
 await db.exec(`insert into public.resume_versions (storage_path,file_name,mime_type,is_published)
                values ('resume/v1.pdf','v1.pdf','application/pdf',true)`)
-await checkRejects(db, 'FR-RES-02: a second published resume is rejected',
+await checkRejects(
+  db,
+  'FR-RES-02: a second published resume is rejected',
   `insert into public.resume_versions (storage_path,file_name,mime_type,is_published)
-   values ('resume/v2.pdf','v2.pdf','application/pdf',true)`, 'resume_versions_one_published')
+   values ('resume/v2.pdf','v2.pdf','application/pdf',true)`,
+  'resume_versions_one_published',
+)
 
 // --- 7. Triggers -----------------------------------------------------------
 console.log('\nTriggers')
@@ -335,21 +454,27 @@ console.log('\nTriggers')
 await db.exec(`insert into public.projects (id,slug,title,summary,category,description_md)
                values ('11111111-1111-4111-a111-111111111111','trigger-test','T','S','other','body')`)
 
-check('published_at is null while draft', (await scalar(db,
-  `select published_at from public.projects where slug='trigger-test'`)) === null)
+check(
+  'published_at is null while draft',
+  (await scalar(db, `select published_at from public.projects where slug='trigger-test'`)) === null,
+)
 
 await db.exec(`update public.projects set publication_state='published' where slug='trigger-test'`)
-const firstPublishedAt = await scalar(db,
-  `select published_at from public.projects where slug='trigger-test'`)
+const firstPublishedAt = await scalar(
+  db,
+  `select published_at from public.projects where slug='trigger-test'`,
+)
 check('set_published_at fires on first publish', firstPublishedAt !== null)
 
 // Unpublishing and republishing must not rewrite history: published_at is what
 // "newest first" ordering means.
 await db.exec(`update public.projects set publication_state='draft' where slug='trigger-test'`)
 await db.exec(`update public.projects set publication_state='published' where slug='trigger-test'`)
-check('set_published_at never clears or rewrites the original date',
+check(
+  'set_published_at never clears or rewrites the original date',
   String(await scalar(db, `select published_at from public.projects where slug='trigger-test'`)) ===
-    String(firstPublishedAt))
+    String(firstPublishedAt),
+)
 
 // --- 8. RLS behaviour, as the anon role (the core of PRD 41.3) -------------
 console.log('\nRLS behaviour (executing as anon)')
@@ -371,17 +496,25 @@ await db.exec(`update public.projects set publication_state='draft' where slug='
 
 await db.exec(`set role anon`)
 
-check('AC-RLS-2: anon sees only published, non-private projects',
-  (await scalar(db, `select count(*)::int from public.projects`)) === 1)
+check(
+  'AC-RLS-2: anon sees only published, non-private projects',
+  (await scalar(db, `select count(*)::int from public.projects`)) === 1,
+)
 
-check('anon cannot see a draft by direct slug (AC-PROJ-8)',
-  (await scalar(db, `select count(*)::int from public.projects where slug='trigger-test'`)) === 0)
+check(
+  'anon cannot see a draft by direct slug (AC-PROJ-8)',
+  (await scalar(db, `select count(*)::int from public.projects where slug='trigger-test'`)) === 0,
+)
 
-check('anon cannot see a private project',
-  (await scalar(db, `select count(*)::int from public.projects where slug='private-one'`)) === 0)
+check(
+  'anon cannot see a private project',
+  (await scalar(db, `select count(*)::int from public.projects where slug='private-one'`)) === 0,
+)
 
-check("anon cannot see a draft project's images",
-  (await scalar(db, `select count(*)::int from public.project_images`)) === 0)
+check(
+  "anon cannot see a draft project's images",
+  (await scalar(db, `select count(*)::int from public.project_images`)) === 0,
+)
 
 // AC-RLS-4 — zero rows, NOT an error. An error would itself be a signal.
 let contactReadThrew = false
@@ -391,33 +524,54 @@ try {
 } catch {
   contactReadThrew = true
 }
-check('AC-RLS-4: anon reading contact_messages gets zero rows, not an error',
-  !contactReadThrew && contactRows === 0, contactReadThrew ? 'it threw' : `rows=${contactRows}`)
+check(
+  'AC-RLS-4: anon reading contact_messages gets zero rows, not an error',
+  !contactReadThrew && contactRows === 0,
+  contactReadThrew ? 'it threw' : `rows=${contactRows}`,
+)
 
-check('anon cannot read admin_users',
-  (await scalar(db, `select count(*)::int from public.admin_users`)) === 0)
+check(
+  'anon cannot read admin_users',
+  (await scalar(db, `select count(*)::int from public.admin_users`)) === 0,
+)
 
-check('25.1: anon sees only allow-listed site_settings',
-  (await scalar(db, `select count(*)::int from public.site_settings where not is_public`)) === 0)
+check(
+  '25.1: anon sees only allow-listed site_settings',
+  (await scalar(db, `select count(*)::int from public.site_settings where not is_public`)) === 0,
+)
 
-check('anon sees no unpublished social links (Q-02/Q-03 placeholders stay hidden)',
-  (await scalar(db, `select count(*)::int from public.social_links`)) === 1)
+check(
+  'anon sees no unpublished social links (Q-02/Q-03 placeholders stay hidden)',
+  (await scalar(db, `select count(*)::int from public.social_links`)) === 1,
+)
 
-check('anon sees only published education (Class X/XII stay drafts)',
-  (await scalar(db, `select count(*)::int from public.education`)) === 1)
+check(
+  'anon sees only published education (Class X/XII stay drafts)',
+  (await scalar(db, `select count(*)::int from public.education`)) === 1,
+)
 
-await checkRejects(db, 'AC-PROJ-12: anon cannot insert a project',
+await checkRejects(
+  db,
+  'AC-PROJ-12: anon cannot insert a project',
   `insert into public.projects (slug,title,summary,category) values ('hack','h','s','other')`,
-  'permission denied')
+  'permission denied',
+)
 
-await checkRejects(db, 'anon cannot update a project',
-  `update public.projects set title='hacked' where slug='visible-one'`, 'permission denied')
+await checkRejects(
+  db,
+  'anon cannot update a project',
+  `update public.projects set title='hacked' where slug='visible-one'`,
+  'permission denied',
+)
 
-await checkRejects(db, 'anon cannot delete a contact message',
-  `delete from public.contact_messages`, 'permission denied')
+await checkRejects(
+  db,
+  'anon cannot delete a contact message',
+  `delete from public.contact_messages`,
+  'permission denied',
+)
 
-check('is_admin() is false for anon',
-  (await scalar(db, `select public.is_admin()`)) === false)
+check('is_admin() is false for anon', (await scalar(db, `select public.is_admin()`)) === false)
 
 await db.exec(`reset role`)
 
@@ -428,27 +582,39 @@ await db.exec(`insert into auth.users (id, email) values ('${NON_ADMIN}','strang
 await db.exec(`set role authenticated`)
 await db.exec(`set local request.jwt.claim.sub = '${NON_ADMIN}'`)
 
-check('AC-AUTH-6: authenticated non-admin is not an admin',
-  (await scalar(db, `select public.is_admin()`)) === false)
-check('AC-RLS-5: authenticated non-admin sees no drafts',
-  (await scalar(db, `select count(*)::int from public.projects`)) === 1)
-check('AC-CONT-8: authenticated non-admin cannot read contact_messages',
-  (await scalar(db, `select count(*)::int from public.contact_messages`)) === 0)
+check(
+  'AC-AUTH-6: authenticated non-admin is not an admin',
+  (await scalar(db, `select public.is_admin()`)) === false,
+)
+check(
+  'AC-RLS-5: authenticated non-admin sees no drafts',
+  (await scalar(db, `select count(*)::int from public.projects`)) === 1,
+)
+check(
+  'AC-CONT-8: authenticated non-admin cannot read contact_messages',
+  (await scalar(db, `select count(*)::int from public.contact_messages`)) === 0,
+)
 
 await db.exec(`reset role`)
 
 // --- 9. Contact spam controls (FR-CONT-08) ---------------------------------
 console.log('\nContact spam controls')
 
-await checkRejects(db, 'FR-CONT-08: submission faster than 3s is rejected',
+await checkRejects(
+  db,
+  'FR-CONT-08: submission faster than 3s is rejected',
   `insert into public.contact_messages (name,email,subject,message,form_rendered_at)
    values ('Bot','bot@example.com','Subject','A message body long enough to pass the length check.', now())`,
-  'too fast')
+  'too fast',
+)
 
-await checkRejects(db, 'FR-CONT-08: a missing form_rendered_at is rejected, not waved through',
+await checkRejects(
+  db,
+  'FR-CONT-08: a missing form_rendered_at is rejected, not waved through',
   `insert into public.contact_messages (name,email,subject,message)
    values ('Bot','bot@example.com','Subject','A message body long enough to pass the length check.')`,
-  'too fast')
+  'too fast',
+)
 
 // AC-CONT-6 — the sixth submission within an hour is rejected. One row already
 // exists from section 8, so five more reach the limit.
@@ -457,60 +623,99 @@ for (let i = 0; i < 4; i++) {
     values ('Ada','ada@example.com','Subject ${i}','A message body long enough to pass the length check.',
             now() - interval '10 seconds')`)
 }
-await checkRejects(db, 'AC-CONT-6: the sixth submission within an hour is rejected',
+await checkRejects(
+  db,
+  'AC-CONT-6: the sixth submission within an hour is rejected',
   `insert into public.contact_messages (name,email,subject,message,form_rendered_at)
    values ('Ada','ada@example.com','Sixth','A message body long enough to pass the length check.',
            now() - interval '10 seconds')`,
-  'rate limit')
+  'rate limit',
+)
 
-check('23.14: the raw IP is never stored — only a hash',
-  (await scalar(db, `select count(*)::int from public.contact_messages where ip_hash is null`)) === 0)
+check(
+  '23.14: the raw IP is never stored — only a hash',
+  (await scalar(db, `select count(*)::int from public.contact_messages where ip_hash is null`)) ===
+    0,
+)
 
-check('form_rendered_at is consumed and not retained',
-  (await scalar(db, `select count(*)::int from public.contact_messages where form_rendered_at is not null`)) === 0)
+check(
+  'form_rendered_at is consumed and not retained',
+  (await scalar(
+    db,
+    `select count(*)::int from public.contact_messages where form_rendered_at is not null`,
+  )) === 0,
+)
 
-check('server owns status: every message is `new`',
-  (await scalar(db, `select count(*)::int from public.contact_messages where status <> 'new'`)) === 0)
+check(
+  'server owns status: every message is `new`',
+  (await scalar(db, `select count(*)::int from public.contact_messages where status <> 'new'`)) ===
+    0,
+)
 
 // --- 10. Seed content gates (AC-CONTENT) -----------------------------------
 console.log('\nSeed content gates')
 
-check('AC-CONTENT: no seeded project is published (Q-06/Q-07 unanswered)',
-  (await scalar(db,
+check(
+  'AC-CONTENT: no seeded project is published (Q-06/Q-07 unanswered)',
+  (await scalar(
+    db,
     `select count(*)::int from public.projects
      where publication_state='published' and slug in
-       ('recipe-costing-restaurant-operations-system','capiche-ai-feedback-automation','exam-build-platform')`)) === 0)
+       ('recipe-costing-restaurant-operations-system','capiche-ai-feedback-automation','exam-build-platform')`,
+  )) === 0,
+)
 
-check('FR-PROJ-16: no seeded project discloses a client',
-  (await scalar(db, `select count(*)::int from public.projects where client_disclosed`)) === 0)
+check(
+  'FR-PROJ-16: no seeded project discloses a client',
+  (await scalar(db, `select count(*)::int from public.projects where client_disclosed`)) === 0,
+)
 
-check('3 projects seeded', (await scalar(db,
-  `select count(*)::int from public.projects where slug in
-   ('recipe-costing-restaurant-operations-system','capiche-ai-feedback-automation','exam-build-platform')`)) === 3)
+check(
+  '3 projects seeded',
+  (await scalar(
+    db,
+    `select count(*)::int from public.projects where slug in
+   ('recipe-costing-restaurant-operations-system','capiche-ai-feedback-automation','exam-build-platform')`,
+  )) === 3,
+)
 
-check('28.3: 9 Capiche pipeline steps seeded', (await scalar(db,
-  `select count(*)::int from public.project_pipeline_steps s
+check(
+  '28.3: 9 Capiche pipeline steps seeded',
+  (await scalar(
+    db,
+    `select count(*)::int from public.project_pipeline_steps s
    join public.projects p on p.id = s.project_id
-   where p.slug='capiche-ai-feedback-automation'`)) === 9)
+   where p.slug='capiche-ai-feedback-automation'`,
+  )) === 9,
+)
 
-check('13 technologies, 3 skill categories, 14 skills seeded',
+check(
+  '13 technologies, 3 skill categories, 14 skills seeded',
   (await scalar(db, `select count(*)::int from public.technologies`)) === 13 &&
-  (await scalar(db, `select count(*)::int from public.skill_categories`)) === 3 &&
-  (await scalar(db, `select count(*)::int from public.skills`)) === 14)
+    (await scalar(db, `select count(*)::int from public.skill_categories`)) === 3 &&
+    (await scalar(db, `select count(*)::int from public.skills`)) === 14,
+)
 
-check('Exam Build Platform is in_progress, not completed (Principle 3)',
-  (await scalar(db, `select status from public.projects where slug='exam-build-platform'`)) === 'in_progress')
+check(
+  'Exam Build Platform is in_progress, not completed (Principle 3)',
+  (await scalar(db, `select status from public.projects where slug='exam-build-platform'`)) ===
+    'in_progress',
+)
 
-check('Q-10: the phone number is stored but not visible',
-  (await scalar(db, `select phone_visible from public.profiles`)) === false)
+check(
+  'Q-10: the phone number is stored but not visible',
+  (await scalar(db, `select phone_visible from public.profiles`)) === false,
+)
 
 // Principle 4 / AC-CONTENT-1 — the easiest mistake to make, per R-06.
-const numericClaims = await scalar(db,
+const numericClaims = await scalar(
+  db,
   `select count(*)::int from public.projects
    where publication_state <> 'archived' and (
      coalesce(business_impact_md,'') ~ '[0-9]+ ?%'
      or coalesce(business_impact_md,'') ~ '₹'
-     or coalesce(business_impact_md,'') ~* '[0-9]+ (hours|hrs) saved')`)
+     or coalesce(business_impact_md,'') ~* '[0-9]+ (hours|hrs) saved')`,
+)
 check('Principle 4: zero fabricated metrics in seeded impact copy', numericClaims === 0)
 
 // Seeds must be safe to re-run locally (28.1).
@@ -524,9 +729,15 @@ for (const file of seedFiles) {
     break
   }
 }
-check('28.1: the seed is idempotent — re-running it is safe', reseedFailed === null, reseedFailed ?? '')
-check('re-running the seed did not duplicate technologies',
-  (await scalar(db, `select count(*)::int from public.technologies`)) === 13)
+check(
+  '28.1: the seed is idempotent — re-running it is safe',
+  reseedFailed === null,
+  reseedFailed ?? '',
+)
+check(
+  're-running the seed did not duplicate technologies',
+  (await scalar(db, `select count(*)::int from public.technologies`)) === 13,
+)
 
 await db.close()
 

@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/prerender.mjs",
+    "build:only": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -15,12 +16,13 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:verify": "node scripts/verify-schema.mjs",
-    "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
-    "db:diff": "supabase db diff",
     "check": "npm run typecheck && npm run lint && npm run test && npm run db:verify",
-    "build:only": "tsc -b && vite build"
+    "db:verify": "node scripts/verify-schema.mjs",
+    "db:verify:remote": "node scripts/verify-remote.mjs",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "db:types:local": "supabase gen types typescript --local > src/types/database.types.ts",
+    "db:diff": "supabase db diff"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.8.0",
