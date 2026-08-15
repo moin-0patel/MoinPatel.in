@@ -27,7 +27,7 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 | 10 | `/experience`, `/skills`, `/about` | ✅ Done |
 | 11 | Contact form with validation and spam controls | ✅ Done |
 | 12 | Supabase Auth — login, route guard, admin membership check | 🟡 Password reset pending |
-| 13 | Admin CMS | 🟡 Dashboard, projects list, project editor, messages inbox, toasts done. Experience/skills/education/social/settings editors pending |
+| 13 | Admin CMS | ✅ All nine resources: dashboard, projects + editor, experience, skills, education, social links, messages, settings. Media/resume await Phase 14 |
 | 14 | Storage — upload, resize, resume versions | ⬜ Not started |
 | 15 | SEO — prerender, sitemap, robots, security headers | ✅ Done (needs a live DB for project routes) |
 | 16 | Testing | 🟡 150 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending |
