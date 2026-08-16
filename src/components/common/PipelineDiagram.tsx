@@ -66,7 +66,13 @@ export function PipelineDiagram({ steps }: { steps: PipelineStep[] }) {
               )}
             </div>
 
-            <h3 className="text-primary font-display text-base font-semibold">{step.label}</h3>
+            {/* `text-[length:...]`, not `text-base` — the latter compiles to
+                color:var(--color-base). It survived here only because
+                `.text-primary` happens to sort after `.text-base`; the font
+                size it was meant to set never applied. See HeroSection. */}
+            <h3 className="text-primary font-display text-[length:var(--text-base)] font-semibold">
+              {step.label}
+            </h3>
 
             {step.description && (
               <p className="text-secondary mt-1.5 text-sm">{step.description}</p>

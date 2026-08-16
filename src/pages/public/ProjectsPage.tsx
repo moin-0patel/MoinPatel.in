@@ -239,7 +239,12 @@ function ProjectGrid({
       )}
     >
       {projects.map((project) => (
-        <li key={project.id} className="flex">
+        // `min-w-0` for the same reason as FeaturedProjectsSection: a grid
+        // item defaults to `min-width: auto`, and the card's `aspect-video`
+        // cover box turns a wrapped title into extra HEIGHT, which the aspect
+        // ratio converts back into WIDTH. Without this the track pins at 478px
+        // and /projects scrolls horizontally at 375px (RES-12).
+        <li key={project.id} className="flex min-w-0">
           <div className="flex w-full">
             <ProjectCard project={project} />
           </div>

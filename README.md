@@ -21,17 +21,17 @@ React 19 · TypeScript · Vite · Tailwind CSS v4 · Supabase (PostgreSQL, Auth,
 | 4     | Seed files for all nine resources                                                 | ✅ Done — verified by `db:verify`                                                                                                                 |
 | 5     | RLS everywhere, `is_admin()`, all policies, storage buckets + policies            | ✅ Done — RLS behaviour verified as `anon`                                                                                                        |
 | 6     | Router, providers, layouts, services, hooks, query keys, error boundaries         | ✅ Done                                                                                                                                           |
-| 7     | Tokens, typography, primitives, skeletons, empty/error states                     | 🟡 Core done; Sheet/Toast/Tabs pending                                                                                                            |
-| 8     | Homepage — all nine content sections, database-driven footer                      | ✅ Done                                                                                                                                           |
+| 7     | Tokens, typography, primitives, skeletons, empty/error states                     | ✅ Done — Sheet (FR-NAV-02) and Toast shipped; Tabs unused so far                                                                                 |
+| 8     | Homepage — all nine content sections, database-driven footer                      | ✅ Done — exit criteria verified in Chrome by `verify:ui`                                                                                         |
 | 9     | Project index with filters; case study with pipeline diagram, gallery, sticky nav | ✅ Done                                                                                                                                           |
 | 10    | `/experience`, `/skills`, `/about`                                                | ✅ Done                                                                                                                                           |
 | 11    | Contact form with validation and spam controls                                    | ✅ Done                                                                                                                                           |
-| 12    | Supabase Auth — login, route guard, admin membership check                        | 🟡 Password reset pending                                                                                                                         |
+| 12    | Supabase Auth — login, route guard, admin membership check                        | ✅ Done — password reset (FR-AUTH-08) included                                                                                                    |
 | 13    | Admin CMS                                                                         | ✅ All nine resources: dashboard, projects + editor, experience, skills, education, social links, messages, settings. Media/resume await Phase 14 |
-| 14    | Storage — upload, resize, resume versions                                         | ⬜ Not started                                                                                                                                    |
+| 14    | Storage — upload, resize, resume versions                                         | ✅ Done — client WebP resize, media browser, resume versions; verified live                                                                       |
 | 15    | SEO — prerender, sitemap, robots, security headers                                | ✅ Done (needs a live DB for project routes)                                                                                                      |
-| 16    | Testing                                                                           | 🟡 150 unit tests (41.1) + 87 DB/RLS checks. Integration, e2e and a11y suites pending                                                             |
-| 17    | Deployment                                                                        | 🟡 vercel.json + docs/deployment.md written; not yet deployed                                                                                     |
+| 16    | Testing                                                                           | 🟡 169 unit + 87 DB/RLS + 100 browser checks + 78 live checks. Admin-screen e2e pending                                                           |
+| 17    | Deployment                                                                        | 🟡 Fully prepared and documented; not deployed (Q-11 domain open)                                                                                 |
 
 The migrations and seed **execute cleanly and are verified** by `npm run db:verify`, which runs them
 against a real PostgreSQL engine with no Docker (see below). `supabase gen types` still cannot run,
@@ -120,6 +120,33 @@ npm run db:types:local    # regenerates src/types/database.types.ts
 
 </details>
 
+### Verifying in a real browser
+
+```bash
+npm run build             # verify:ui serves dist/, so build first
+npm run verify:ui
+```
+
+Drives your installed Chrome (`channel: 'chrome'` — no 300 MB Playwright download) against
+the **production build** served by Vite's programmatic preview, so what is tested is the
+prerendered HTML plus hydration, exactly what a visitor receives. It reads public pages as
+an anonymous visitor and writes nothing.
+
+Covers PRD Phase 8's exit criteria (43.3): Home renders correctly with an empty database,
+at all eight RES-12 widths, and passes axe — plus the full FR-NAV-02 behaviour list.
+
+Preconditions are asserted first and are fatal. That is deliberate: nearly every check
+below them asserts something is _absent_ or _hidden_, and on a blank page all of those
+pass. The first run proved the point by finding `/`, `/404`, `/500` and the case study
+rendering as **completely blank pages** — `<Button asChild>` passed Radix `Slot` two
+children and `Slot` threw on mount. That bug had been latent since Phase 7 and passed
+typecheck, lint, 150 unit tests and `vite build`, because it is a runtime invariant none
+of them can see.
+
+> Scope: **Home only**. axe and the width matrix across `/projects`, `/projects/:slug`,
+> `/contact` and the admin screens are PRD Phase 16, and need a published project plus
+> admin credentials in the runner.
+
 ### Run everything
 
 ```bash
@@ -158,6 +185,7 @@ npx supabase gen types typescript --linked > src/types/database.types.ts
 | `npm run format`             | Prettier write                                                    |
 | `npm run test`               | 150 unit tests (Vitest)                                           |
 | `npm run check`              | typecheck + lint + test + db:verify                               |
+| `npm run verify:ui`          | Render Home in Chrome: 8 widths, empty-DB, FR-NAV-02, axe         |
 | `npm run db:verify`          | Execute all migrations + seed against PGlite and assert 87 checks |
 | `npm run db:verify:remote`   | Same guarantees against the LIVE project, anon key only           |
 | `npm run db:build-apply-all` | Regenerate `supabase/apply-all.sql`, the one-paste bootstrap      |
@@ -248,4 +276,5 @@ work rather than polish:
 | Q-12        | Short and long About copy, in Moin's own words                    | About section                                                                      |
 | Q-16        | Exam Build Platform: what is genuinely built vs planned           | That case study                                                                    |
 
-Plus one environment blocker: **Docker is not installed**, so no migration has been executed.
+Docker is deliberately not used anywhere. Migrations execute against PGlite (`db:verify`, 87 checks)
+and against the live Supabase project (`db:verify:remote`, `db:verify:auth`).

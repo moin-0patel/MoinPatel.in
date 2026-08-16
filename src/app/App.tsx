@@ -43,6 +43,7 @@ const AdminLayout = lazy(() =>
   import('@/layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })),
 )
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
+const AdminResetPasswordPage = lazy(() => import('@/pages/admin/AdminResetPasswordPage'))
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage'))
 const AdminProjectsPage = lazy(() => import('@/pages/admin/AdminProjectsPage'))
 const ProjectEditorPage = lazy(() => import('@/pages/admin/ProjectEditorPage'))
@@ -108,6 +109,12 @@ export function App() {
                       Login sits OUTSIDE the protected tree: guarding it would
                       redirect to itself forever. */}
                     <Route path="/admin/login" element={<AdminLoginPage />} />
+
+                    {/* FR-AUTH-08 — outside the protected tree for the same
+                        reason as login: the recovery session is not an admin
+                        session, and guarding this would bounce the user to a
+                        login they cannot pass. */}
+                    <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
                     <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
                     <Route

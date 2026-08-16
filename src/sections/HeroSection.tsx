@@ -62,7 +62,17 @@ export function HeroSection() {
       aria-labelledby="hero-heading"
       className="container-page flex min-h-[80vh] items-center py-16 xl:min-h-[88vh]"
     >
-      <div className="grid w-full items-center gap-10 lg:grid-cols-[60%_40%] lg:gap-16">
+      {/*
+       * `3fr_2fr`, not `60%_40%` — the ratio is identical (3/5 and 2/5) but the
+       * unit matters. Percentage tracks resolve against the full content box
+       * and the gap is then added on top, so `60% + 40% + gap` overflowed the
+       * container by exactly the gap on every `lg` width. It was invisible at
+       * >= 1440 only because container-page caps at 1280 and the leftover
+       * margin absorbed it; at 1280 and 1024 there is no slack and the page
+       * scrolled horizontally (RES-12). `fr` distributes what remains AFTER
+       * gaps, which is the whole point of the unit.
+       */}
+      <div className="grid w-full items-center gap-10 lg:grid-cols-[3fr_2fr] lg:gap-16">
         {/* RES-02 — on mobile the photo comes first in source order; `order`
             flips it back on desktop without changing the DOM order that
             keyboard and screen-reader users follow. */}
@@ -79,7 +89,17 @@ export function HeroSection() {
             {fullName}
           </h1>
 
-          <p className="text-accent mt-3 font-mono text-sm tracking-[--tracking-mono] md:text-base">
+          {/*
+           * NOT `md:text-base`. Tailwind v4 resolves `text-*` against both
+           * --text-* and --color-*, and when both exist the COLOUR wins, so
+           * `text-base` compiles to `color: var(--color-base)` — the page
+           * background. This line rendered invisible at every width >= 768px,
+           * and the font-size step never applied at all. Verified in the built
+           * CSS: `.text-base{color:var(--color-base)}`.
+           *
+           * The `length:` hint forces the font-size interpretation.
+           */}
+          <p className="text-accent mt-3 font-mono text-sm tracking-[--tracking-mono] md:text-[length:var(--text-base)]">
             {roleTitle}
           </p>
 

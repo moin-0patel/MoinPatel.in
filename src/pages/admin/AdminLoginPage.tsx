@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/cn'
 import { safeReturnTo } from '@/lib/returnTo'
+import { requestPasswordReset } from '@/services/auth.service'
 
 /**
  * Admin sign-in — PRD FR-AUTH-01, FR-AUTH-02, FR-AUTH-05, AC-AUTH.
@@ -129,9 +130,65 @@ export default function AdminLoginPage() {
               Sign in
             </Button>
           </form>
+
+          <ForgotPassword email={email} />
         </div>
       </div>
     </>
+  )
+}
+
+/**
+ * FR-AUTH-08 — request a reset email.
+ *
+ * The confirmation is deliberately identical whether or not the address has an
+ * account. Saying "no account with that email" turns this box into an oracle
+ * for enumerating valid admin addresses (SEC-04), and there is exactly one
+ * admin account to find.
+ *
+ * `redirectTo` is a courtesy, not a control: Supabase only honours origins on
+ * the project's allow-list, so a tampered value is rejected server-side.
+ */
+function ForgotPassword({ email }: { email: string }) {
+  const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  const handleClick = async () => {
+    setSending(true)
+    try {
+      await requestPasswordReset(email, `${window.location.origin}/admin/reset-password`)
+    } catch {
+      // Swallowed on purpose — see above. A failure here must look exactly
+      // like a success, or the difference is itself the disclosure.
+    } finally {
+      setSending(false)
+      setSent(true)
+    }
+  }
+
+  if (sent) {
+    return (
+      <p role="status" className="text-secondary mt-4 text-center text-sm">
+        If that address has an account, a reset link is on its way. It expires after one use.
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-4 text-center">
+      <button
+        type="button"
+        onClick={() => void handleClick()}
+        disabled={!email.trim() || sending}
+        className={cn(
+          'text-secondary hover:text-accent text-sm underline underline-offset-4',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+        )}
+        title={!email.trim() ? 'Enter your email address first.' : undefined}
+      >
+        {sending ? 'Sending…' : 'Forgot your password?'}
+      </button>
+    </div>
   )
 }
 

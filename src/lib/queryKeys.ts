@@ -84,6 +84,17 @@ export const queryKeys = {
     admin: () => [...queryKeys.resume.all, 'admin'] as const,
   },
 
+  // MED-01 — storage objects, keyed by bucket. Separate from `projects` even
+  // though covers live in that bucket: deleting an orphan must not invalidate
+  // every public project list.
+  media: {
+    all: ['media'] as const,
+    bucket: (bucket: string) => [...queryKeys.media.all, bucket] as const,
+    orphans: (bucket: string) => [...queryKeys.media.all, bucket, 'orphans'] as const,
+    projectImages: (projectId: string) =>
+      [...queryKeys.media.all, 'project-images', projectId] as const,
+  },
+
   messages: {
     all: ['messages'] as const,
     list: (status?: string) => [...queryKeys.messages.all, 'list', status ?? 'all'] as const,

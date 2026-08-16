@@ -95,3 +95,37 @@ export function onAuthStateChange(callback: (session: Session | null) => void): 
   })
   return () => data.subscription.unsubscribe()
 }
+
+/**
+ * FR-AUTH-08 — set a new password after following the emailed link.
+ *
+ * Callable only while the recovery session Supabase establishes from the
+ * link's tokens is active. That session is what authorises the change; there
+ * is no "old password" parameter because possession of the mailbox is the
+ * proof, and asking for a password the user has by definition forgotten would
+ * make the flow unusable.
+ */
+export async function updatePassword(newPassword: string): Promise<void> {
+  try {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+  } catch (cause) {
+    throw new AppError('unknown', 'auth.updatePassword', { cause })
+  }
+}
+
+/**
+ * FR-AUTH-08 — fires once a recovery link's tokens have been parsed into a
+ * session.
+ *
+ * Distinct from `onAuthStateChange` above, which reports the session only.
+ * The reset page needs the EVENT: it has to tell "a recovery session was just
+ * established from the link" apart from "no session yet", and a plain null
+ * session cannot express the difference.
+ */
+export function onPasswordRecovery(callback: () => void): () => void {
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY' || session) callback()
+  })
+  return () => data.subscription.unsubscribe()
+}

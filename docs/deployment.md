@@ -9,12 +9,12 @@ first-release sequence.
 
 Static output from `npm run build`, served by Vercel.
 
-| Setting | Value | Why |
-|---|---|---|
-| `buildCommand` | `npm run build` | Runs typecheck → Vite build → prerender + sitemap |
-| `outputDirectory` | `dist` | DEP-03 |
-| `cleanUrls` | `true` | `/about` serves `dist/about/index.html` without the `.html` |
-| `rewrites` | `/(.*)` → `/index.html` | DEP-04 |
+| Setting           | Value                   | Why                                                         |
+| ----------------- | ----------------------- | ----------------------------------------------------------- |
+| `buildCommand`    | `npm run build`         | Runs typecheck → Vite build → prerender + sitemap           |
+| `outputDirectory` | `dist`                  | DEP-03                                                      |
+| `cleanUrls`       | `true`                  | `/about` serves `dist/about/index.html` without the `.html` |
+| `rewrites`        | `/(.*)` → `/index.html` | DEP-04                                                      |
 
 **The rewrite does not defeat the prerender.** Vercel checks the filesystem
 first: a request for `/projects/exam-build-platform` finds
@@ -33,7 +33,7 @@ route's `<title>`, description, canonical and Open Graph tags baked into `<head>
 This exists because Google executes JavaScript and **LinkedIn, WhatsApp, Slack
 and X do not**. Without it, every shared project link shows the site-wide default
 preview instead of that project's own title, description and image. For a
-portfolio, sharing project links *is* the distribution channel — R-01 rates it
+portfolio, sharing project links _is_ the distribution channel — R-01 rates it
 high impact and high likelihood.
 
 The script is idempotent: it strips all SEO tags from the shell before injecting,
@@ -52,14 +52,14 @@ only. The build does not fail — the SPA still works, only the previews degrade
 
 ## Security headers (SEC-08)
 
-| Header | Value | Note |
-|---|---|---|
-| `Content-Security-Policy` | see `vercel.json` | Details below |
-| `X-Content-Type-Options` | `nosniff` | |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | |
-| `X-Frame-Options` | `DENY` | Belt and braces with `frame-ancestors 'none'` |
-| `Permissions-Policy` | camera, microphone, geolocation denied | |
-| `Strict-Transport-Security` | 2 years, preload | SEC-09 — **enable only once the domain is stable**; a preload entry is slow to undo |
+| Header                      | Value                                  | Note                                                                                |
+| --------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------- |
+| `Content-Security-Policy`   | see `vercel.json`                      | Details below                                                                       |
+| `X-Content-Type-Options`    | `nosniff`                              |                                                                                     |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`      |                                                                                     |
+| `X-Frame-Options`           | `DENY`                                 | Belt and braces with `frame-ancestors 'none'`                                       |
+| `Permissions-Policy`        | camera, microphone, geolocation denied |                                                                                     |
+| `Strict-Transport-Security` | 2 years, preload                       | SEC-09 — **enable only once the domain is stable**; a preload entry is slow to undo |
 
 ### CSP notes
 
@@ -73,8 +73,24 @@ only. The build does not fail — the SPA still works, only the previews degrade
   single project URL, because `vercel.json` cannot interpolate an environment
   variable. Pin it to the exact project origin once the project ref is fixed —
   that is a genuine tightening, not cosmetic.
-- `object-src 'none'`, `base-uri 'self'` and `form-action 'self'` block three
-  common injection escapes that `default-src` alone does not cover.
+- `base-uri 'self'` and `form-action 'self'` block two common injection escapes
+  that `default-src` alone does not cover.
+- `object-src` is `'self' https://*.supabase.co`, **not** `'none'`.
+
+  This is a deliberate, narrow relaxation and it is worth understanding before
+  anyone tightens it back. `/resume` satisfies FR-RES-04 by embedding the PDF in
+  an `<object>` pointed at a short-lived Supabase signed URL. Under
+  `object-src 'none'` the browser blocks that element outright — and the failure
+  is invisible in development, because the dev server sends no CSP at all. It
+  would have appeared only in production, as a resume viewer that silently
+  showed its fallback forever.
+
+  The allow-list is still restrictive: plugin/embed content may load from this
+  origin and Supabase Storage, and nowhere else. It does **not** restore the
+  general `<object>` injection vector from an attacker-controlled origin.
+
+  If the PDF embed is ever dropped in favour of a download-only flow, put this
+  back to `'none'`.
 
 ---
 
@@ -82,11 +98,11 @@ only. The build does not fail — the SPA still works, only the previews degrade
 
 Set per environment in the Vercel dashboard. Never in the repository.
 
-| Variable | Notes |
-|---|---|
-| `VITE_SUPABASE_URL` | Public by nature |
+| Variable                        | Notes                                                  |
+| ------------------------------- | ------------------------------------------------------ |
+| `VITE_SUPABASE_URL`             | Public by nature                                       |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Public by nature; safe **only** because RLS is correct |
-| `VITE_SITE_URL` | Canonical origin, no trailing slash. Q-11 |
+| `VITE_SITE_URL`                 | Canonical origin, no trailing slash. Q-11              |
 
 `SUPABASE_SERVICE_ROLE_KEY` has no place here. `src/lib/env.ts` decodes the
 publishable key at startup and refuses to boot if a service-role JWT has been

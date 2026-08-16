@@ -17,7 +17,10 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-strong',
+  // Rests on accent-STRONG, not accent: white on #4f7df3 is 3.77:1, which axe
+  // flags serious. #3b62d9 carries white at 5.34:1 and the hover goes deeper
+  // still. `text-accent` elsewhere keeps the lighter #4f7df3 — see tokens.css.
+  primary: 'bg-accent-strong text-white hover:bg-accent-deep',
   secondary:
     'border border-strong bg-transparent text-primary hover:border-accent hover:text-accent',
   ghost: 'bg-transparent text-secondary hover:text-primary hover:bg-surface',
@@ -26,10 +29,15 @@ const VARIANT: Record<ButtonVariant, string> = {
 
 // RES-07: >= 44px touch targets. `sm` is 36px and is therefore desktop-only —
 // on mobile the padding classes below lift it back to 44.
+// `lg` carries no text-* class on purpose. `text-base` does NOT set a font
+// size here: --color-base makes Tailwind compile it to `color:var(--color-base)`
+// (see HeroSection). It was inert — overridden by `text-white` — and one
+// reorder away from painting the label the page-background colour. Dropping it
+// changes nothing visually: the body already sets font-size: var(--text-base).
 const SIZE: Record<ButtonSize, string> = {
   sm: 'h-11 md:h-9 px-3 text-sm',
   md: 'h-11 px-4 text-sm',
-  lg: 'h-13 px-6 text-base',
+  lg: 'h-13 px-6',
 }
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -53,30 +61,57 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   ref,
 ) {
-  const Component = asChild ? Slot : 'button'
   const isDisabled = disabled === true || loading
 
+  const surface = cn(
+    'relative inline-flex items-center justify-center gap-2 rounded-[--radius-md]',
+    'font-medium whitespace-nowrap select-none',
+    'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+    // 32.4: disabled is 45% opacity and never the only signal — the
+    // aria-disabled below carries it for non-visual users.
+    'disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45',
+    VARIANT[variant],
+    SIZE[size],
+    className,
+  )
+
+  /*
+   * `asChild` renders through Radix Slot, which merges these props onto the
+   * caller's element — a <Link> or an <a>. It requires EXACTLY ONE React
+   * element child, and it must be the caller's element.
+   *
+   * This branch exists because the shared render below cannot satisfy that.
+   * It passes Slot two children (the label <span> and the `{loading && …}`
+   * expression, which is `false` when not loading), and Slot throws:
+   *
+   *   Slot failed to slot onto its children.
+   *   Expected a single React element child or `Slottable`.
+   *
+   * That crash blanked every page containing an `asChild` button — the
+   * homepage, /404, /500 and the case study among them — and went unnoticed
+   * from Phase 7 until the first browser run, because it is a runtime
+   * invariant that tsc, ESLint and vite build cannot see.
+   *
+   * No loading treatment here: `asChild` is for navigation, and none of the
+   * call sites passes `loading`. A spinner would also have to live INSIDE the
+   * caller's element, which Slot has no way to arrange.
+   */
+  if (asChild) {
+    return (
+      <Slot ref={ref} aria-disabled={isDisabled || undefined} className={surface} {...props}>
+        {children}
+      </Slot>
+    )
+  }
+
   return (
-    <Component
+    <button
       ref={ref}
-      // A Slot child owns its own element type, so `type` would land on an <a>.
-      {...(asChild ? {} : { type: props.type ?? 'button' })}
-      disabled={asChild ? undefined : isDisabled}
-      // Slot renders an anchor; `disabled` means nothing there, so the state
-      // is communicated to assistive tech explicitly.
+      type={props.type ?? 'button'}
+      disabled={isDisabled}
       aria-disabled={isDisabled || undefined}
       aria-busy={loading || undefined}
-      className={cn(
-        'relative inline-flex items-center justify-center gap-2 rounded-[--radius-md]',
-        'font-medium whitespace-nowrap select-none',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
-        // 32.4: disabled is 45% opacity and never the only signal — the
-        // aria-disabled above carries it for non-visual users.
-        'disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45',
-        VARIANT[variant],
-        SIZE[size],
-        className,
-      )}
+      className={surface}
       {...props}
     >
       {/*
@@ -93,6 +128,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           <span className="visually-hidden">Working…</span>
         </span>
       )}
-    </Component>
+    </button>
   )
 })

@@ -90,10 +90,24 @@ function section(title) {
   console.log(`\n${title}`)
 }
 
-/** Does this error mean "no such table" rather than "not allowed"? */
+/**
+ * Does this error mean "no such table" — as opposed to "not allowed", or "no
+ * such column"?
+ *
+ * Matched on exact error CODES, never on the message text. A substring match on
+ * "does not exist" conflates a missing table (PGRST205) with a missing column
+ * (42703), and that is not hypothetical: probing existence with
+ * `.select('id')` made every table with a composite or natural primary key —
+ * site_settings, admin_users, project_technologies, experience_technologies —
+ * report as missing against a database where all four were present and seeded.
+ *
+ *   PGRST205  table not found in the schema cache
+ *   PGRST106  schema not exposed
+ *   42P01     undefined_table
+ */
 function isMissingRelation(error) {
   if (!error) return false
-  return /schema cache|does not exist|PGRST205|42P01/i.test(`${error.code} ${error.message}`)
+  return ['PGRST205', 'PGRST106', '42P01'].includes(error.code)
 }
 
 /**
@@ -157,17 +171,21 @@ const TABLES = [
 const missing = []
 for (const table of TABLES) {
   /*
-   * A plain select, NOT `{ head: true }`.
+   * `select('*')`, and NOT `{ head: true }`, and NOT `select('id')`. Both of
+   * the obvious shortcuts are wrong here, each verified against the live
+   * project:
    *
-   * A HEAD request discards the response body, and PostgREST puts the error
-   * there — so a head-count against a table that does not exist comes back with
-   * `error: null` and this probe reported every missing table as present.
-   * Verified against the live project before fixing.
+   *   head: true    a HEAD request discards the response body and PostgREST
+   *                 puts the error there, so every missing table came back
+   *                 `error: null` and reported as PRESENT.
+   *   select('id')  four tables have a composite or natural primary key and no
+   *                 `id` column at all, so this errored 42703 and reported them
+   *                 as MISSING on a database where they existed and were seeded.
    *
-   * The distinction being drawn: a table with no SELECT policy returns zero
-   * rows and no error; a MISSING table returns PGRST205 / 42P01.
+   * The distinction that matters: a table with no SELECT policy returns zero
+   * rows and no error; a genuinely missing table returns PGRST205.
    */
-  const { error } = await supabase.from(table).select('id').limit(1)
+  const { error } = await supabase.from(table).select('*').limit(1)
   if (isMissingRelation(error)) missing.push(table)
 }
 check(`all ${TABLES.length} tables exist`, missing.length === 0, `missing: ${missing.join(', ')}`)
@@ -281,9 +299,30 @@ section('RLS as anon (the publishable key is safe only if these hold)')
 }
 
 {
-  // AC-PROJ-8 — a known seeded draft must be invisible even by direct slug.
+  /*
+   * AC-PROJ-8 — draft invisibility.
+   *
+   * This used to assert that 'exam-build-platform' returns zero rows to anon,
+   * which only worked because the script carried out-of-band knowledge that
+   * the slug was a draft. That project has since been published, and the check
+   * failed — not because RLS broke, but because the assumption expired.
+   *
+   * The deeper problem is that an anon-only script CANNOT verify this: it
+   * cannot enumerate drafts, so a zero-row answer is indistinguishable between
+   * "hidden by RLS" and "no such row". Any assertion here is true by
+   * assumption, which is worse than no assertion at all.
+   *
+   * It is instead proven properly in verify-authenticated.mjs (AC-PROJ-5),
+   * which creates a draft it controls, confirms anon cannot see it by direct
+   * slug, publishes it, confirms anon now can, and deletes it.
+   */
   const { data } = await supabase.from('projects').select('slug').eq('slug', 'exam-build-platform')
-  check('a seeded draft is invisible by direct slug', (data?.length ?? 0) === 0)
+  notes.push(
+    `AC-PROJ-8 (draft invisible by direct slug) is NOT asserted here — anon cannot ` +
+      `distinguish an RLS-hidden row from a missing one. Proven in ` +
+      `verify-authenticated.mjs (AC-PROJ-5) with a controlled fixture. ` +
+      `'exam-build-platform' is currently ${(data?.length ?? 0) > 0 ? 'PUBLISHED and visible' : 'not visible'} to anon.`,
+  )
 }
 
 {
@@ -402,27 +441,79 @@ section('Storage')
   /*
    * MED-01 / AC-STORE-1 — there is no anonymous upload path anywhere.
    *
-   * "Bucket not found" does NOT count as a pass: it would mean the buckets were
-   * never created, not that uploading is refused. Same discipline as
-   * checkRefused above.
+   * The MIME type must be one the bucket ALLOWS. Probing with text/plain makes
+   * every bucket answer "mime type text/plain is not supported" — a refusal,
+   * but the wrong refusal, and the check then passes without ever exercising
+   * the storage RLS policy it exists to test. Verified against the live
+   * project: that is exactly what was happening.
+   *
+   * "Bucket not found" is likewise not a pass — it would mean the buckets were
+   * never created.
    */
-  const body = new Blob(['probe'], { type: 'text/plain' })
-  for (const bucket of ['profile', 'projects', 'resume']) {
+  const ALLOWED_PROBE = {
+    profile: { name: 'rls-probe.webp', type: 'image/webp' },
+    projects: { name: 'rls-probe.webp', type: 'image/webp' },
+    resume: { name: 'rls-probe.pdf', type: 'application/pdf' },
+  }
+
+  for (const [bucket, probe] of Object.entries(ALLOWED_PROBE)) {
+    const body = new Blob(['probe'], { type: probe.type })
     const { error } = await supabase.storage
       .from(bucket)
-      .upload(`rls-probe-${Date.now()}.txt`, body)
+      .upload(`${Date.now()}-${probe.name}`, body, { contentType: probe.type })
 
+    const message = error?.message ?? ''
     if (!error) {
       failures.push(`anon uploaded to "${bucket}" — CRITICAL`)
       console.log(`  ✗ anon cannot upload to "${bucket}" — the upload SUCCEEDED`)
-    } else if (/not found|does not exist/i.test(error.message)) {
+    } else if (/bucket not found/i.test(message)) {
       failures.push(`anon upload to "${bucket}" inconclusive: the bucket does not exist`)
       console.log(`  ✗ anon cannot upload to "${bucket}" — inconclusive, no such bucket`)
+    } else if (/mime type/i.test(message)) {
+      // Refused, but by the MIME allow-list rather than by the policy. The
+      // authorization boundary is still untested, so this is not a pass.
+      failures.push(
+        `anon upload to "${bucket}" inconclusive: refused on MIME, not authorization (${message})`,
+      )
+      console.log(`  ✗ anon cannot upload to "${bucket}" — inconclusive, MIME refusal`)
     } else {
       passed++
-      console.log(`  ✓ anon cannot upload to "${bucket}"`)
+      console.log(`  ✓ anon cannot upload to "${bucket}" (${message})`)
     }
   }
+}
+
+{
+  /*
+   * MED-02 / AC-STORE-2 — MIME enforcement is server-side, in the bucket
+   * configuration, not merely a client-side courtesy. Tested separately from
+   * the authorization check above so neither can stand in for the other.
+   */
+  for (const bucket of ['profile', 'projects', 'resume']) {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(`mime-probe-${Date.now()}.txt`, new Blob(['x'], { type: 'text/plain' }), {
+        contentType: 'text/plain',
+      })
+    check(
+      `AC-STORE-2: "${bucket}" rejects a disallowed MIME type server-side`,
+      Boolean(error) && /mime type/i.test(error.message),
+      error ? error.message : 'text/plain was ACCEPTED',
+    )
+  }
+
+  // MED-06 / SEC-06 — SVG is absent from every allow-list because an
+  // unsanitised SVG served same-origin is an XSS vector.
+  const { error: svgError } = await supabase.storage
+    .from('projects')
+    .upload(`svg-probe-${Date.now()}.svg`, new Blob(['<svg/>'], { type: 'image/svg+xml' }), {
+      contentType: 'image/svg+xml',
+    })
+  check(
+    'MED-06: SVG upload is rejected',
+    Boolean(svgError),
+    'image/svg+xml was ACCEPTED — SEC-06 violation',
+  )
 }
 
 {
@@ -465,17 +556,40 @@ section('Auth')
 }
 
 {
-  // FR-AUTH-01 / SEC-10 — public sign-up must be disabled in the project.
-  const probe = `signup-probe-delete-me-${Date.now()}@example.invalid`
-  const { data, error } = await supabase.auth.signUp({ email: probe, password: 'Xk9!pQ2m#Lv7' })
-  const created = !error && data.user !== null
-  check(
-    'FR-AUTH-01: public sign-up is disabled',
-    !created,
-    'sign-up SUCCEEDED — turn it off in Authentication → Sign In / Providers',
-  )
-  if (created) {
-    notes.push(`A probe user was created and must be deleted: ${probe}`)
+  /*
+   * FR-AUTH-01 / SEC-10 — public sign-up must be disabled in the project.
+   *
+   * Read from GoTrue's own settings endpoint rather than by ATTEMPTING a
+   * sign-up. The attempt-based version passed against a project where sign-up
+   * was in fact wide open: it probed with an `@example.invalid` address, GoTrue
+   * rejected the address as invalid, the check saw "no user created" and called
+   * that a pass. A refusal for the wrong reason again — and this one was hiding
+   * a live security misconfiguration rather than a cosmetic gap.
+   *
+   * `/auth/v1/settings` is public, read-only, authoritative, and creates no
+   * user as a side effect.
+   */
+  const response = await fetch(`${URL_}/auth/v1/settings`, { headers: { apikey: KEY } })
+  const settings = response.ok ? await response.json() : null
+
+  check('auth settings are readable', settings !== null, `HTTP ${response.status}`)
+
+  if (settings) {
+    check(
+      'FR-AUTH-01 / SEC-10: public sign-up is disabled',
+      settings.disable_signup === true,
+      'sign-up is OPEN — anyone can create an account. Authentication → ' +
+        'Sign In / Providers → turn OFF "Allow new users to sign up"',
+    )
+
+    // Not a pass/fail on its own, but it explains an otherwise baffling
+    // "Invalid login credentials" on a freshly created dashboard user.
+    if (settings.mailer_autoconfirm === false) {
+      notes.push(
+        'mailer_autoconfirm is false: a user created in the dashboard WITHOUT ' +
+          '"Auto Confirm User" ticked cannot sign in until the address is confirmed',
+      )
+    }
   }
 }
 

@@ -40,7 +40,32 @@ export function Chip({
 /**
  * RES-05 — a horizontally scrolling chip row with no visible scrollbar. Tech
  * chips must never wrap into four lines on a card; they scroll instead.
+ *
+ * `tabIndex={0}` and the group label are required, not decorative. A region
+ * that scrolls with a mouse or a finger but cannot be reached by keyboard
+ * strands keyboard-only users with content they can see and never read — axe
+ * flags it `scrollable-region-focusable` (serious), and it is a real WCAG
+ * 2.1.1 failure. Making it focusable lets the arrow keys scroll it; the label
+ * stops it announcing as an unnamed focus stop with no explanation.
  */
-export function ChipRow({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn('scroll-row flex items-center gap-1.5', className)}>{children}</div>
+export function ChipRow({
+  className,
+  children,
+  label = 'Technologies',
+}: {
+  className?: string
+  children: ReactNode
+  /** Accessible name; override when the row holds something other than tech. */
+  label?: string
+}) {
+  return (
+    <div
+      className={cn('scroll-row flex items-center gap-1.5', className)}
+      tabIndex={0}
+      role="group"
+      aria-label={label}
+    >
+      {children}
+    </div>
+  )
 }

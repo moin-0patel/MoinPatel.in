@@ -24,13 +24,28 @@
   /* Text */
   --color-primary: #f2f4f8; /* headings, body     — >= 7:1 on base */
   --color-secondary: #a8b0c0; /* supporting copy    — >= 4.5:1 on base */
-  --color-muted: #6e7688; /* captions, meta */
+  /* Was #6e7688, which measured 4.37:1 on base and 3.93:1 on surface-raised —
+     under the 4.5:1 AA floor everywhere it was used, and flagged serious by
+     axe. Raised to clear AA on ALL THREE surfaces, since text-muted appears on
+     cards and in the admin sidebar, not just on the page background. */
+  --color-muted: #7d8595; /* captions, meta — >= 4.8:1 on base/surface/raised */
 
-  /* Accent — exactly one hue family. A second accent is a design regression. */
-  --color-accent: #4f7df3;
-  --color-accent-strong: #3b62d9;
-  --color-accent-soft: oklch(from #4f7df3 l c h / 0.12);
-  --color-indigo-deep: #1b1f4b; /* CTA band gradient anchor only */
+  /*
+   * Accent — exactly one hue family. A second accent is a design regression.
+   *
+   * The three shades exist because one value cannot serve both roles: as TEXT
+   * on the dark base the accent must be light (#4f7df3 = 5.27:1), while as a
+   * BACKGROUND under white text it must be dark (#4f7df3 = 3.77:1, a serious
+   * axe failure). So the lighter value stays the text colour and the darker
+   * ones carry white.
+   */
+  --color-accent: #4f7df3; /* text on base — 5.27:1 */
+  --color-accent-strong: #3b62d9; /* white on it — 5.34:1 (button rest, link hover) */
+  --color-accent-deep: #3159c9; /* white on it — 6.17:1 (button hover) */
+  /* Alpha was 0.12, which composited to #161d30 and left `text-accent` badges
+     at 4.43:1 — just under AA. 0.08 gives 4.65:1 with room to spare. */
+  --color-accent-soft: oklch(from #4f7df3 l c h / 0.08);
+  --color-indigo-deep: #1b1f4b; /* CTA band gradient anchor only — not an accent shade */
 
   /* Status — always paired with text, never colour alone (A11Y-09) */
   --color-success: #3fbf87;

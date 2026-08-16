@@ -88,10 +88,22 @@ export function FeaturedProjectsSection() {
         </Button>
       </div>
 
+      {/*
+       * The `min-w-0` on the <li> and its child is load-bearing, not tidying.
+       * A grid item defaults to `min-width: auto`, so the track can never
+       * shrink below the card's min-content width. The card contains an
+       * `aspect-video` cover box, and when no cover image exists the fallback
+       * tile holds the project title: a narrower card wraps that title onto
+       * more lines, which makes the box taller, which the aspect ratio
+       * converts straight back into WIDTH. That feedback loop settled at 478px
+       * and forced ~112px of horizontal page scroll at 430px and below
+       * (RES-12). `min-w-0` breaks it — width comes from the track, height
+       * follows from the ratio.
+       */}
       <ul className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {projects.map((project) => (
-          <li key={project.id} className="flex">
-            <div className="flex w-full">
+          <li key={project.id} className="flex min-w-0">
+            <div className="flex w-full min-w-0">
               <ProjectCard project={project} />
             </div>
           </li>

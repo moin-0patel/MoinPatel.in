@@ -1,9 +1,11 @@
-import { Mail } from 'lucide-react'
-import type { ComponentType } from 'react'
+import { Download, Mail, Menu } from 'lucide-react'
+import { Suspense, lazy, useEffect, useRef, useState, type ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { BRAND_ICONS } from '@/components/ui/brandIcons'
-import { useProfile, useSocialLinks } from '@/hooks/useSiteContent'
+import { Button } from '@/components/ui/Button'
+import { useIsTablet } from '@/hooks/useMediaQuery'
+import { useProfile, usePublishedResume, useSettings, useSocialLinks } from '@/hooks/useSiteContent'
 import { cn } from '@/lib/cn'
 import { currentYear } from '@/lib/dates'
 
@@ -16,11 +18,10 @@ const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 /**
  * PublicLayout — PRD 9.3, FR-NAV-01…08.
  *
- * Phase 6 scope: the landmark structure, skip link, header and footer shell.
- * The mobile nav sheet (FR-NAV-02), scroll-spy active state, database-driven
- * social links and the Resume action are Phase 8, where the data they need is
- * wired up. The structure is here so every route resolves with correct
- * semantics from the start rather than being retrofitted.
+ * Landmark structure, skip link, header (with the FR-NAV-02 mobile sheet) and
+ * the database-driven footer.
+ *
+ * Still outstanding here: the scroll-spy active state on Home.
  */
 
 const NAV_ITEMS = [
@@ -43,7 +44,9 @@ export function PublicLayout() {
         href="#main"
         className={cn(
           'visually-hidden',
-          'focus:bg-accent focus:static focus:m-2 focus:inline-block focus:size-auto',
+          // accent-strong for the same white-on-accent contrast reason as the
+          // Button. axe never catches this one: it only exists while focused.
+          'focus:bg-accent-strong focus:static focus:m-2 focus:inline-block focus:size-auto',
           'focus:rounded-[--radius-md] focus:px-4 focus:py-2 focus:text-white focus:[clip-path:none]',
         )}
       >
@@ -98,14 +101,139 @@ function Header() {
           </ul>
         </nav>
 
-        {/*
-         * FR-NAV-02: below 768px this becomes a full-screen sheet with a focus
-         * trap, Esc/backdrop close and body scroll lock — Phase 8. Until then
-         * the links are reachable from the footer, so no route is orphaned on
-         * mobile.
-         */}
+        <div className="flex items-center gap-2">
+          <HeaderResumeAction />
+
+          {/* FR-NAV-02 — below 768px only. The desktop nav above is untouched. */}
+          <MobileNavSheet />
+        </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * FR-NAV-01 — the Resume action in the header.
+ *
+ * Three conditions must all hold before it renders, and each hides it for a
+ * different reason:
+ *
+ *   resumePending          nothing yet. Rendering and then removing it is the
+ *                          layout shift PERF-03 forbids.
+ *   !resume                FR-RES-06 — nothing published, so every resume CTA
+ *                          is hidden site-wide rather than offered and broken.
+ *   navResumeVisible false the owner switched it off in Settings.
+ *
+ * Desktop only (`hidden md:inline-flex`): below 768px the sheet carries the
+ * navigation, and a second action next to the hamburger crowds a 375px header.
+ */
+function HeaderResumeAction() {
+  const { data: resume, isPending } = usePublishedResume()
+  const { data: settings } = useSettings()
+
+  if (isPending || !resume || settings?.navResumeVisible === false) return null
+
+  return (
+    <Button size="sm" variant="secondary" className="hidden md:inline-flex" asChild>
+      <NavLink to="/resume">
+        <Download className="size-4" aria-hidden="true" />
+        Resume
+      </NavLink>
+    </Button>
+  )
+}
+
+/*
+ * The sheet's contents live in a separate, lazily-imported module.
+ *
+ * Radix Dialog is ~12 KB gzipped. Importing it here — PublicLayout renders on
+ * every public route — pulled it out of the lazy admin/case-study chunks and
+ * into the public entry chunk, pushing initial JS from ~176 KB to 183.71 KB
+ * and breaking the 180 KB PERF-05 budget. Deferring it keeps the entry chunk
+ * to a plain button and fetches Radix only if someone opens the menu, which
+ * never happens on desktop.
+ */
+const MobileNavPanel = lazy(() => import('@/components/common/MobileNavPanel'))
+
+const MOBILE_NAV_PANEL_ID = 'mobile-nav-panel'
+
+/**
+ * MobileNavSheet — PRD FR-NAV-02 (P0), 9.3, 12.1, RES-01, A11Y-11.
+ *
+ * "Header collapses to a hamburger sheet below 768px, with focus trap, Esc
+ * close, backdrop close and body scroll lock."
+ *
+ * This component is only the trigger and the open state. Everything the
+ * requirement actually names — focus trap, Esc, backdrop dismissal, scroll
+ * lock, role/aria-modal, focus returned to the trigger — is Radix's, inside
+ * MobileNavPanel. PRD 29.3 chose headless primitives precisely so this
+ * behaviour is not hand-rolled.
+ *
+ * `aria-expanded` and `aria-controls` are set here rather than by
+ * Dialog.Trigger, since the dialog is not mounted until first open. Both read
+ * from the same `open` state that drives the panel, so they cannot fall out
+ * of step with it. `aria-controls` is omitted while closed because the
+ * element it names does not exist yet — which is also what Radix itself does.
+ */
+function MobileNavSheet() {
+  const [open, setOpen] = useState(false)
+  // Once opened, the panel stays mounted so reopening costs no second fetch.
+  const [everOpened, setEverOpened] = useState(false)
+  const isTabletUp = useIsTablet()
+  // The panel focuses this on close; Radix cannot, since it looks for its own
+  // Dialog.Trigger and there is none. See MobileNavPanel's onCloseAutoFocus.
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  /*
+   * Close if the viewport grows past the breakpoint while the sheet is open.
+   *
+   * Without this, resizing (or rotating a tablet) hides the sheet via
+   * `md:hidden` while Radix still considers it open — leaving body scroll
+   * locked and focus trapped inside an invisible dialog, with no visible way
+   * out. CSS can hide it; only state can close it.
+   */
+  useEffect(() => {
+    if (isTabletUp) setOpen(false)
+  }, [isTabletUp])
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        // RES-07 — 44px touch target. The negative margin keeps the header
+        // height unchanged while the hit area stays full size.
+        className={cn(
+          'text-secondary hover:text-primary -mr-2 grid size-11 place-items-center',
+          'rounded-[--radius-sm] md:hidden',
+          'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+        )}
+        aria-label="Open navigation menu"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open ? MOBILE_NAV_PANEL_ID : undefined}
+        onClick={() => {
+          setEverOpened(true)
+          setOpen(true)
+        }}
+      >
+        <Menu className="size-5" aria-hidden="true" />
+      </button>
+
+      {everOpened && (
+        // No fallback: the chunk is a few KB and a flash of placeholder would
+        // be worse than the sheet appearing a moment later.
+        <Suspense fallback={null}>
+          <MobileNavPanel
+            id={MOBILE_NAV_PANEL_ID}
+            open={open}
+            onOpenChange={setOpen}
+            items={NAV_ITEMS}
+            triggerRef={triggerRef}
+          />
+        </Suspense>
+      )}
+    </>
   )
 }
 

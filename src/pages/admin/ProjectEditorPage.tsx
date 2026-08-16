@@ -3,8 +3,11 @@ import { AlertTriangle, ArrowLeft, GripVertical, Plus, Trash2 } from 'lucide-rea
 import { useEffect, useId, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import { ImageUploader } from '@/components/admin/ImageUploader'
+import { useAddProjectImage, useDeleteProjectImage, useProjectImages } from '@/hooks/useMedia'
+import { publicStorageUrl } from '@/lib/storage'
+
 import { ErrorState } from '@/components/common/States'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FormField, Input, Select, Textarea } from '@/components/ui/Field'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -34,10 +37,9 @@ import type {
  * every field must be reachable at any time and a half-finished draft must
  * always be saveable.
  *
- * Deliberately NOT here: the Media tab. Uploads need the storage layer
- * (Phase 14) — client-side resize to WebP, alt-text enforcement, the
- * delete-before-row flow. A file input that appears to work and silently
- * discards the file would be worse than an honest placeholder.
+ * The Media tab covers both halves of MED-01: the cover, which is a column on
+ * this row and saves with the form, and the gallery, which is child rows that
+ * save immediately. See MediaSection for why they differ.
  */
 
 const SECTIONS = [
@@ -107,6 +109,10 @@ type FormState = {
   videoUrl: string
   seoTitle: string
   seoDescription: string
+  /* MED-01 — the cover lives on the projects row, so it is form state and is
+     persisted by the form's own Save, not on upload. */
+  coverImagePath: string
+  coverImageAlt: string
   clientName: string
   clientDisclosed: boolean
   confidentialityNote: string
@@ -141,6 +147,8 @@ const EMPTY: FormState = {
   videoUrl: '',
   seoTitle: '',
   seoDescription: '',
+  coverImagePath: '',
+  coverImageAlt: '',
   clientName: '',
   // FR-PROJ-16 — the safe default. A new project does not disclose a client
   // until someone deliberately says it may.
@@ -199,6 +207,8 @@ export default function ProjectEditorPage() {
       videoUrl: p.video_url ?? '',
       seoTitle: p.seo_title ?? '',
       seoDescription: p.seo_description ?? '',
+      coverImagePath: p.cover_image_path ?? '',
+      coverImageAlt: p.cover_image_alt ?? '',
       clientName: p.client_name ?? '',
       clientDisclosed: p.client_disclosed,
       confidentialityNote: p.confidentiality_note ?? '',
@@ -225,8 +235,11 @@ export default function ProjectEditorPage() {
       getPublishBlockers({
         ...form,
         images: loaded?.images.map((i) => ({ altText: i.alt_text })) ?? [],
-        coverImagePath: loaded?.project.cover_image_path ?? '',
-        coverImageAlt: loaded?.project.cover_image_alt ?? '',
+        // From the FORM, not the loaded row: the gate must judge what is about
+        // to be saved, or uploading a cover without alt text would still show
+        // as publishable until after a save.
+        coverImagePath: form.coverImagePath,
+        coverImageAlt: form.coverImageAlt,
       }),
     [form, loaded],
   )
@@ -297,6 +310,8 @@ export default function ProjectEditorPage() {
           video_url: form.videoUrl.trim() || null,
           seo_title: form.seoTitle.trim() || null,
           seo_description: form.seoDescription.trim() || null,
+          cover_image_path: form.coverImagePath.trim() || null,
+          cover_image_alt: form.coverImageAlt.trim() || null,
           client_name: form.clientName.trim() || null,
           client_disclosed: form.clientDisclosed,
           confidentiality_note: form.confidentialityNote.trim() || null,
@@ -426,7 +441,7 @@ export default function ProjectEditorPage() {
         {section === 'technology' && (
           <TechnologySection form={form} set={set} technologies={technologies ?? []} />
         )}
-        {section === 'media' && <MediaSection imageCount={loaded?.images.length ?? 0} />}
+        {section === 'media' && <MediaSection form={form} set={set} projectId={id} />}
         {section === 'links' && <LinksSection form={form} set={set} />}
         {section === 'confidentiality' && <ConfidentialitySection form={form} set={set} />}
       </div>
@@ -818,25 +833,174 @@ function TechnologySection({
 }
 
 /**
- * Honest placeholder. Uploads need the Phase 14 storage layer — client-side
- * resize to WebP, alt-text enforcement before publish, and the
- * delete-storage-before-row flow (MED-04/07). A file input that appeared to
- * work and silently dropped the file would be worse than saying so.
+ * Media — PRD MED-01…04, MED-07, A11Y-06.
+ *
+ * Two distinct things live here and they behave differently:
+ *
+ *   COVER    a path on the `projects` row itself. Uploading replaces the
+ *            value in the form; it is persisted by the form's own Save, so
+ *            an abandoned edit does not change the project.
+ *   GALLERY  rows in `project_images`. Written IMMEDIATELY on upload, because
+ *            they are child records with their own ids — deferring them to
+ *            Save would mean holding uploaded objects with no row pointing at
+ *            them, which is precisely the orphan state MED-05 exists to find.
+ *
+ * The gallery therefore needs a saved project to attach to. On a new,
+ * unsaved project there is no id yet, so it says so rather than uploading
+ * into nowhere.
  */
-function MediaSection({ imageCount }: { imageCount: number }) {
+function MediaSection({
+  form,
+  set,
+  projectId,
+}: {
+  form: FormState
+  set: SetField
+  projectId: string | undefined
+}) {
+  const { data: images } = useProjectImages(projectId)
+  const addImage = useAddProjectImage(projectId)
+  const removeImage = useDeleteProjectImage(projectId)
+  const toast = useToast()
+
+  const coverUrl = publicStorageUrl('projects', form.coverImagePath || null)
+
   return (
-    <div className="border-subtle rounded-[--radius-lg] border border-dashed p-6">
-      <Badge tone="outline">Phase 14</Badge>
-      <p className="text-primary mt-3 font-medium">Image upload is not built yet</p>
-      <p className="text-secondary measure mt-2 text-sm">
-        Uploads need the storage layer: browser-side resize to WebP, alt text captured at upload and
-        required before publish, and storage objects removed before the row on delete.
-      </p>
-      {imageCount > 0 && (
-        <p className="text-muted mt-3 text-sm">
-          This project already has {imageCount} image{imageCount === 1 ? '' : 's'} attached.
+    <div className="space-y-8">
+      <section aria-labelledby="cover-heading">
+        <h3 id="cover-heading" className="text-primary font-medium">
+          Cover image
+        </h3>
+        <p className="text-secondary measure mt-1 text-sm">
+          Used on cards and as the social share image. Saved with the rest of the form.
         </p>
-      )}
+
+        {form.coverImagePath ? (
+          <div className="border-subtle bg-surface mt-4 flex gap-4 rounded-[--radius-lg] border p-4">
+            {coverUrl && (
+              <img
+                src={coverUrl}
+                alt=""
+                className="border-subtle size-24 shrink-0 rounded-[--radius-md] border object-cover"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="text-muted truncate text-xs">{form.coverImagePath}</p>
+              <PlainField
+                label="Cover alt text"
+                value={form.coverImageAlt}
+                onChange={(v) => set('coverImageAlt', v)}
+                hint="Required before this project can be published (A11Y-06)."
+              />
+              <Button
+                size="sm"
+                variant="danger"
+                className="mt-3"
+                onClick={() => {
+                  // Clears the reference only. The object stays in the bucket
+                  // and shows up under Media → Unreferenced, because deleting
+                  // it here would break any OTHER project reusing the path.
+                  set('coverImagePath', '')
+                  set('coverImageAlt', '')
+                }}
+              >
+                Remove cover
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <ImageUploader
+              bucket="projects"
+              pathPrefix={projectId ? `covers/${projectId}` : 'covers'}
+              label="Upload a cover image"
+              onUploaded={(uploaded, altText) => {
+                set('coverImagePath', uploaded.path)
+                set('coverImageAlt', altText)
+                toast.success('Cover uploaded. Save the project to keep it.')
+              }}
+            />
+          </div>
+        )}
+      </section>
+
+      <section aria-labelledby="gallery-heading">
+        <h3 id="gallery-heading" className="text-primary font-medium">
+          Gallery
+        </h3>
+        <p className="text-secondary measure mt-1 text-sm">
+          Screenshots and architecture diagrams. These save immediately.
+        </p>
+
+        {!projectId ? (
+          <p className="text-muted border-subtle mt-4 rounded-[--radius-lg] border border-dashed p-6 text-sm">
+            Save this project once before adding gallery images — they attach to its id.
+          </p>
+        ) : (
+          <>
+            {images && images.length > 0 && (
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                {images.map((image) => {
+                  const url = publicStorageUrl('projects', image.storage_path)
+                  return (
+                    <li
+                      key={image.id}
+                      className="border-subtle bg-surface flex min-w-0 gap-3 rounded-[--radius-lg] border p-3"
+                    >
+                      {url && (
+                        <img
+                          src={url}
+                          alt=""
+                          className="size-16 shrink-0 rounded-[--radius-sm] object-cover"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-primary line-clamp-2 text-sm">{image.alt_text}</p>
+                        <p className="text-muted mt-1 truncate text-xs">{image.storage_path}</p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="mt-1"
+                          onClick={() => {
+                            if (!window.confirm('Remove this image?')) return
+                            void removeImage
+                              .mutateAsync({ id: image.id, storagePath: image.storage_path })
+                              .then(() => toast.success('Image removed.'))
+                              .catch((cause) => toast.error('Could not remove it.', cause))
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+
+            <div className="mt-4">
+              <ImageUploader
+                bucket="projects"
+                pathPrefix={`gallery/${projectId}`}
+                label="Add a gallery image"
+                onUploaded={async (uploaded, altText) => {
+                  await addImage.mutateAsync({
+                    project_id: projectId,
+                    storage_path: uploaded.path,
+                    alt_text: altText,
+                    role: 'screenshot',
+                    width: uploaded.width,
+                    height: uploaded.height,
+                    file_size_bytes: uploaded.sizeBytes,
+                    sort_order: (images?.length ?? 0) + 1,
+                  })
+                  toast.success('Image added.')
+                }}
+              />
+            </div>
+          </>
+        )}
+      </section>
     </div>
   )
 }
