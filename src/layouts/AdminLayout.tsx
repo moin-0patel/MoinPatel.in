@@ -159,7 +159,20 @@ function AdminNavLink({
           'flex items-center gap-2.5 rounded-[--radius-sm] px-2 py-2 text-sm',
           'transition-colors duration-[--duration-hover] ease-[--ease-out]',
           isActive
-            ? 'bg-accent-soft text-accent'
+            ? // A solid pill, not a tint. `bg-accent-soft text-accent` put accent
+              // text on a tinted RAISED surface, which composites to #191f30 and
+              // measures 4.34:1 — under the 4.5 AA floor, and axe flagged it
+              // serious on all five admin screens verify:admin scans.
+              //
+              // It survived an earlier accent-soft fix because that one checked
+              // the composite over `base` (4.95) and `surface` (4.65) but not
+              // over `surface-raised`, which only the admin sidebar uses.
+              //
+              // accent-strong carries white at 5.34:1 and is already the primary
+              // Button's resting surface, so no fourth accent shade enters the
+              // system. A filled pill is also a stronger selected-state signal
+              // than a faint wash (A11Y-09: never colour alone).
+              'bg-accent-strong text-white'
             : 'text-secondary hover:text-primary hover:bg-surface',
         )
       }
