@@ -96,7 +96,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
   )
 
   const cardClass = cn(
-    'group border-subtle bg-surface relative flex flex-col overflow-hidden',
+    'group rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] relative flex flex-col overflow-hidden',
     'rounded-[--radius-lg] border',
     'transition-colors duration-[--duration-hover] ease-[--ease-out]',
     'hover:border-strong hover:shadow-[--shadow-raised]',

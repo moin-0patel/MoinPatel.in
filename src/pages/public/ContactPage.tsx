@@ -118,7 +118,11 @@ export default function ContactPage() {
 
       <div className="container-page py-12 md:py-20">
         <header className="mb-10">
-          <h1 className="text-primary">Let&rsquo;s Talk</h1>
+          {/* Design's display treatment; the accessible gradient pair, and
+              text-primary first so it survives without background-clip. */}
+          <h1 className="text-primary font-display bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.1] font-bold tracking-[-0.03em] text-transparent md:text-4xl lg:text-5xl">
+            Let&rsquo;s Talk
+          </h1>
           <p className="text-secondary measure mt-4">
             Describe what your team does by hand today. If it can be automated, I&rsquo;ll tell you
             how — and if it can&rsquo;t, I&rsquo;ll tell you that too.
@@ -336,7 +340,18 @@ function DirectChannels({
   if (!email && !phone && !location) return null
 
   return (
-    <aside aria-labelledby="direct-channels-heading">
+    <aside
+      aria-labelledby="direct-channels-heading"
+      className="rim-light border-subtle bg-surface rounded-[--radius-lg] border p-5"
+    >
+      {/* Design's live-status chip. Decorative, so it is hidden from AT. */}
+      <p
+        aria-hidden="true"
+        className="text-accent mb-4 flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase"
+      >
+        <span className="bg-success size-1.5 shrink-0 rounded-full" />
+        Available
+      </p>
       <h2
         id="direct-channels-heading"
         className="text-muted mb-4 font-mono text-xs tracking-[--tracking-mono] uppercase"

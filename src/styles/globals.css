@@ -159,3 +159,101 @@ h4 {
     backdrop-filter: blur(var(--glass-blur));
   }
 }
+
+/* --- Ambient background --------------------------------------------------
+ *
+ * A CSS-only stand-in for the approved design's full-screen WebGL shader.
+ *
+ * The design export ships a `<canvas>` driven by a WebGL fragment shader. That
+ * was deliberately not ported: it costs JS on a PERF-05 budget that is already
+ * over (185.66 / 180 KB gz), runs a continuous render loop on battery, and
+ * needs its own reduced-motion path. Layered radial gradients reach most of the
+ * way for no JavaScript at all.
+ *
+ * `fixed` and `-z-10` keep it behind content without joining the scroll, and it
+ * is `aria-hidden` at the call site — it carries no information.
+ */
+@utility ambient-field {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  overflow: hidden;
+
+  /*
+   * DESIGN.md, Volumetric Backgrounds: 2-3 blob elements at filter blur(120px),
+   * the accent at 5-10% opacity, moving slowly. Real blurred blobs rather than
+   * soft radial gradients, because that is what the spec asks for and the
+   * falloff differs visibly at these sizes.
+   *
+   * The spec drives this with WebGL; it is CSS here by decision. PERF-05 is
+   * already over budget and a canvas would add JS plus a render loop.
+   */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(120px);
+  }
+  &::before {
+    width: 46rem;
+    height: 46rem;
+    top: -14rem;
+    left: -10rem;
+    background: oklch(from var(--color-accent-strong) l c h / 0.1);
+  }
+  &::after {
+    width: 38rem;
+    height: 38rem;
+    right: -8rem;
+    bottom: -12rem;
+    background: oklch(from var(--color-accent) l c h / 0.07);
+  }
+
+  /*
+   * A11Y-10 / 32.5 — the drift only exists when motion is welcome. The blobs
+   * stay either way, so nothing disappears; only the movement stops. The guard
+   * sits INSIDE the utility because Tailwind v4 rejects an @utility nested
+   * inside an @media.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    animation: ambient-drift 32s ease-in-out infinite alternate;
+  }
+}
+
+/*
+ * DESIGN.md, Cards: a rim-light border — a gradient stroke strongest at the
+ * top-left, fading to nothing by the bottom-right. Implemented as a masked
+ * pseudo-element so it follows whatever border-radius the card already has,
+ * instead of hard-coding one.
+ */
+@utility rim-light {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 60%);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+}
+
+@keyframes ambient-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(0, -2%, 0) scale(1.06);
+  }
+}

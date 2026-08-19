@@ -35,7 +35,12 @@ export function ExperienceSection({
   if (isPending) {
     return (
       <Section id="experience" labelledBy="experience-heading">
-        <SectionHeading id="experience-heading" eyebrow="Experience" title="Where I work" />
+        <SectionHeading
+          id="experience-heading"
+          eyebrow="Experience"
+          meta="SYS_EVOLUTION"
+          title="Where I work"
+        />
         <LoadingRegion label="Loading experience" className="space-y-6">
           <Skeleton className="h-32 w-full rounded-[--radius-lg]" />
           <Skeleton className="h-24 w-full rounded-[--radius-lg]" />
@@ -47,7 +52,12 @@ export function ExperienceSection({
   if (isError) {
     return (
       <Section id="experience" labelledBy="experience-heading">
-        <SectionHeading id="experience-heading" eyebrow="Experience" title="Where I work" />
+        <SectionHeading
+          id="experience-heading"
+          eyebrow="Experience"
+          meta="SYS_EVOLUTION"
+          title="Where I work"
+        />
         <ErrorState error={error} onRetry={() => void refetch()} />
       </Section>
     )
@@ -64,6 +74,7 @@ export function ExperienceSection({
         <SectionHeading
           id="experience-heading"
           eyebrow="Experience"
+          meta="SYS_EVOLUTION"
           title="Where I work"
           className="mb-0"
         />
@@ -101,7 +112,7 @@ function TimelineItem({ record }: { record: ExperienceRecord }) {
   return (
     <article
       className={cn(
-        'border-subtle bg-surface rounded-[--radius-lg] border p-5',
+        'rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] rounded-[--radius-lg] border p-5',
         'md:border-0 md:bg-transparent md:p-0',
       )}
     >

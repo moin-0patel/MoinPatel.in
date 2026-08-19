@@ -36,6 +36,15 @@ export function PublicLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       {/*
+       * The design's ambient backdrop. CSS-only by decision: the export drove
+       * it with a WebGL shader, and a second Three.js scene sat behind the
+       * hero, loaded from ajax.googleapis.com. Neither is ported — a
+       * third-party CDN script is blocked outright by the script-src 'self'
+       * policy in vercel.json, and both would add JS to a PERF-05 budget that
+       * is already over. Purely decorative, so it is hidden from AT.
+       */}
+      <div className="ambient-field" aria-hidden="true" />
+      {/*
        * A11Y-05 / FR-NAV-04 — the first focusable element on every page.
        * Visually hidden until focused, never `display: none`, which would take
        * it out of the tab order entirely and defeat the purpose.
@@ -71,7 +80,7 @@ function Header() {
       <div className="container-page flex h-[--header-height] items-center justify-between gap-6">
         <NavLink
           to="/"
-          className="font-mono text-sm font-semibold tracking-[0.18em]"
+          className="text-primary font-display text-base font-bold tracking-[0.14em]"
           aria-label="Moin Patel — home"
         >
           MP
@@ -89,8 +98,8 @@ function Header() {
                       'rounded-[--radius-sm] px-3 py-2 text-sm',
                       'transition-colors duration-[--duration-hover] ease-[--ease-out]',
                       isActive
-                        ? 'text-primary underline decoration-[--color-accent] decoration-2 underline-offset-8'
-                        : 'text-secondary hover:text-primary',
+                        ? 'bg-accent-soft text-accent'
+                        : 'text-secondary hover:text-primary hover:bg-surface',
                     )
                   }
                 >

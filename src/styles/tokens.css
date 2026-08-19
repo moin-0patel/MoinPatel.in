@@ -12,40 +12,66 @@
 
 @theme {
   /* --- 32.1 Colour ------------------------------------------------------- */
-  /* Surfaces */
-  --color-base: #08090c; /* page background */
-  --color-surface: #0e1015; /* cards, header on scroll */
-  --color-surface-raised: #14171f; /* modals, popovers, admin sidebar */
+  /*
+   * Palette translated from the approved design export (Stitch, Material 3
+   * dark). Token NAMES are unchanged on purpose: every component picks the new
+   * palette up without editing, which is also how the admin inherits the new
+   * look without any structural change.
+   *
+   * Every ratio below was recomputed against the NEW surfaces before any
+   * component was touched. The old numbers in this file were measured against
+   * #08090c/#0e1015/#14171f and none of them survive a palette change — that
+   * recheck is the whole reason this comment records values rather than just
+   * intent.
+   */
 
-  /* Borders */
-  --color-subtle: #1e222c; /* default */
-  --color-strong: #2c3240; /* hover / focus */
+  /* Surfaces — M3 background / container-low / container-high */
+  --color-base: #13121b; /* page background */
+  --color-surface: #1b1b24; /* cards, header on scroll */
+  --color-surface-raised: #2a2933; /* modals, popovers, admin sidebar */
+
+  /*
+   * Borders. `subtle` is decorative (card edges) and is not a UI-component
+   * boundary, so WCAG 1.4.11's 3:1 does not apply to it; at 1.98 on base it is
+   * still a large improvement on the 1.25 it replaces. `strong` IS used for
+   * focus and hover edges, so it clears 3:1 on all three surfaces.
+   */
+  --color-subtle: #464555; /* M3 outline-variant — 1.98 on base, decorative */
+  --color-strong: #918fa1; /* M3 outline — 4.54 raised … 5.88 base */
 
   /* Text */
-  --color-primary: #f2f4f8; /* headings, body     — >= 7:1 on base */
-  --color-secondary: #a8b0c0; /* supporting copy    — >= 4.5:1 on base */
-  /* Was #6e7688, which measured 4.37:1 on base and 3.93:1 on surface-raised —
-     under the 4.5:1 AA floor everywhere it was used, and flagged serious by
-     axe. Raised to clear AA on ALL THREE surfaces, since text-muted appears on
-     cards and in the admin sidebar, not just on the page background. */
-  --color-muted: #7d8595; /* captions, meta — >= 4.8:1 on base/surface/raised */
+  --color-primary: #e4e1ee; /* headings, body — 11.14 raised … 14.43 base */
+  --color-secondary: #c7c4d8; /* supporting copy — 8.42 raised … 10.90 base */
+  /*
+   * Lightened from the design's outline (#918fa1), which measured 4.54:1 on
+   * surface-raised — passing by 0.04, which is not a margin. #9b99aa keeps the
+   * same hue and clears 5.15:1 on the tightest surface.
+   */
+  --color-muted: #9b99aa; /* captions, meta — 5.15 raised … 6.66 base */
 
   /*
    * Accent — exactly one hue family. A second accent is a design regression.
    *
-   * The three shades exist because one value cannot serve both roles: as TEXT
-   * on the dark base the accent must be light (#4f7df3 = 5.27:1), while as a
-   * BACKGROUND under white text it must be dark (#4f7df3 = 3.77:1, a serious
-   * axe failure). So the lighter value stays the text colour and the darker
-   * ones carry white.
+   * The design export also carries a warm tertiary (#ffb695). It is
+   * deliberately NOT adopted: one hue family stands, and the footer sign-off
+   * that used it takes --color-muted instead.
+   *
+   * Material 3 already splits the accent the way this file had to discover the
+   * hard way: `primary` is the light TEXT tone and `primary-container` is the
+   * filled SURFACE tone. That split is why the old palette's single mid-blue
+   * could not do both jobs (white on it was 3.77:1, a serious axe failure).
    */
-  --color-accent: #4f7df3; /* text on base — 5.27:1 */
-  --color-accent-strong: #3b62d9; /* white on it — 5.34:1 (button rest, link hover) */
-  --color-accent-deep: #3159c9; /* white on it — 6.17:1 (button hover) */
-  /* Alpha was 0.12, which composited to #161d30 and left `text-accent` badges
-     at 4.43:1 — just under AA. 0.08 gives 4.65:1 with room to spare. */
-  --color-accent-soft: oklch(from #4f7df3 l c h / 0.08);
-  --color-indigo-deep: #1b1f4b; /* CTA band gradient anchor only — not an accent shade */
+  --color-accent: #c3c0ff; /* M3 primary — text: 8.41 raised … 10.89 base */
+  --color-accent-strong: #4f46e5; /* M3 primary-container — white on it 6.29:1 */
+  --color-accent-deep: #3f37cc; /* filled hover — white on it 7.99:1 */
+  /*
+   * 12% rather than the old 8%: the accent is now a LIGHT lavender, so a tint
+   * of the container colour reads as a wash the light accent sits on cleanly.
+   * Accent text on this tint measures 7.84:1 on raised and 10.07:1 on base —
+   * the old pairing failed at 4.34:1 on raised.
+   */
+  --color-accent-soft: oklch(from #4f46e5 l c h / 0.12);
+  --color-indigo-deep: #1d00a5; /* CTA band gradient anchor only — not an accent shade */
 
   /* Status — always paired with text, never colour alone (A11Y-09) */
   --color-success: #3fbf87;
@@ -55,10 +81,19 @@
   --color-warning-soft: oklch(from #e0a32e l c h / 0.12);
   --color-danger-soft: oklch(from #e5484d l c h / 0.12);
 
-  --color-focus-ring: #8aa9ff;
+  /* Shifted into the accent hue family with the palette. 6.45:1 on the
+     tightest surface, well clear of 1.4.11's 3:1 for a focus indicator. */
+  --color-focus-ring: #a9a4ff;
 
   /* --- 32.2 Type families ------------------------------------------------ */
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /*
+   * Display face is Geist, per the approved design export. Geist is named
+   * first and Space Grotesk is retained behind it: NEITHER binary is in the
+   * repo yet (Q-25 defers ~200 KB of font files), so both currently fall
+   * through to the system stack exactly as before. Naming Geist here records
+   * the design intent and costs nothing at runtime.
+   */
+  --font-display: 'Geist', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -85,8 +120,9 @@
   --tracking-mono: 0.02em;
 
   /* --- 32.3 Radius ------------------------------------------------------- */
-  --radius-sm: 6px; /* chips, inputs */
-  --radius-md: 10px; /* buttons */
+  /* DESIGN.md rounded scale: sm 0.25rem, md 0.75rem, lg 1rem, xl 1.5rem. */
+  --radius-sm: 4px; /* chips, inputs */
+  --radius-md: 12px; /* buttons */
   --radius-lg: 16px; /* cards */
   --radius-xl: 24px; /* modals, hero photo frame */
 
@@ -114,14 +150,19 @@
   --duration-modal-out: 150ms;
   --duration-process-line: 600ms;
 
-  --content-max: 1280px; /* 33.1 */
+  /* DESIGN.md spacing.container-max. Was 1280px; the design centres on a
+     narrower 1200px measure to leave outer columns atmospheric. */
+  --content-max: 1200px;
   --prose-measure: 72ch; /* FR-CASE-10 */
   --gutter: 24px;
   --header-height: 64px;
 
   /* Glass: sticky header and mobile nav sheet ONLY (32.3). Nowhere else. */
   --glass-blur: 12px;
-  --glass-bg: rgb(8 9 12 / 0.72);
+  /* Tracks --color-base. This was rgb(8 9 12) for the old #08090c base; a
+     palette change leaves it silently wrong otherwise, and the sticky header
+     would tint toward the previous background. */
+  --glass-bg: rgb(19 18 27 / 0.72);
 }
 
 @media (max-width: 429px) {

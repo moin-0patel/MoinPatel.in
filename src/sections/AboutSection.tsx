@@ -24,7 +24,7 @@ export function AboutSection() {
   if (isPending) {
     return (
       <Section id="about" labelledBy="about-heading">
-        <SectionHeading id="about-heading" eyebrow="About" title="Who I am" />
+        <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="Who I am" />
         {/* Skeletons at the final line-height so nothing shifts (12.3). */}
         <div className="measure space-y-2">
           <Skeleton className="h-[1lh] w-full" />
@@ -39,7 +39,7 @@ export function AboutSection() {
 
   return (
     <Section id="about" labelledBy="about-heading">
-      <SectionHeading id="about-heading" eyebrow="About" title="Who I am" />
+      <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="Who I am" />
 
       <div className="measure">
         <p className="text-secondary text-lg leading-[--leading-body]">{profile.shortBio}</p>

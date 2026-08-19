@@ -210,8 +210,40 @@ try {
       const rect = el.getBoundingClientRect()
       if (rect.width === 0 || rect.height === 0) continue
 
+      const label = `<${el.tagName.toLowerCase()}> "${ownText.slice(0, 40)}"`
+
+      // 1. Text painted the same colour as what is behind it.
       if (cs.color === backgroundBehind(el)) {
-        found.push(`<${el.tagName.toLowerCase()}> "${ownText.slice(0, 40)}" is ${cs.color}`)
+        found.push(`${label} is ${cs.color}, same as its background`)
+        continue
+      }
+
+      /*
+       * 2. Transparent text whose gradient fill never arrived.
+       *
+       * This case was added because the first one missed a real invisible
+       * headline. `text-transparent` + `bg-clip-text` is the standard gradient
+       * -text idiom, and it is only safe while the gradient actually has
+       * colour. Written as `from-[--color-primary]`, Tailwind v4 does not
+       * resolve the bare custom property: it compiled to rgba(0,0,0,0), so the
+       * fill was transparent, the text was transparent, and the entire hero
+       * headline rendered as blank space — while check 1 passed, because
+       * transparent never equals the background colour.
+       */
+      const transparent = /^rgba?\([^)]*,\s*0\s*\)$/.test(cs.color.replace(/\s/g, ''))
+      if (transparent) {
+        if (cs.backgroundClip !== 'text' && cs.webkitBackgroundClip !== 'text') {
+          found.push(`${label} is transparent with no background-clip:text`)
+          continue
+        }
+        // Any fully-transparent stop makes the clipped fill invisible.
+        const stops = cs.backgroundImage.match(/rgba?\([^)]+\)/g) ?? []
+        const allTransparent =
+          stops.length === 0 ||
+          stops.every((s) => /,\s*0\s*\)$/.test(s.replace(/\s/g, '').replace(/,0\)$/, ',0)')))
+        if (allTransparent) {
+          found.push(`${label} uses bg-clip-text but its gradient has no colour`)
+        }
       }
     }
     return found

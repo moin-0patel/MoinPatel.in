@@ -4,8 +4,8 @@
   "description": "Building AI-powered systems that automate work, save time, and reduce business costs.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#08090C",
-  "theme_color": "#08090C",
+  "background_color": "#13121B",
+  "theme_color": "#13121B",
   "icons": [
     {
       "src": "/favicon.svg",

@@ -17,10 +17,15 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const VARIANT: Record<ButtonVariant, string> = {
-  // Rests on accent-STRONG, not accent: white on #4f7df3 is 3.77:1, which axe
-  // flags serious. #3b62d9 carries white at 5.34:1 and the hover goes deeper
-  // still. `text-accent` elsewhere keeps the lighter #4f7df3 — see tokens.css.
-  primary: 'bg-accent-strong text-white hover:bg-accent-deep',
+  // Rests on accent-STRONG, not accent. --color-accent is the light TEXT tone
+  // (#c3c0ff); the filled surface is --color-accent-strong (#4f46e5), which
+  // carries white at 6.29:1, hovering to accent-deep at 7.99:1. The split is
+  // Material 3's and it is why one value cannot do both jobs — see tokens.css.
+  // The design fills the primary action with a gradient and an inset top
+  // highlight rather than a flat colour. White is safe across the whole ramp:
+  // 6.29:1 at accent-strong through 9.93:1 at the dark end.
+  primary:
+    'bg-gradient-to-br from-accent-strong to-accent-deep text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:brightness-110',
   secondary:
     'border border-strong bg-transparent text-primary hover:border-accent hover:text-accent',
   ghost: 'bg-transparent text-secondary hover:text-primary hover:bg-surface',

@@ -263,7 +263,7 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
                   'transition-colors duration-[--duration-hover] ease-[--ease-out]',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   isActive
-                    ? // accent-strong, not accent: white on #4f7df3 is 3.77:1.
+                    ? // accent-strong, not accent: --color-accent is the light text tone.
                       'bg-accent-strong text-white'
                     : 'text-secondary hover:text-primary hover:bg-surface-raised',
                 )}

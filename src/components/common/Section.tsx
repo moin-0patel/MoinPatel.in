@@ -62,28 +62,54 @@ export function SectionHeading({
   eyebrow,
   title,
   description,
+  meta,
   className,
 }: {
   id: string
   eyebrow?: string
   title: string
   description?: string
+  /**
+   * Optional right-aligned mono label — the design pairs a section title with a
+   * small status word on the same rule ("Core Architecture … MODULES_LOADED").
+   * Decorative, so it is hidden from assistive tech like the eyebrow.
+   */
+  meta?: string
   className?: string
 }) {
   return (
-    <div className={cn('mb-8 md:mb-12', className)}>
+    // flex-1/min-w-0: several sections place this in a flex row beside a
+    // link, where a content-sized block would cut the divider short.
+    <div className={cn('mb-8 min-w-0 flex-1 md:mb-12', className)}>
+      {/*
+       * The design leads each section with a mono uppercase label preceded by a
+       * short accent rule, then sets the title over a hairline divider.
+       */}
       {eyebrow && (
         <p
           aria-hidden="true"
-          className="text-accent mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase"
+          className="text-accent mb-3 flex items-center gap-2.5 font-mono text-xs tracking-[--tracking-mono] uppercase"
         >
+          <span className="bg-accent inline-block h-px w-6 shrink-0" />
           {eyebrow}
         </p>
       )}
-      {/* A11Y-02 — every section heading is an h2; levels never skip. */}
-      <h2 id={id} className="text-primary">
-        {title}
-      </h2>
+
+      <div className="border-subtle flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b pb-4">
+        {/* A11Y-02 — every section heading is an h2; levels never skip. */}
+        <h2 id={id} className="text-primary text-2xl md:text-3xl">
+          {title}
+        </h2>
+        {meta && (
+          <p
+            aria-hidden="true"
+            className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase"
+          >
+            {meta}
+          </p>
+        )}
+      </div>
+
       {description && <p className="text-secondary measure mt-4">{description}</p>}
     </div>
   )

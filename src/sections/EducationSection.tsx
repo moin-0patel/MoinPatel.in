@@ -23,7 +23,12 @@ export function EducationSection() {
   if (isPending) {
     return (
       <Section id="education" labelledBy="education-heading">
-        <SectionHeading id="education-heading" eyebrow="Education" title="Education" />
+        <SectionHeading
+          id="education-heading"
+          eyebrow="Education"
+          meta="CREDENTIALS"
+          title="Education"
+        />
         <Skeleton className="h-28 w-full max-w-md rounded-[--radius-lg]" />
       </Section>
     )
@@ -36,12 +41,17 @@ export function EducationSection() {
 
   return (
     <Section id="education" labelledBy="education-heading">
-      <SectionHeading id="education-heading" eyebrow="Education" title="Education" />
+      <SectionHeading
+        id="education-heading"
+        eyebrow="Education"
+        meta="CREDENTIALS"
+        title="Education"
+      />
 
       <ul className="grid gap-4 lg:grid-cols-2">
         {education.map((record) => (
           <li key={record.id}>
-            <article className="border-subtle bg-surface h-full rounded-[--radius-lg] border p-5">
+            <article className="rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] h-full rounded-[--radius-lg] border p-5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-primary text-lg">{record.qualification}</h3>
                 {/* FR-EDU-03 / AC-EDU-2 — "Expected 2027" is rendered as

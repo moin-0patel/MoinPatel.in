@@ -31,6 +31,7 @@ export function FeaturedProjectsSection() {
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
+          meta="MODULES_LOADED"
           title="Recent systems"
         />
         <LoadingRegion
@@ -51,6 +52,7 @@ export function FeaturedProjectsSection() {
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
+          meta="MODULES_LOADED"
           title="Recent systems"
         />
         <ErrorState error={error} onRetry={() => void refetch()} />
@@ -76,6 +78,7 @@ export function FeaturedProjectsSection() {
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
+          meta="MODULES_LOADED"
           title="Recent systems"
           description="Each one is a case study: the problem, the mechanism, and what changed."
           className="mb-0"

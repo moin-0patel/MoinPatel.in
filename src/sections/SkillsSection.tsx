@@ -21,7 +21,12 @@ export function SkillsSection() {
   if (isPending) {
     return (
       <Section id="skills" labelledBy="skills-heading">
-        <SectionHeading id="skills-heading" eyebrow="Skills" title="What I work with" />
+        <SectionHeading
+          id="skills-heading"
+          eyebrow="Skills"
+          meta="STACK_INDEX"
+          title="What I work with"
+        />
         <LoadingRegion label="Loading skills" className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }, (_, column) => (
             <div key={column} className="space-y-3">
@@ -41,7 +46,12 @@ export function SkillsSection() {
   if (isError) {
     return (
       <Section id="skills" labelledBy="skills-heading">
-        <SectionHeading id="skills-heading" eyebrow="Skills" title="What I work with" />
+        <SectionHeading
+          id="skills-heading"
+          eyebrow="Skills"
+          meta="STACK_INDEX"
+          title="What I work with"
+        />
         <ErrorState error={error} onRetry={() => void refetch()} />
       </Section>
     )
@@ -53,7 +63,12 @@ export function SkillsSection() {
 
   return (
     <Section id="skills" labelledBy="skills-heading" className="bg-surface/30">
-      <SectionHeading id="skills-heading" eyebrow="Skills" title="What I work with" />
+      <SectionHeading
+        id="skills-heading"
+        eyebrow="Skills"
+        meta="STACK_INDEX"
+        title="What I work with"
+      />
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {groups.map((group) => (

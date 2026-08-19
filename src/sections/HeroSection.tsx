@@ -77,35 +77,62 @@ export function HeroSection() {
             flips it back on desktop without changing the DOM order that
             keyboard and screen-reader users follow. */}
         <div className="order-2 lg:order-1">
+          {/*
+           * The design opens with a pill-shaped status chip carrying a mono
+           * uppercase label and a live dot. That treatment is applied to the
+           * REAL role title rather than the mockup's invented
+           * "AI + AUTOMATION | BUILDING SYSTEMS THAT MATTER" string.
+           *
+           * `border-strong` rather than the design's `glass-panel`: PRD 32.3
+           * restricts glass to the sticky header and the mobile nav sheet,
+           * "nowhere else". At this size a solid surface is visually equivalent.
+           */}
+          <p className="border-strong bg-surface text-accent inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs tracking-[--tracking-mono] uppercase">
+            <span className="bg-accent size-1.5 shrink-0 rounded-full" aria-hidden="true" />
+            {roleTitle}
+          </p>
+
           {showAvailability && (
-            <p className="border-success/30 bg-success-soft text-success mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+            <p className="border-success/30 bg-success-soft text-success mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
               <span className="bg-success size-1.5 rounded-full" aria-hidden="true" />
               {availabilityLabel}
             </p>
           )}
 
-          {/* A11Y-02 — the page's single h1. */}
-          <h1 id="hero-heading" className="text-primary">
+          {/*
+           * A11Y-02 — the page's single h1, and it stays the owner's name.
+           *
+           * The design puts its headline in an <h2> and drops the name from the
+           * hero entirely. That is not adopted: PRD 12.12 fixes the name as the
+           * h1 and the positioning line as a <p>, "never a heading". The visual
+           * hierarchy the design wants is still achieved — the positioning line
+           * below is far larger — which is exactly the split 12.12 describes.
+           */}
+          <h1
+            id="hero-heading"
+            className="text-secondary font-display mt-6 text-lg font-medium tracking-[0.02em]"
+          >
             {fullName}
           </h1>
 
           {/*
-           * NOT `md:text-base`. Tailwind v4 resolves `text-*` against both
-           * --text-* and --color-*, and when both exist the COLOUR wins, so
-           * `text-base` compiles to `color: var(--color-base)` — the page
-           * background. This line rendered invisible at every width >= 768px,
-           * and the font-size step never applied at all. Verified in the built
-           * CSS: `.text-base{color:var(--color-base)}`.
+           * The positioning line carries the design's display-xl headline
+           * treatment: the largest type on the page, with a gradient fill.
            *
-           * The `length:` hint forces the font-size interpretation.
+           * The gradient endpoints are NOT the design's. It ran
+           * primary (#c3c0ff, 10.89:1) → primary-container (#4f46e5, 2.96:1),
+           * so the tail of the text fell under the 4.5:1 AA floor. This runs
+           * --color-primary → --color-accent instead: 14.43:1 → 10.89:1, the
+           * same lavender direction with no dip. `text-primary` is set first so
+           * the text stays visible if background-clip:text is unsupported.
+           *
+           * Uses the TOKEN utilities (from-primary / to-accent), not
+           * from-[--color-primary]. The bracket form does not resolve a bare
+           * custom property in Tailwind v4 — it compiled to rgba(0,0,0,0), and
+           * combined with text-transparent the entire headline rendered
+           * invisible while verify:ui still reported 100/100.
            */}
-          <p className="text-accent mt-3 font-mono text-sm tracking-[--tracking-mono] md:text-[length:var(--text-base)]">
-            {roleTitle}
-          </p>
-
-          {/* The approved positioning line — largest visual weight after the
-              name, and a <p>, never a heading (12.12 accessibility note). */}
-          <p className="text-primary font-display mt-6 text-2xl leading-[1.25] font-semibold text-balance md:text-3xl">
+          <p className="text-primary font-display mt-4 bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.1] font-semibold text-balance text-transparent md:text-4xl lg:text-5xl">
             {positioningLine}
           </p>
 
@@ -117,7 +144,13 @@ export function HeroSection() {
               <Skeleton className="h-[1lh] w-3/5 max-w-lg" />
             </div>
           ) : (
-            profile?.tagline && <p className="text-secondary measure mt-5">{profile.tagline}</p>
+            /* The design rules the supporting paragraph off with a left border
+               in the accent hue — the one place it uses a rule as emphasis. */
+            profile?.tagline && (
+              <p className="text-secondary measure border-accent/30 mt-6 border-l py-1 pl-4">
+                {profile.tagline}
+              </p>
+            )
           )}
 
           {location && <p className="text-muted mt-4 text-sm">{location}</p>}

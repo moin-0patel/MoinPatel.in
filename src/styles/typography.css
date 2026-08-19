@@ -55,49 +55,63 @@
 }
 */
 
-/* --- Element defaults ---------------------------------------------------- */
+/* --- Element defaults ----------------------------------------------------
+ *
+ * Wrapped in @layer base, and that is load-bearing rather than tidy.
+ *
+ * Unlayered CSS beats layered CSS in the cascade, regardless of specificity.
+ * These rules used to sit outside any layer while Tailwind emits utilities
+ * into @layer utilities, so an element selector here silently defeated every
+ * text-* size utility written on a heading. An h1 carrying text-2xl resolved
+ * to --text-5xl instead: 68px on a 1440px viewport, across 19 files.
+ *
+ * Inside @layer base these are ordinary defaults again — utilities win, which
+ * is what every call site was already written to assume.
+ * ------------------------------------------------------------------------- */
 
-body {
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: var(--leading-body);
-  font-synthesis-weight: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-}
+@layer base {
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
-  font-weight: 600;
-  text-wrap: balance;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    font-weight: 600;
+    text-wrap: balance;
+  }
 
-h1 {
-  font-size: var(--text-5xl);
-}
-h2 {
-  font-size: var(--text-3xl);
-}
-h3 {
-  font-size: var(--text-xl);
-}
-h4 {
-  font-size: var(--text-lg);
-}
+  h1 {
+    font-size: var(--text-5xl);
+  }
+  h2 {
+    font-size: var(--text-3xl);
+  }
+  h3 {
+    font-size: var(--text-xl);
+  }
+  h4 {
+    font-size: var(--text-lg);
+  }
 
-code,
-kbd,
-samp,
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
 }
 
 /* A11Y-14 — text resizes to 200% without loss of content or function, so there

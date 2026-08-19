@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Gallery } from '@/components/common/Lightbox'
 import { PipelineDiagram } from '@/components/common/PipelineDiagram'
 import { Prose } from '@/components/common/Prose'
+import { PROJECT_CLAIMS } from '@/content/project-claims'
 import { SEO } from '@/components/common/SEO'
 import { StatusBadge } from '@/components/ui/Badge'
 import { GithubIcon } from '@/components/ui/BrandIcon'
@@ -137,7 +138,16 @@ function CaseStudy({
             </span>
           </div>
 
-          <h1 className="text-primary">{project.title}</h1>
+          {/*
+           * The design sets the case-study title as the page's largest type,
+           * uppercase, with the same lavender gradient as the home hero.
+           * Endpoints are the accessible pair (14.43:1 -> 10.89:1); the design's
+           * own gradient ran into #4f46e5 at 2.96:1. text-primary is set first
+           * so the title stays visible if background-clip:text is unsupported.
+           */}
+          <h1 className="text-primary font-display bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.05] font-bold tracking-[-0.03em] text-transparent uppercase md:text-4xl lg:text-5xl">
+            {project.title}
+          </h1>
 
           {project.subtitle && <p className="text-accent mt-3 text-lg">{project.subtitle}</p>}
 
@@ -198,6 +208,8 @@ function CaseStudy({
           />
         )}
       </header>
+
+      <ClaimBand slug={project.slug} />
 
       <div className="container-page grid gap-10 pb-16 lg:grid-cols-[200px_1fr] lg:gap-16">
         {/* FR-CASE-06 — sticky in-page nav, >= 1024px only, showing only the
@@ -372,6 +384,37 @@ function CaseStudy({
  * Encoding that as a component rather than repeating `{x && (...)}` eleven
  * times means the rule cannot be forgotten on the twelfth block.
  */
+/**
+ * The design's "Impact Metrics" strip, without the invented arithmetic.
+ *
+ * See src/content/project-claims.ts for why these are structural facts rather
+ * than percentages. A project with no claims renders nothing at all.
+ */
+function ClaimBand({ slug }: { slug: string }) {
+  const claims = PROJECT_CLAIMS[slug]
+  if (!claims || claims.length === 0) return null
+
+  return (
+    <section aria-labelledby="claims-heading" className="container-page pb-4">
+      <h2 id="claims-heading" className="visually-hidden">
+        What this system guarantees
+      </h2>
+      <ul className="grid gap-3 sm:grid-cols-3">
+        {claims.map((claim) => (
+          <li
+            key={claim.label}
+            className="rim-light border-subtle bg-surface min-w-0 rounded-[--radius-lg] border p-5"
+          >
+            <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
+              {claim.label}
+            </p>
+            <p className="text-secondary mt-2 text-sm">{claim.detail}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
 function Block({
   id,
   title,
