@@ -1,7 +1,14 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense, useState } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
+} from 'react-router-dom'
 
 import { AuthProvider } from '@/app/AuthProvider'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
@@ -19,6 +26,15 @@ import { PublicLayout } from '@/layouts/PublicLayout'
  * React.lazy is what produces the separate chunk. A static import of any admin
  * page here would fold the entire CMS into the public bundle and blow the
  * 180 KB budget (PERF-05).
+ *
+ * WHY A DATA ROUTER
+ *
+ * This uses `createBrowserRouter` + `RouterProvider`, not `<BrowserRouter>`
+ * with `<Routes>`. The difference is not stylistic: `useBlocker` — which
+ * FR-ADM-05 needs to stop a half-written case study being lost to a stray
+ * sidebar click — THROWS outside a data router. With the old setup it took
+ * `/admin/projects/new` and `/admin/settings` straight to the 500 boundary,
+ * and both screens were unusable. See useUnsavedChanges for the full story.
  */
 
 /* --- Public ------------------------------------------------------------- */
@@ -65,6 +81,101 @@ function RouteFallback() {
   return <div className="min-h-[50dvh]" aria-hidden="true" />
 }
 
+/**
+ * The pathless layout route that owns every provider needing router context.
+ *
+ * These used to wrap `<BrowserRouter>` as ordinary components. A data router
+ * owns everything beneath it, so anything calling a router hook — ScrollToTop's
+ * `useLocation`, ProtectedRoute's redirect — has to live inside a route element
+ * instead. Hence a layout route rather than a stack of wrappers.
+ *
+ * Nesting order is unchanged and each level is deliberate.
+ */
+function RootLayout() {
+  return (
+    // FR-NAV-07 — inside the router so a toast can outlive a route change
+    // ("Published" should still be readable after the redirect), and outside
+    // the boundary so an error toast survives a crash.
+    <ToastProvider>
+      <AuthProvider>
+        <ScrollToTop />
+        <RouteErrorBoundary
+          context="root"
+          fallback={(_error, reset) => (
+            <Suspense fallback={<RouteFallback />}>
+              <ServerErrorPage onReload={reset} />
+            </Suspense>
+          )}
+        >
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
+        </RouteErrorBoundary>
+      </AuthProvider>
+    </ToastProvider>
+  )
+}
+
+/*
+ * Built once at module scope. A data router holds navigation state — including
+ * whatever `useBlocker` is currently holding back — and rebuilding it on every
+ * render would throw that away.
+ */
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<RootLayout />}>
+      {/* --- Public --- */}
+      <Route element={<PublicLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="experience" element={<ExperiencePage />} />
+        <Route path="projects" element={<ProjectsPage />} />
+        <Route path="projects/:slug" element={<ProjectDetailPage />} />
+        <Route path="skills" element={<SkillsPage />} />
+        <Route path="contact" element={<ContactPage />} />
+        <Route path="resume" element={<ResumePage />} />
+        <Route path="500" element={<ServerErrorPage />} />
+        {/* FR-NAV-08 — unknown routes render 404, not a blank page. */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      {/* --- Admin ---
+          Login sits OUTSIDE the protected tree: guarding it would
+          redirect to itself forever. */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+
+      {/* FR-AUTH-08 — outside the protected tree for the same
+          reason as login: the recovery session is not an admin
+          session, and guarding this would bounce the user to a
+          login they cannot pass. */}
+      <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="projects" element={<AdminProjectsPage />} />
+        <Route path="projects/new" element={<ProjectEditorPage />} />
+        <Route path="projects/:id/edit" element={<ProjectEditorPage />} />
+        <Route path="experience" element={<AdminExperiencePage />} />
+        <Route path="skills" element={<AdminSkillsPage />} />
+        <Route path="education" element={<AdminEducationPage />} />
+        <Route path="social-links" element={<AdminSocialLinksPage />} />
+        <Route path="messages" element={<AdminMessagesPage />} />
+        <Route path="media" element={<AdminMediaPage />} />
+        <Route path="resume" element={<AdminResumePage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+      </Route>
+    </Route>,
+  ),
+)
+
 export function App() {
   // Created once per app instance, not per render — a new QueryClient on
   // re-render would discard the entire cache.
@@ -73,77 +184,7 @@ export function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          {/* FR-NAV-07 — inside the router so a toast can outlive a route
-              change ("Published" should still be readable after the redirect),
-              and outside the boundary so an error toast survives a crash. */}
-          <ToastProvider>
-            <AuthProvider>
-              <ScrollToTop />
-              <RouteErrorBoundary
-                context="root"
-                fallback={(_error, reset) => (
-                  <Suspense fallback={<RouteFallback />}>
-                    <ServerErrorPage onReload={reset} />
-                  </Suspense>
-                )}
-              >
-                <Suspense fallback={<RouteFallback />}>
-                  <Routes>
-                    {/* --- Public --- */}
-                    <Route element={<PublicLayout />}>
-                      <Route index element={<HomePage />} />
-                      <Route path="about" element={<AboutPage />} />
-                      <Route path="experience" element={<ExperiencePage />} />
-                      <Route path="projects" element={<ProjectsPage />} />
-                      <Route path="projects/:slug" element={<ProjectDetailPage />} />
-                      <Route path="skills" element={<SkillsPage />} />
-                      <Route path="contact" element={<ContactPage />} />
-                      <Route path="resume" element={<ResumePage />} />
-                      <Route path="500" element={<ServerErrorPage />} />
-                      {/* FR-NAV-08 — unknown routes render 404, not a blank page. */}
-                      <Route path="*" element={<NotFoundPage />} />
-                    </Route>
-
-                    {/* --- Admin ---
-                      Login sits OUTSIDE the protected tree: guarding it would
-                      redirect to itself forever. */}
-                    <Route path="/admin/login" element={<AdminLoginPage />} />
-
-                    {/* FR-AUTH-08 — outside the protected tree for the same
-                        reason as login: the recovery session is not an admin
-                        session, and guarding this would bounce the user to a
-                        login they cannot pass. */}
-                    <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
-                    <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute>
-                          <AdminLayout />
-                        </ProtectedRoute>
-                      }
-                    >
-                      <Route path="dashboard" element={<DashboardPage />} />
-                      <Route path="projects" element={<AdminProjectsPage />} />
-                      <Route path="projects/new" element={<ProjectEditorPage />} />
-                      <Route path="projects/:id/edit" element={<ProjectEditorPage />} />
-                      <Route path="experience" element={<AdminExperiencePage />} />
-                      <Route path="skills" element={<AdminSkillsPage />} />
-                      <Route path="education" element={<AdminEducationPage />} />
-                      <Route path="social-links" element={<AdminSocialLinksPage />} />
-                      <Route path="messages" element={<AdminMessagesPage />} />
-                      <Route path="media" element={<AdminMediaPage />} />
-                      <Route path="resume" element={<AdminResumePage />} />
-                      <Route path="settings" element={<AdminSettingsPage />} />
-                    </Route>
-                  </Routes>
-                </Suspense>
-              </RouteErrorBoundary>
-            </AuthProvider>
-          </ToastProvider>
-        </BrowserRouter>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </HelmetProvider>
   )

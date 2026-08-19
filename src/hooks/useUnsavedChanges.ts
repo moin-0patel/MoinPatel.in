@@ -19,6 +19,27 @@ import { useBlocker } from 'react-router-dom'
  *
  * Implementing only the first is the common mistake: in-app navigation is
  * guarded, and then a reload silently discards everything.
+ *
+ * REQUIRES A DATA ROUTER — AND THAT IS NOT A DETAIL
+ *
+ * `useBlocker` does not degrade when it is used outside a data router. It
+ * throws:
+ *
+ *   Error: useBlocker must be used within a data router.
+ *
+ * The app was originally built on `<BrowserRouter>` with `<Routes>`, so this
+ * hook took every screen that called it straight to the 500 error boundary.
+ * `/admin/projects/new` failed every time; `/admin/settings` failed as soon as
+ * its profile query resolved and the hook ran, which made it look
+ * intermittent. Both were completely unusable.
+ *
+ * Nothing caught it. The browser harness does not cover admin routes — they
+ * need a signed-in session — and a router-context requirement is invisible to
+ * tsc, to ESLint and to a production build. It was found only by driving the
+ * real admin UI in a browser.
+ *
+ * App.tsx now uses `createBrowserRouter` + `RouterProvider` specifically so
+ * this works. If anyone reverts that, these two screens break again.
  */
 export function useUnsavedChanges(hasUnsavedChanges: boolean) {
   const blocker = useBlocker(

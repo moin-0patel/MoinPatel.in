@@ -1,3 +1,5 @@
+import { ImageUploader } from '@/components/admin/ImageUploader'
+import { publicStorageUrl } from '@/lib/storage'
 import { useEffect, useId, useState } from 'react'
 
 import { ErrorState } from '@/components/common/States'
@@ -148,6 +150,7 @@ type ProfileForm = {
   email_public: string
   phone_public: string
   phone_visible: boolean
+  avatar_path: string
   avatar_alt: string
   available_for_work: boolean
 }
@@ -171,6 +174,7 @@ function ProfileForm({ profile }: { profile: ReturnType<typeof useAdminProfile>[
       email_public: profile.email_public ?? '',
       phone_public: profile.phone_public ?? '',
       phone_visible: profile.phone_visible,
+      avatar_path: profile.avatar_path ?? '',
       avatar_alt: profile.avatar_alt ?? '',
       available_for_work: profile.available_for_work,
     })
@@ -213,6 +217,7 @@ function ProfileForm({ profile }: { profile: ReturnType<typeof useAdminProfile>[
           email_public: form.email_public.trim() || null,
           phone_public: form.phone_public.trim() || null,
           phone_visible: form.phone_visible,
+          avatar_path: form.avatar_path.trim() || null,
           avatar_alt: form.avatar_alt.trim() || null,
           available_for_work: form.available_for_work,
         },
@@ -283,11 +288,11 @@ function ProfileForm({ profile }: { profile: ReturnType<typeof useAdminProfile>[
         checked={form.phone_visible}
         onChange={(v) => set('phone_visible', v)}
       />
-      <Field
-        label="Avatar alt text"
-        hint="Required by the database once a photo is uploaded. Usually just your name."
-        value={form.avatar_alt}
-        onChange={(v) => set('avatar_alt', v)}
+      <AvatarField
+        path={form.avatar_path}
+        altText={form.avatar_alt}
+        onPathChange={(v) => set('avatar_path', v)}
+        onAltChange={(v) => set('avatar_alt', v)}
       />
       <Toggle
         label="Available for work"
@@ -488,6 +493,124 @@ function Toggle({
         </label>
       </div>
       {hint && <p className="text-muted pl-6.5 text-xs">{hint}</p>}
+    </div>
+  )
+}
+
+/**
+ * Q-04 — the profile photo. PRD MED-01…04, A11Y-06, FR-ADM-12.
+ *
+ * ADMIN-ONLY BY THREE INDEPENDENT MECHANISMS
+ *
+ * This screen sits behind `<ProtectedRoute>`, which is UX only (FR-AUTH-07).
+ * What actually restricts the upload is the storage policy
+ * `storage_public_images_insert`, which requires `is_admin()` inside Postgres —
+ * so a crafted API call with the publishable key is refused whether or not any
+ * UI is involved. The `profiles` UPDATE is gated the same way. Nothing here
+ * needs an extra permission check; adding one would only be theatre.
+ *
+ * WHY THE PATH SAVES WITH THE FORM
+ *
+ * The upload writes the object immediately — that is unavoidable, the bytes
+ * have to go somewhere — but the `avatar_path` COLUMN is form state, saved by
+ * the Save button along with the alt text. That keeps the photo and its alt
+ * text in one transaction: an avatar with no alt text is exactly what A11Y-06
+ * forbids, and the database's own constraint would reject the pair anyway.
+ *
+ * Abandoning the edit therefore leaves an uploaded object nothing references —
+ * which is harmless and findable under Media → Unreferenced (MED-05). That is
+ * the right trade: a stray file is recoverable, a broken avatar on the live
+ * homepage is not.
+ */
+function AvatarField({
+  path,
+  altText,
+  onPathChange,
+  onAltChange,
+}: {
+  path: string
+  altText: string
+  onPathChange: (value: string) => void
+  onAltChange: (value: string) => void
+}) {
+  const url = publicStorageUrl('profile', path || null)
+
+  return (
+    <div className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+      <p className="text-secondary text-sm font-medium">Profile photo</p>
+      <p className="text-muted mt-1 text-xs">
+        Q-04. Replaces the monogram tile in the hero. Resized to 1920px and converted to WebP in
+        your browser; the original never leaves your machine, and its location metadata is
+        discarded.
+      </p>
+
+      {path ? (
+        <div className="mt-4 flex gap-4">
+          {url && (
+            <img
+              src={url}
+              alt=""
+              className="border-subtle size-24 shrink-0 rounded-[--radius-md] border object-cover"
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-muted truncate text-xs" title={path}>
+              {path}
+            </p>
+
+            <div className="mt-3">
+              <label htmlFor="avatar-alt" className="text-secondary mb-1 block text-sm font-medium">
+                Alt text <span className="text-danger">*</span>
+              </label>
+              <input
+                id="avatar-alt"
+                value={altText}
+                onChange={(event) => onAltChange(event.target.value)}
+                maxLength={200}
+                aria-invalid={altText.trim() === '' || undefined}
+                aria-describedby="avatar-alt-hint"
+                placeholder="Moin Patel"
+                className="border-strong bg-base text-primary focus:border-accent w-full rounded-[--radius-sm] border px-3 py-2 text-sm focus:outline-none"
+              />
+              <p id="avatar-alt-hint" className="text-muted mt-1 text-xs">
+                Required once a photo is set — the database enforces it too. Your name is fine.
+              </p>
+              {altText.trim() === '' && (
+                <p role="alert" className="text-danger mt-1 text-xs">
+                  Add alt text before saving, or the save will be rejected.
+                </p>
+              )}
+            </div>
+
+            <Button
+              size="sm"
+              variant="danger"
+              className="mt-3"
+              onClick={() => {
+                // Clears the reference only; the object stays in the bucket and
+                // appears under Media → Unreferenced. Deleting it here would
+                // break the OG image if it happens to point at the same file.
+                onPathChange('')
+                onAltChange('')
+              }}
+            >
+              Remove photo
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <ImageUploader
+            bucket="profile"
+            pathPrefix="avatar"
+            label="Upload your photo"
+            onUploaded={(uploaded, alt) => {
+              onPathChange(uploaded.path)
+              onAltChange(alt)
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

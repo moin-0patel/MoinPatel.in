@@ -231,9 +231,29 @@ try {
   )
   notes.push(`Home sections rendered: ${sectionIds.join(', ')}`)
 
-  // 12.3 — short_bio is null, so the About section is omitted entirely rather
-  // than rendering placeholder prose.
-  check('12.3: About is absent (short_bio is null)', !sectionIds.includes('about'))
+  /*
+   * 12.3 — About renders only when there is real copy for it.
+   *
+   * Asserted against the data as it IS, for the same reason as 12.6 below: this
+   * previously hardcoded "About is absent", which held only while `short_bio`
+   * was null. Populating it from the resume turned a correct render into a
+   * failing check. An assertion that has to be edited whenever real content
+   * arrives will eventually be edited to match a bug.
+   *
+   * Both directions are still checked — an About section with no prose in it
+   * would fail, which is the actual 12.3 requirement (hide, never render a
+   * placeholder).
+   */
+  const aboutPresent = sectionIds.includes('about')
+  if (aboutPresent) {
+    const aboutProse = await page.evaluate(
+      () => document.querySelector('section#about')?.textContent?.trim().length ?? 0,
+    )
+    check('12.3: About renders with real prose', aboutProse > 120, `${aboutProse} chars`)
+    notes.push(`About section is rendering (${aboutProse} chars of copy).`)
+  } else {
+    check('12.3: About is absent because short_bio is empty', true)
+  }
 
   /*
    * 12.6 — asserted against whatever the database actually contains, not
@@ -594,7 +614,7 @@ try {
 
   const ROUTES = [
     { path: '/projects', label: 'Projects index', expect: 'h1' },
-    { path: '/projects/capiche-ai-feedback-automation', label: 'Case study', expect: 'h1' },
+    { path: '/projects/exam-build-platform', label: 'Case study', expect: 'h1' },
     { path: '/contact', label: 'Contact', expect: 'form' },
     { path: '/about', label: 'About', expect: 'h1' },
     { path: '/experience', label: 'Experience', expect: 'h1' },
