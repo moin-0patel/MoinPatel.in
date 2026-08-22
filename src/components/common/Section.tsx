@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import type { ChapterId } from '@/lib/chapters'
+
 import { RouteErrorBoundary } from '@/app/RouteErrorBoundary'
 import { ErrorState } from '@/components/common/States'
 import { cn } from '@/lib/cn'
@@ -19,17 +21,33 @@ export function Section({
   id,
   labelledBy,
   className,
+  chapter,
   children,
 }: {
   id: string
   labelledBy: string
   className?: string
+  /**
+   * Marks this section as one of the seven narrative chapters — motion spec
+   * section 10.
+   *
+   * Optional because Section is also used for the homepage blocks that sit
+   * outside the narrative (Impact, Experience, Skills, Education) and for
+   * sections on other routes, none of which the timeline drives.
+   *
+   * It exists as a prop rather than a Chapter wrapper for the four chapters
+   * that predate Phase 1. Wrapping them would add the chapter number and change
+   * their visual treatment, which is a redesign nobody asked for; all the
+   * timeline actually needs is the hook.
+   */
+  chapter?: ChapterId
   children: ReactNode
 }) {
   return (
     <section
       id={id}
       aria-labelledby={labelledBy}
+      data-chapter={chapter}
       className={cn('scroll-mt-24 py-12 md:py-16 lg:py-24', className)}
     >
       <div className="container-page">

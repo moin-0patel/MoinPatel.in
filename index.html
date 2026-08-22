@@ -25,10 +25,24 @@
 
     <!--
       PERF-08: fonts are self-hosted, so there is nothing to preconnect to.
-      When the WOFF2 files land (see src/styles/typography.css and Q-25), add
-      a single <link rel="preload" as="font" type="font/woff2" crossorigin>
-      for the DISPLAY face only — preloading all three costs more than it saves.
+
+      One preload, for the sans only. It carries both the display and body
+      roles and every one of them is above the fold, so the request is on the
+      critical path either way and hinting it is free. Geist Mono is not
+      preloaded: it renders small metadata labels that mostly sit below the
+      fold, and preloading it would compete with the face the first paint
+      actually needs. Preloading everything is the same as preloading nothing.
+
+      `crossorigin` is required even same-origin — fonts are fetched in CORS
+      mode, and without it the browser downloads the file twice.
     -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/geist-sans-variable.woff2"
+      crossorigin
+    />
 
     <style>
       /*
@@ -43,8 +57,23 @@
       body {
         margin: 0;
         padding: 0;
-        background: #13121b;
         color: #e4e1ee;
+      }
+      /*
+       * The background is on html ONLY, never on body.
+       *
+       * The ambient layer (the CSS blob field, and the WebGL scene since
+       * Phase 2) is a fixed element at z-index -10. Negative-z descendants
+       * paint after the root element's background but before the block
+       * backgrounds of in-flow elements — so a background on body covers the
+       * entire layer. It did exactly that, invisibly, until it was measured.
+       *
+       * These literals are duplicated from --color-base in tokens.css because
+       * this block is inlined to paint before any stylesheet loads and cannot
+       * reference a custom property that does not exist yet. Keep them in step.
+       */
+      html {
+        background: #13121b;
       }
       #root {
         min-height: 100dvh;

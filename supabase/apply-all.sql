@@ -2396,8 +2396,15 @@ insert into public.projects (
   'web_application',
   'draft',            -- Q-07, Q-16
   'case_study_only',
-  false,              -- not featured: an in-progress project should not be one
-                      -- of the three proof points on the homepage
+  true,               -- featured. This was `false` originally, on the reasoning
+                      -- that an in-progress project should not be one of the
+                      -- homepage proof points. Reversed by owner decision once
+                      -- the project was published: the portfolio is three
+                      -- projects and all three belong in the featured set.
+                      -- Principle 3 is not weakened by this — the In Progress
+                      -- status is carried on the record and rendered on every
+                      -- surface, so featuring it presents work in progress AS
+                      -- work in progress rather than hiding it.
   30,
   false,              -- Q-07
   'Q-07: confirm who this is for and whether it may be published. Q-16: confirm what is genuinely built versus planned before any how-it-works content is written. Must render as In Progress everywhere (Principle 3).'

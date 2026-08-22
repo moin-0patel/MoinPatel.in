@@ -24,7 +24,13 @@ export function ContactCtaSection() {
   const responseNote = settings?.contactResponseNote
 
   return (
-    <section aria-labelledby="contact-cta-heading" className="container-page py-12 md:py-20">
+    <section
+      aria-labelledby="contact-cta-heading"
+      // Chapter 07 of the narrative — motion spec section 10. The hook only;
+      // the section's own layout is untouched.
+      data-chapter="contact"
+      className="container-page py-12 md:py-20"
+    >
       <div
         className={cn(
           'relative overflow-hidden rounded-[--radius-xl] px-6 py-14 text-center md:px-12',

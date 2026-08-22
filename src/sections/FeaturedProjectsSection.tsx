@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { ProjectCard } from '@/components/common/ProjectCard'
+import { ProjectPlate } from '@/components/common/ProjectPlate'
 import { Section, SectionHeading } from '@/components/common/Section'
 import { EmptyState, ErrorState } from '@/components/common/States'
 import { Button } from '@/components/ui/Button'
@@ -10,11 +10,24 @@ import { useFeaturedProjects } from '@/hooks/useProjects'
 import { env } from '@/lib/env'
 
 /**
- * Featured Projects — PRD 12.6.
+ * Selected Systems — PRD 12.6, presented as an editorial showcase.
  *
- * Proves the claims with real systems. Up to three cards; the service already
- * applies the FR-HOME fallback of using the three most recent published
- * projects when nothing is explicitly featured.
+ * Proves the claims with real systems. The service already applies the FR-HOME
+ * fallback of using the three most recent published projects when nothing is
+ * explicitly featured.
+ *
+ * ONE PROJECT PER COMPOSITION, not a three-column grid. The grid made every
+ * project the same size as every other and the same size as a thumbnail, which
+ * is the wrong claim: these are products someone can open, not images. Each
+ * plate gets the full measure — display-scale title, the verified claim band,
+ * technology, and a live link where one exists.
+ *
+ * The live URL is the primary action. Today every project is
+ * `visibility_mode = 'case_study_only'` with a null `live_url`, so every plate
+ * currently renders its documented-only state instead. That is the honest
+ * state of the data, not a placeholder: the path is wired end to end, and the
+ * moment a URL is added through the admin and the mode is widened, the link
+ * appears with no code change.
  *
  * 12.6 "Empty": with zero published projects the section hides ENTIRELY rather
  * than rendering an apologetic placeholder. That is the current state — all
@@ -27,7 +40,7 @@ export function FeaturedProjectsSection() {
 
   if (isPending) {
     return (
-      <Section id="featured-projects" labelledBy="featured-projects-heading">
+      <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
@@ -48,7 +61,7 @@ export function FeaturedProjectsSection() {
 
   if (isError) {
     return (
-      <Section id="featured-projects" labelledBy="featured-projects-heading">
+      <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
@@ -73,45 +86,37 @@ export function FeaturedProjectsSection() {
   }
 
   return (
-    <Section id="featured-projects" labelledBy="featured-projects-heading">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
+      <div className="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading
           id="featured-projects-heading"
-          eyebrow="Selected work"
-          meta="MODULES_LOADED"
-          title="Recent systems"
-          description="Each one is a case study: the problem, the mechanism, and what changed."
+          eyebrow="Selected systems"
+          meta="SYSTEMS_INDEX"
+          title="Systems I've built"
+          description="Each one solved a real operational problem. The problem, the mechanism, and what changed."
           className="mb-0"
         />
         <Button variant="ghost" asChild className="mb-1">
           <Link to="/projects">
-            View all projects
+            All projects
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>
       </div>
 
       {/*
-       * The `min-w-0` on the <li> and its child is load-bearing, not tidying.
-       * A grid item defaults to `min-width: auto`, so the track can never
-       * shrink below the card's min-content width. The card contains an
-       * `aspect-video` cover box, and when no cover image exists the fallback
-       * tile holds the project title: a narrower card wraps that title onto
-       * more lines, which makes the box taller, which the aspect ratio
-       * converts straight back into WIDTH. That feedback loop settled at 478px
-       * and forced ~112px of horizontal page scroll at 430px and below
-       * (RES-12). `min-w-0` breaks it — width comes from the track, height
-       * follows from the ratio.
+       * An ordered list, because the numbering is real: these are presented in
+       * a deliberate order and the numerals on each plate are decorative
+       * duplicates of it. `ol` gives that to a screen reader for free, which is
+       * why the visible numeral can be aria-hidden.
        */}
-      <ul className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {projects.map((project) => (
-          <li key={project.id} className="flex min-w-0">
-            <div className="flex w-full min-w-0">
-              <ProjectCard project={project} />
-            </div>
+      <ol className="mt-[--section-gap] flex flex-col gap-[--section-gap]">
+        {projects.map((project, index) => (
+          <li key={project.id} className="min-w-0">
+            <ProjectPlate project={project} index={index} />
           </li>
         ))}
-      </ul>
+      </ol>
     </Section>
   )
 }

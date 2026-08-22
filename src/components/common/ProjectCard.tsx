@@ -5,9 +5,10 @@ import { StatusBadge } from '@/components/ui/Badge'
 import { GithubIcon } from '@/components/ui/BrandIcon'
 import { Chip, ChipRow } from '@/components/ui/Chip'
 import { cn } from '@/lib/cn'
+import { CATEGORY_LABEL } from '@/lib/labels'
 import { imageSizes, publicStorageUrl } from '@/lib/storage'
 import { resolveCardLinks } from '@/lib/visibility'
-import type { ProjectCategory, ProjectSummary } from '@/types/domain'
+import type { ProjectSummary } from '@/types/domain'
 
 /**
  * ProjectCard — PRD 13.2.
@@ -18,14 +19,6 @@ import type { ProjectCategory, ProjectSummary } from '@/types/domain'
  * visibility modes and unit-tested — this component never branches on
  * `visibility_mode` itself.
  */
-
-const CATEGORY_LABEL: Record<ProjectCategory, string> = {
-  ai_automation: 'AI Automation',
-  web_application: 'Web Application',
-  business_process_automation: 'Business Process Automation',
-  data_reporting: 'Data & Reporting',
-  other: 'Other',
-}
 
 /** 13.2 — up to 4 chips, then a "+N" overflow. */
 const MAX_VISIBLE_TECH = 4

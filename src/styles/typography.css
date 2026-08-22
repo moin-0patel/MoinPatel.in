@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
  * Typography — PRD Section 32.2.
  *
- * Three families carry the personality:
+ * One family carries the personality, in two cuts:
  *   display  large sizes, tight tracking  — h1, positioning line, section and
  *                                           project titles
  *   body     everything else
@@ -11,49 +11,47 @@
  * generates matching utilities. This file owns font loading and the element
  * defaults that keep unstyled markup correct.
  *
- * Fonts are self-hosted WOFF2, subset to Latin, `font-display: swap`, with no
- * render-blocking third-party request (PERF-08). The @font-face blocks are
- * written but commented out: the files are not in the repo yet because Q-25
- * asks Moin to confirm the display/body/mono trio before ~200 KB of binaries
- * are committed. Until then the stacks fall through to close system
- * equivalents — the site renders correctly, only the personality is
- * provisional. Uncomment together with dropping the files into /public/fonts.
+ * Q-25 IS CLOSED. These blocks were written and commented out because the
+ * files were not in the repo: the site named Geist, Inter and JetBrains Mono
+ * and had none of them, so every face fell through to a system equivalent and
+ * the page looked different on every OS. Geist Sans and Geist Mono are now
+ * vendored into /public/fonts and self-hosted — no third-party request, so
+ * PERF-08 and the CSP hold.
+ *
+ * WHY THESE TWO FILES
+ *
+ * Sans is the VARIABLE cut and mono is a STATIC single weight, which is not an
+ * inconsistency but the cheaper half of each trade. Measured from the package:
+ * the sans variable is 68 KB against 135 KB for the three static weights the
+ * display scale needs, so variable wins outright. Mono is used at one weight
+ * for small metadata only, where the variable cut costs 69.7 KB against 49.2
+ * for the static — so the static wins. 117 KB rather than 138 KB, losing
+ * nothing.
+ *
+ * Both are unsubsetted: subsetting needs pyftsubset and Python is not
+ * available here. The unicode-range below still stops the browser downloading
+ * them for non-Latin content, but the files themselves carry the full charset.
+ * Subsetting would take them down considerably and is worth doing when a
+ * toolchain exists.
  * ------------------------------------------------------------------------- */
 
-/*
 @font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-latin-500.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
-}
-@font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-latin-700.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
-}
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/inter-latin-variable.woff2') format('woff2-variations');
+  font-family: 'Geist';
+  src: url('/fonts/geist-sans-variable.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
 }
+
 @font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/jetbrains-mono-latin-400.woff2') format('woff2');
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2122, U+2212;
 }
-*/
 
 /* --- Element defaults ----------------------------------------------------
  *

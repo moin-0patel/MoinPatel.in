@@ -60,8 +60,23 @@ export function HeroSection() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="container-page flex min-h-[80vh] items-center py-16 xl:min-h-[88vh]"
+      // Chapter 01 — motion spec section 10. Without it the scroll hook cannot
+      // report the hero as the active chapter, which is what reduced motion
+      // uses to pick a state.
+      data-chapter="hero"
+      className="container-page relative flex min-h-[80vh] items-center py-16 xl:min-h-[88vh]"
     >
+      {/*
+       * The scrim between the 3D scene and this text. `relative` on the section
+       * above is what it positions against.
+       *
+       * aria-hidden and pointer-events-none: it carries nothing and must never
+       * intercept a click meant for a CTA. See the `hero-scrim` utility in
+       * globals.css for why it is a gradient and why it lives here rather than
+       * on the fixed scene layer.
+       */}
+      <div aria-hidden="true" className="hero-scrim" />
+
       {/*
        * `3fr_2fr`, not `60%_40%` — the ratio is identical (3/5 and 2/5) but the
        * unit matters. Percentage tracks resolve against the full content box
@@ -226,9 +241,21 @@ function HeroPortrait({
     'sm:w-52 md:w-72 lg:w-[360px] xl:w-[420px]',
   )
 
+  /*
+   * The 3D scene frames itself on this element — see CoreFraming in Scene.tsx.
+   *
+   * An anchor rather than hard-coded breakpoint offsets: the portrait is the
+   * one thing in the hero that is already positioned correctly at every width
+   * by FR-HOME-02's own responsive table (right column above 1024px, centred
+   * above the text below it). Measuring it gives the Core the same answer for
+   * free, and it cannot drift out of step with a layout change the way a list
+   * of magic percentages would.
+   */
+  const anchor = { 'data-hero-anchor': '' }
+
   if (!url) {
     return (
-      <div className={cn(frame, 'bg-surface-raised grid place-items-center')}>
+      <div {...anchor} className={cn(frame, 'bg-surface-raised grid place-items-center')}>
         <span
           aria-hidden="true"
           className="text-muted font-display text-5xl font-semibold tracking-tight md:text-7xl"
@@ -241,7 +268,7 @@ function HeroPortrait({
   }
 
   return (
-    <div className={frame}>
+    <div {...anchor} className={frame}>
       <img
         src={url}
         alt={alt}

@@ -22,6 +22,26 @@ html {
   /* FR-CASE-06: sticky in-page nav must not cover the target heading. */
   scroll-padding-top: calc(var(--header-height) + 24px);
   -webkit-text-size-adjust: 100%;
+
+  /*
+   * The page background lives HERE, not on body, and that is load-bearing.
+   *
+   * The ambient layer — the CSS blob field and, since Phase 2, the WebGL scene
+   * — is a `fixed inset-0` element at `z-index: -10`. Negative-z descendants
+   * are painted after the root element's background but BEFORE the block
+   * backgrounds of in-flow elements. With `background-color` on body, body's
+   * background is one of those block backgrounds and it paints straight over
+   * the whole layer.
+   *
+   * The result was a page that looked correct, passed every check, and was
+   * quietly discarding an entire visual layer: the ambient blobs from the
+   * design system had never once been visible, and the 3D scene mounted,
+   * rendered and composited behind an opaque rectangle. Measured directly —
+   * making body transparent made both appear immediately.
+   *
+   * So: html owns the background, body owns none. Do not move it back.
+   */
+  background-color: var(--color-base);
 }
 
 /* A11Y-10 — honour the OS setting for the smooth-scroll behaviour too. */
@@ -42,7 +62,8 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  background-color: var(--color-base);
+  /* No background-color — see the html rule above. It is on html so the
+   * ambient/3D layer at z-index -10 is not painted over. */
   color: var(--color-primary);
 }
 
@@ -228,6 +249,90 @@ h4 {
  * pseudo-element so it follows whatever border-radius the card already has,
  * instead of hard-coding one.
  */
+/* --- Hero scrim ----------------------------------------------------------
+ *
+ * A gradient veil between the 3D scene and the hero text.
+ *
+ * WHY IT EXISTS
+ *
+ * Phase 2 put an emissive Core at the centre of the viewport, and the hero is
+ * still the 2D layout it had before the Core existed: text left, portrait
+ * right. The two overlap. Measured against composited pixels, the location line
+ * fell to 4.30:1 on desktop (needs 4.5:1) and the whole hero block to
+ * 2.04-2.81:1 on mobile, where the sphere fills the column. axe cannot see any
+ * of this — it resolves backdrops through the CSSOM and a WebGL canvas has no
+ * CSS colour — so it is measured from real pixels in verify:ui.
+ *
+ * WHY A GRADIENT AND NOT A PANEL
+ *
+ * A solid panel would fix the contrast and destroy the effect: a hard edge
+ * across the Core reads as a rectangle sitting on the artwork. A gradient is
+ * dense where the words are and gone before it reaches the far side of the
+ * Core, so the object stays bright exactly where nothing is written over it.
+ *
+ * WHY NOT JUST DIM THE CORE
+ *
+ * Because the Core is the piece. Dimming it globally pays the accessibility
+ * cost by deleting the thing the page is about, and it would still be marginal
+ * on mobile. The scrim is local: it costs brightness only where brightness was
+ * making text unreadable.
+ *
+ * SCROLLS WITH THE HERO, deliberately. It is positioned inside the section
+ * rather than fixed to the viewport, because it protects THIS text. A fixed
+ * veil would keep dimming the same screen region after the hero had scrolled
+ * away, which is a different and worse thing.
+ *
+ * This is Phase 2's fix, not the final answer. The storyboard's section 01 puts
+ * the Core centred with the name beneath it — a composition where text and
+ * object do not fight for the same pixels. That rework is Phase 3; until then
+ * the words have to be readable.
+ */
+@utility hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1; /* above the canvas at -10, below the hero content at auto */
+  pointer-events: none;
+
+  /*
+   * MOBILE FIRST — and mobile is the hard case.
+   *
+   * At 390px the Core is roughly two thirds of the column width and the entire
+   * hero block sits on top of it. There is no "beside the text" to fade
+   * toward, so the gradient runs vertically: clear at the top where the
+   * portrait tile is, dense through the text band, clearing again below the
+   * buttons. The Core's upper and lower extremities and the wireframe shell
+   * still read; its middle is deliberately muted, because that is where the
+   * words are.
+   */
+  background: linear-gradient(
+    to bottom,
+    oklch(from var(--color-base) l c h / 0) 0%,
+    oklch(from var(--color-base) l c h / 0.2) 22%,
+    oklch(from var(--color-base) l c h / 0.55) 34%,
+    oklch(from var(--color-base) l c h / 0.55) 76%,
+    oklch(from var(--color-base) l c h / 0.2) 90%,
+    oklch(from var(--color-base) l c h / 0) 100%
+  );
+
+  /*
+   * DESKTOP — the text occupies the left 3fr of a 3fr/2fr grid, so the
+   * gradient can run horizontally and be honest about where it stops. It is
+   * dense across the text column, releases through the middle, and is fully
+   * clear by 82% — past the right edge of the Core, which keeps its lit side
+   * and its full silhouette against the page.
+   */
+  @media (min-width: 768px) {
+    background: linear-gradient(
+      to right,
+      oklch(from var(--color-base) l c h / 0.6) 0%,
+      oklch(from var(--color-base) l c h / 0.55) 40%,
+      oklch(from var(--color-base) l c h / 0.3) 55%,
+      oklch(from var(--color-base) l c h / 0.1) 66%,
+      oklch(from var(--color-base) l c h / 0) 76%
+    );
+  }
+}
+
 @utility rim-light {
   position: relative;
   &::before {

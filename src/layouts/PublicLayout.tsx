@@ -89,7 +89,7 @@ function Header() {
         {/* A11Y-01 — landmarks carry accessible names. */}
         <nav aria-label="Primary" className="hidden md:block">
           <ul className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS.map((item, index) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
@@ -103,6 +103,19 @@ function Header() {
                     )
                   }
                 >
+                  {/*
+                   * Spec §25 numbers the navigation. Decorative and
+                   * aria-hidden: it repeats ordinal position the list already
+                   * conveys, and "zero three Projects" is noise in a screen
+                   * reader. The label and route are unchanged, so FR-NAV-02 and
+                   * the verified nav assertions still hold.
+                   */}
+                  <span
+                    aria-hidden="true"
+                    className="text-muted mr-1.5 font-mono text-[0.7em] tabular-nums"
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                   {item.label}
                 </NavLink>
               </li>

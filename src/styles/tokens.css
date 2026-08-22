@@ -93,9 +93,9 @@
    * through to the system stack exactly as before. Naming Geist here records
    * the design intent and costs nothing at runtime.
    */
-  --font-display: 'Geist', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* --- 32.2 Type scale ---------------------------------------------------
    * Fluid, interpolating between the 375px and 1440px viewports, so sizes
@@ -112,12 +112,49 @@
   --text-5xl: clamp(3rem, 2.5rem + 2.13vw, 4.25rem);
   --text-6xl: clamp(3.75rem, 3.02rem + 3.11vw, 5.625rem);
 
+  /*
+   * Statement sizes. Deliberately above the heading scale rather than an
+   * extension of it: 7xl and 8xl are for the two or three moments on the site
+   * where the type IS the composition, not for section headings. Using them
+   * routinely is how an editorial page turns into a shouting one.
+   *
+   * The upper bounds are large enough to be a real decision at 1440px+ while
+   * the lower bounds stay readable at 375px, where 7.5rem would simply not fit.
+   */
+  --text-7xl: clamp(4rem, 2.9rem + 4.7vw, 7.5rem);
+  --text-8xl: clamp(4.75rem, 3.1rem + 7vw, 10rem);
+
   --leading-display: 1.15;
   --leading-body: 1.6;
   --leading-ui: 1.5;
 
   --tracking-display: -0.02em;
   --tracking-mono: 0.02em;
+
+  /*
+   * Optical tracking. One value cannot serve 1.5rem and 8rem: letterforms need
+   * progressively less space as they grow, and display type set at body
+   * tracking reads loose and amateur. These are for the 6xl-8xl steps.
+   */
+  --tracking-tight: -0.03em;
+  --tracking-tighter: -0.045em;
+
+  /*
+   * Leading for statement sizes. --leading-display (1.15) is right for a
+   * heading and far too airy for a three-line statement at 7xl, where the
+   * lines need to lock into a block.
+   */
+  --leading-statement: 1.02;
+  --leading-snug: 1.08;
+
+  /*
+   * Weights, named. Previously hard-coded per component, which is how a system
+   * ends up with five near-identical semibolds. Geist is variable, so these are
+   * exact rather than synthesised — font-synthesis-weight is already off.
+   */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 
   /* --- 32.3 Radius ------------------------------------------------------- */
   /* DESIGN.md rounded scale: sm 0.25rem, md 0.75rem, lg 1rem, xl 1.5rem. */
@@ -132,6 +169,16 @@
 
   /* --- 32.5 Motion ------------------------------------------------------- */
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /*
+   * Three more, because one curve cannot express three intents. Entrance
+   * decelerates into place, exit accelerates away, emphasis overshoots
+   * slightly. All are DOM-side; the scene's damping is frame-rate independent
+   * and lives in ScrollDirector, not here.
+   */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-emphasis: cubic-bezier(0.34, 1.4, 0.64, 1);
 
   /* --- 33.1 Breakpoints — replaces Tailwind's defaults -------------------- */
   --breakpoint-sm: 430px; /* large phones */
@@ -153,6 +200,27 @@
   /* DESIGN.md spacing.container-max. Was 1280px; the design centres on a
      narrower 1200px measure to leave outer columns atmospheric. */
   --content-max: 1200px;
+
+  /*
+   * Two more measures. Asymmetric editorial composition needs somewhere to put
+   * a narrow column against a wide one; a single 1200px container produces the
+   * centred, evenly-stacked look this redesign is moving away from.
+   */
+  --content-narrow: 680px;
+  --content-wide: 1440px;
+
+  /*
+   * Section rhythm, so vertical space is a decision made once rather than
+   * `py-12 md:py-16 lg:py-24` repeated in every section with slight drift.
+   * Fluid for the same reason the type scale is: no jump at a breakpoint.
+   */
+  --section-y: clamp(4rem, 3rem + 4.2vw, 8rem);
+  --section-y-lg: clamp(6rem, 4.2rem + 7.6vw, 12rem);
+  --section-gap: clamp(2rem, 1.6rem + 1.7vw, 3.5rem);
+
+  /* Hairline rules are a primary device in this direction, so the width is a
+   * token rather than a literal scattered across components. */
+  --rule-width: 1px;
   --prose-measure: 72ch; /* FR-CASE-10 */
   --gutter: 24px;
   --header-height: 64px;
