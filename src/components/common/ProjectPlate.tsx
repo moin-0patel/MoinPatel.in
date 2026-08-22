@@ -48,8 +48,31 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
   const claims = PROJECT_CLAIMS[project.slug] ?? []
   const liveHref = showLiveIcon ? project.liveUrl : null
 
+  /*
+   * MOBILE IS CONTAINED, DESKTOP IS OPEN — deliberate responsive art
+   * direction, not a fallback.
+   *
+   * Below `lg` the plate sits on an opaque surface; above it the surface
+   * disappears and the composition breathes against the page. The reason is
+   * measured: during chapter 04 the Core's silhouette is roughly 404px wide, so
+   * on a 390px viewport there is no screen position where it clears this prose
+   * — the summary measured 1.66:1 against a 4.5:1 requirement. Desktop has room
+   * either side and the framing search finds it, so desktop keeps the open
+   * composition.
+   *
+   * The old card grid passed contrast here only because every project sat on an
+   * opaque tile. Removing the tile is what made this section editorial; keeping
+   * one at the width where the scene cannot be avoided is what keeps it
+   * readable.
+   */
   return (
-    <article className="group border-subtle relative border-t pt-[--section-gap]">
+    <article
+      className={cn(
+        'group border-subtle relative border-t pt-[--section-gap]',
+        'bg-surface -mx-[--gutter] px-[--gutter] pb-[--section-gap]',
+        'lg:bg-transparent lg:mx-0 lg:px-0 lg:pb-0',
+      )}
+    >
       <div className="grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10">
         {/*
          * The index numeral. Decorative: the ordered list already conveys
