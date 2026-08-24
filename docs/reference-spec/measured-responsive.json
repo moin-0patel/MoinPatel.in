@@ -1,0 +1,50 @@
+{
+  "1440x900": {
+    "h1Size": "76.32px",
+    "h1LineHeight": "78.6096px",
+    "h1Tracking": "normal",
+    "contentWidth": 1440,
+    "docScrollHeight": 13863,
+    "horizontalOverflow": true
+  },
+  "1280x800": {
+    "h1Size": "67.84px",
+    "h1LineHeight": "69.8752px",
+    "h1Tracking": "normal",
+    "contentWidth": 1280,
+    "docScrollHeight": 12243,
+    "horizontalOverflow": true
+  },
+  "1024x768": {
+    "h1Size": "54.272px",
+    "h1LineHeight": "55.9002px",
+    "h1Tracking": "normal",
+    "contentWidth": 1024,
+    "docScrollHeight": 10604,
+    "horizontalOverflow": true
+  },
+  "768x1024": {
+    "h1Size": "48px",
+    "h1LineHeight": "49.44px",
+    "h1Tracking": "normal",
+    "contentWidth": 768,
+    "docScrollHeight": 11466,
+    "horizontalOverflow": true
+  },
+  "390x844": {
+    "h1Size": "43.637px",
+    "h1LineHeight": "44.9461px",
+    "h1Tracking": "normal",
+    "contentWidth": 390,
+    "docScrollHeight": 10421,
+    "horizontalOverflow": false
+  },
+  "375x812": {
+    "h1Size": "42.0005px",
+    "h1LineHeight": "43.2605px",
+    "h1Tracking": "normal",
+    "contentWidth": 375,
+    "docScrollHeight": 10015,
+    "horizontalOverflow": false
+  }
+}

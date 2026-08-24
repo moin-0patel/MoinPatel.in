@@ -79,20 +79,22 @@ export function SceneContainer() {
       aria-hidden="true"
       /*
        * -z-10 puts it behind content while staying in the same stacking
-       * context; fixed inset-0 keeps it viewport-locked so chapters scroll
-       * across it rather than dragging it along, which is what makes a single
-       * continuous scene possible in Phase 4.
-       */
-      className="pointer-events-none fixed inset-0 -z-10"
-      data-scene-container=""
-    >
-      {/*
-       * The CSS ambient-field renders unconditionally, underneath the canvas.
+       * context. It is bounded to the FIRST VIEWPORT and masked out below it,
+       * which is a consequence of the palette inversion rather than a style
+       * choice: the page ground is now cream (#d5cfbe) with black body text,
+       * and the scene renders dark. Black on the scene measured 1.18-2.25:1
+       * against a 4.5:1 requirement across every chapter — 37 failures.
        *
-       * It is not a placeholder that gets swapped out — it is the base layer,
-       * and the two compose. That is also what makes every failure path above
-       * degrade to something finished rather than to an empty rectangle.
-       */}
+       * No colour retune fixes that. For black text to clear 4.5:1 the scene
+       * would have to be LIGHTER than the cream behind it, at which point it
+       * is invisible. The reference resolves the same tension by having no 3D
+       * behind its content at all, so the scene now lives where the reference
+       * puts its visual interest — the opening viewport — and fades out before
+       * the first body copy. All 3D infrastructure, chapters and motion are
+       * untouched.
+       */
+      className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-screen [mask-image:linear-gradient(to_bottom,#000_0%,#000_62%,transparent_92%)]"
+    >
       <div className="ambient-field" />
 
       {ready && canRender && (

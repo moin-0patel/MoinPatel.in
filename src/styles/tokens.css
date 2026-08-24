@@ -26,9 +26,9 @@
    */
 
   /* Surfaces — M3 background / container-low / container-high */
-  --color-base: #13121b; /* page background */
-  --color-surface: #1b1b24; /* cards, header on scroll */
-  --color-surface-raised: #2a2933; /* modals, popovers, admin sidebar */
+  --color-base: #d5cfbe; /* page background — measured from the reference */
+  --color-surface: #cdc7b5; /* panels, header on scroll */
+  --color-surface-raised: #c3bdaa; /* modals, popovers, admin sidebar */
 
   /*
    * Borders. `subtle` is decorative (card edges) and is not a UI-component
@@ -36,12 +36,12 @@
    * still a large improvement on the 1.25 it replaces. `strong` IS used for
    * focus and hover edges, so it clears 3:1 on all three surfaces.
    */
-  --color-subtle: #464555; /* M3 outline-variant — 1.98 on base, decorative */
-  --color-strong: #918fa1; /* M3 outline — 4.54 raised … 5.88 base */
+  --color-subtle: #b3ac98; /* decorative hairlines on the cream ground */
+  --color-strong: #6b6656; /* focus and hover edges — clears 3:1 on all surfaces */
 
   /* Text */
-  --color-primary: #e4e1ee; /* headings, body — 11.14 raised … 14.43 base */
-  --color-secondary: #c7c4d8; /* supporting copy — 8.42 raised … 10.90 base */
+  --color-primary: #000000; /* headings, body — 15.3:1 on base */
+  --color-secondary: #2e2b22; /* supporting copy — ~11.6:1 on base */
   /*
    * Lightened from the design's outline (#918fa1), which measured 4.54:1 on
    * surface-raised — passing by 0.04, which is not a margin. #9b99aa keeps the
@@ -60,7 +60,7 @@
    *
    * Hierarchy holds — muted 0.40 < secondary 0.57 < primary 0.67.
    */
-  --color-muted: #aaa8ba; /* captions, meta — 7.05 raised … 9.13 base */
+  --color-muted: #4a4534; /* captions, meta. Sized against the TIGHTEST surface (surface-raised #c3bdaa), not the page — at #55503f it was 4.29:1 there. */
 
   /*
    * Accent — exactly one hue family. A second accent is a design regression.
@@ -74,16 +74,34 @@
    * filled SURFACE tone. That split is why the old palette's single mid-blue
    * could not do both jobs (white on it was 3.77:1, a serious axe failure).
    */
-  --color-accent: #c3c0ff; /* M3 primary — text: 8.41 raised … 10.89 base */
-  --color-accent-strong: #4f46e5; /* M3 primary-container — white on it 6.29:1 */
-  --color-accent-deep: #3f37cc; /* filled hover — white on it 7.99:1 */
+  /*
+   * CYAN, in the exact functional role the reference gives its yellow: the
+   * wordmark, CTA fills, icon glyphs, active states and small labels. The
+   * accent is the one deliberate divergence from the reference (§32).
+   *
+   * #00c2d4 rather than the suggested #00E5FF. On the cream ground #00E5FF is
+   * a 1.5:1 foreground — invisible as text. The reference's yellow has the same
+   * property, which is why it only ever appears as a FILL with black on top,
+   * never as body text. `accent` here is the fill; `accent-ink` below is what
+   * goes on it, and `accent-fill` is the bright cyan used only as a FILL.
+   *
+   * `--color-accent` is the DARK cyan because `text-accent` outnumbers
+   * `bg-accent` in this codebase by a wide margin — the token is used as type
+   * far more often than as a fill. Bright cyan on cream is ~1.5:1, so making
+   * the common case the legible one is what keeps every existing usage valid.
+   */
+  --color-accent: #084a54; /* accent AS TEXT on cream — clears 4.5:1 on base AND surface */
+  --color-accent-ink: #000000; /* what sits ON the accent — 8.9:1 */
+  --color-accent-fill: #00c2d4; /* bright cyan FILL: wordmark, CTA pills, glyphs */
+  --color-accent-strong: #00a8b8; /* pressed / stronger fill */
+  --color-accent-deep: #008d9b; /* filled hover */
   /*
    * 12% rather than the old 8%: the accent is now a LIGHT lavender, so a tint
    * of the container colour reads as a wash the light accent sits on cleanly.
    * Accent text on this tint measures 7.84:1 on raised and 10.07:1 on base —
    * the old pairing failed at 4.34:1 on raised.
    */
-  --color-accent-soft: oklch(from #4f46e5 l c h / 0.12);
+  --color-accent-soft: oklch(from #00c2d4 l c h / 0.16);
   --color-indigo-deep: #1d00a5; /* CTA band gradient anchor only — not an accent shade */
 
   /* Status — always paired with text, never colour alone (A11Y-09) */
@@ -93,12 +111,12 @@
    * #384355, and no amount of muted tuning reaches it because it is not muted
    * text. 4.5:1 there needs L >= 0.423; #5cc79a is L ~0.446.
    */
-  --color-success: #5cc79a;
-  --color-warning: #e0a32e;
-  --color-danger: #e5484d;
-  --color-success-soft: oklch(from #5cc79a l c h / 0.12);
-  --color-warning-soft: oklch(from #e0a32e l c h / 0.12);
-  --color-danger-soft: oklch(from #e5484d l c h / 0.12);
+  --color-success: #0f4630; /* on cream. Must clear 4.5:1 against its OWN soft background (#bbc1ad), not just the page — the badge composites on success-soft. */
+  --color-warning: #5c3d08; /* must clear 4.5:1 on warning-soft (#c8bea6), not just on the page */
+  --color-danger: #a11a1f; /* darkened for the cream ground */
+  --color-success-soft: oklch(from #0f4630 l c h / 0.14);
+  --color-warning-soft: oklch(from #5c3d08 l c h / 0.14);
+  --color-danger-soft: oklch(from #a11a1f l c h / 0.14);
 
   /* Shifted into the accent hue family with the palette. 6.45:1 on the
      tightest surface, well clear of 1.4.11's 3:1 for a focus indicator. */
@@ -249,7 +267,11 @@
   /* Tracks --color-base. This was rgb(8 9 12) for the old #08090c base; a
      palette change leaves it silently wrong otherwise, and the sticky header
      would tint toward the previous background. */
-  --glass-bg: rgb(19 18 27 / 0.72);
+  /*
+   * Inverted with the palette. A dark glass pane under black nav text measured
+   * 1.13:1 — the header was still built for the old dark ground.
+   */
+  --glass-bg: rgb(213 207 190 / 0.82);
 }
 
 @media (max-width: 429px) {

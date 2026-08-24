@@ -126,7 +126,7 @@ export default function AdminResumePage() {
                 accept="application/pdf"
                 onChange={(event) => handleFile(event.target.files?.[0] ?? null)}
                 aria-describedby="resume-file-hint"
-                className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-white"
+                className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-accent-ink"
               />
               <p id="resume-file-hint" className="text-muted mt-1.5 text-xs">
                 PDF only, up to {formatBytes(MAX_RESUME_BYTES)}.

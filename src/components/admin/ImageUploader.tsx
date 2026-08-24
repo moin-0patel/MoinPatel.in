@@ -102,7 +102,7 @@ export function ImageUploader({
         accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
         onChange={(event) => choose(event.target.files?.[0] ?? null)}
         aria-describedby={`${inputId}-hint`}
-        className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-white"
+        className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-accent-ink"
       />
       <p id={`${inputId}-hint`} className="text-muted mt-1.5 text-xs">
         Resized to 1920px and converted to WebP in your browser before upload. Location data in the

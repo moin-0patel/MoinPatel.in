@@ -637,7 +637,20 @@ try {
        * headline rendered as blank space — while check 1 passed, because
        * transparent never equals the background colour.
        */
-      const transparent = /^rgba?\([^)]*,\s*0\s*\)$/.test(cs.color.replace(/\s/g, ''))
+      /*
+       * Alpha-0 only, and it must be the FOUR-component rgba() form.
+       *
+       * This previously used a pattern where the leading [^)]* swallowed the
+       * first two channels, so rgb(0,0,0) matched the trailing ",0)" and pure
+       * black was reported as transparent text. It never surfaced while the
+       * palette was light-on-dark; it fired on 42 elements the moment body
+       * text became #000000.
+       *
+       * Narrowed to exactly rgba() with four components and a zero alpha —
+       * which is precisely what the check exists to catch. This removes a
+       * false positive without weakening the assertion.
+       */
+      const transparent = /^rgba\(\d+,\d+,\d+,0(\.0+)?\)$/.test(cs.color.replace(/\s/g, ""))
       if (transparent) {
         if (cs.backgroundClip !== 'text' && cs.webkitBackgroundClip !== 'text') {
           found.push(`${label} is transparent with no background-clip:text`)

@@ -75,7 +75,7 @@ export default function AdminMediaPage() {
               'rounded-[--radius-md] px-3 py-1.5 text-sm',
               'transition-colors duration-[--duration-hover] ease-[--ease-out]',
               bucket === entry.id
-                ? 'bg-accent-strong text-white'
+                ? 'bg-accent-strong text-accent-ink'
                 : 'text-secondary hover:text-primary hover:bg-surface-raised',
             )}
           >

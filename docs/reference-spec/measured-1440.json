@@ -1,0 +1,369 @@
+{
+  "page": {
+    "background": "#d5cfbe",
+    "color": "#000000",
+    "fontFamily": "\"Ppneuemontreal Book\", Arial, sans-serif"
+  },
+  "headings": [
+    {
+      "text": "Webflow, Applied Differently.",
+      "family": "Tr 3 A",
+      "size": "76.32px",
+      "weight": "700",
+      "lineHeight": "78.6096px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#f8f7f3"
+    },
+    {
+      "text": "About Me (&) My Journey",
+      "family": "Tr 3 A",
+      "size": "65.952px",
+      "weight": "500",
+      "lineHeight": "65.952px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "Starting out with my brother",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "First freelance steps",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "Beyond what I knew",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "Leveling up",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "From trust to referrals",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "A life-changing year",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "The journey continues",
+      "family": "Tr 3 A",
+      "size": "24.048px",
+      "weight": "500",
+      "lineHeight": "26.4528px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#000000"
+    },
+    {
+      "text": "Built in Webflow,Made to Perform",
+      "family": "Tr 3 A",
+      "size": "65.952px",
+      "weight": "500",
+      "lineHeight": "75.8448px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#ffffff"
+    },
+    {
+      "text": "1910.ai",
+      "family": "Tr 3 A",
+      "size": "27.936px",
+      "weight": "500",
+      "lineHeight": "27.936px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#ffffff"
+    },
+    {
+      "text": "SemiconBio",
+      "family": "Tr 3 A",
+      "size": "27.936px",
+      "weight": "500",
+      "lineHeight": "27.936px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#ffffff"
+    },
+    {
+      "text": "Happy Ring",
+      "family": "Tr 3 A",
+      "size": "27.936px",
+      "weight": "500",
+      "lineHeight": "27.936px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#ffffff"
+    },
+    {
+      "text": "PSSLTD",
+      "family": "Tr 3 A",
+      "size": "27.936px",
+      "weight": "500",
+      "lineHeight": "27.936px",
+      "tracking": "normal",
+      "transform": "none",
+      "color": "#ffffff"
+    }
+  ],
+  "sections": [
+    {
+      "tag": "section",
+      "id": "hero",
+      "heading": "Webflow, Applied Differently.",
+      "width": 1440,
+      "height": 2700,
+      "paddingTop": "0px",
+      "paddingBottom": "1620px",
+      "background": "transparent",
+      "display": "flex",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "about",
+      "heading": "About Me (&) My Journey",
+      "width": 1440,
+      "height": 3120,
+      "paddingTop": "0px",
+      "paddingBottom": "216px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "work",
+      "heading": "Built in Webflow,Made to Perform",
+      "width": 1440,
+      "height": 3600,
+      "paddingTop": "0px",
+      "paddingBottom": "0px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "overview",
+      "heading": "What You Get?",
+      "width": 1440,
+      "height": 1240,
+      "paddingTop": "216px",
+      "paddingBottom": "216px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "services",
+      "heading": "Solutions That Deliver",
+      "width": 1440,
+      "height": 1234,
+      "paddingTop": "28.8px",
+      "paddingBottom": "144px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "webflow_journey",
+      "heading": "Transform Your WebflowExperience Journey",
+      "width": 1440,
+      "height": 1056,
+      "paddingTop": "144px",
+      "paddingBottom": "144px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "section",
+      "id": "testimonial",
+      "heading": "From People I've Worked with",
+      "width": 1440,
+      "height": 847,
+      "paddingTop": "144px",
+      "paddingBottom": "0px",
+      "background": "transparent",
+      "display": "block",
+      "gridCols": null
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "heading": null,
+      "width": 1152,
+      "height": 720,
+      "paddingTop": "0px",
+      "paddingBottom": "0px",
+      "background": "transparent",
+      "display": "flex",
+      "gridCols": null
+    }
+  ],
+  "motion": [
+    {
+      "el": "path",
+      "property": "color",
+      "duration": "0.2s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "p.nav-webflow-text",
+      "property": "font-variation-settings",
+      "duration": "0.4s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "div.nav-item-bg",
+      "property": "background-color",
+      "duration": "0.3s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "div.nav-comapny-item",
+      "property": "all",
+      "duration": "0s",
+      "easing": "ease",
+      "animationDuration": "25s",
+      "animationName": "marquee-move"
+    },
+    {
+      "el": "div.nav-email-item",
+      "property": "color, background-color",
+      "duration": "0.3s, 0.3s",
+      "easing": "ease, ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "p.email-text",
+      "property": "opacity",
+      "duration": "0.3s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "div.popup-card-wrap",
+      "property": "transform, opacity",
+      "duration": "0.4s, 0.2s",
+      "easing": "cubic-bezier(0.25, 0.46, 0.45, 0.94), cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "div.popup-close",
+      "property": "color",
+      "duration": "0.25s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "div.popup-close-path-1",
+      "property": "background-color, transform",
+      "duration": "0.2s, 0.3s",
+      "easing": "ease, ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "a.work-card",
+      "property": "opacity",
+      "duration": "0.4s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "svg",
+      "property": "margin-left",
+      "duration": "0.25s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "svg",
+      "property": "margin",
+      "duration": "0.25s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "svg",
+      "property": "all",
+      "duration": "0.4s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "span.swiper-bullet",
+      "property": "background-color, width",
+      "duration": "0.25s, 0.25s",
+      "easing": "ease, ease",
+      "animationDuration": null,
+      "animationName": null
+    },
+    {
+      "el": "path",
+      "property": "transform",
+      "duration": "0.4s",
+      "easing": "ease",
+      "animationDuration": null,
+      "animationName": null
+    }
+  ]
+}

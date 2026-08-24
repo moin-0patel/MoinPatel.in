@@ -264,7 +264,7 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   isActive
                     ? // accent-strong, not accent: --color-accent is the light text tone.
-                      'bg-accent-strong text-white'
+                      'bg-accent-strong text-accent-ink'
                     : 'text-secondary hover:text-primary hover:bg-surface-raised',
                 )}
               >

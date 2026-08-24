@@ -172,7 +172,7 @@ function AdminNavLink({
               // Button's resting surface, so no fourth accent shade enters the
               // system. A filled pill is also a stronger selected-state signal
               // than a faint wash (A11Y-09: never colour alone).
-              'bg-accent-strong text-white'
+              'bg-accent-strong text-accent-ink'
             : 'text-secondary hover:text-primary hover:bg-surface',
         )
       }

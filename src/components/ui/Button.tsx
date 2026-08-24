@@ -25,7 +25,9 @@ const VARIANT: Record<ButtonVariant, string> = {
   // highlight rather than a flat colour. White is safe across the whole ramp:
   // 6.29:1 at accent-strong through 9.93:1 at the dark end.
   primary:
-    'bg-gradient-to-br from-accent-strong to-accent-deep text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:brightness-110',
+    // Black on the accent fill, exactly as the reference does it: its yellow
+    // CTA carries black type. White measured 1.69:1 on the cyan.
+    'bg-accent-fill text-accent-ink hover:bg-accent-strong',
   secondary:
     'border border-strong bg-transparent text-primary hover:border-accent hover:text-accent',
   ghost: 'bg-transparent text-secondary hover:text-primary hover:bg-surface',
