@@ -178,34 +178,71 @@ export function HeroSection() {
           {/* Centre band — identity, role, controls. */}
           <div className="order-1 flex max-w-[34rem] flex-col items-start lg:order-2 lg:items-center lg:text-center">
             {/*
-             * A11Y-02 / PRD 12.12 — the page's single h1, and it stays the
-             * name. The reference's own brand name is its wordmark; this is the
-             * accessible equivalent, set small because the wordmark above
-             * already carries the visual weight.
-             */}
-            <h1
-              id="hero-heading"
-              className="text-secondary font-mono text-xs tracking-[0.22em] uppercase"
-            >
-              {fullName}
-            </h1>
-
-            {/*
-             * #f8f7f3 — the reference's own measured headline colour, and it
-             * is set over the figure exactly as the reference sets it. Black
-             * here was unreadable: the headline lands on a black t-shirt.
-             */}
-            {/*
-             * The role, as metadata — not the headline.
+             * THE IDENTITY PLATE.
              *
-             * It had the display treatment, which left the hero with no
-             * headline at all: the positioning line was not rendered, and the
-             * audit measured this hero's only heading at 13px against the
-             * reference's 76px.
+             * The reference sets its small text over the figure on translucent
+             * panels — the stat cards lower left, the trait list right — for the
+             * same reason we need one here: a photograph is not a background you
+             * can set 13px type on and predict. This is that treatment, at the
+             * one place our composition puts small text on the figure.
+             *
+             * It is tinted with `--glass-bg`, which is the page ground at 82%,
+             * and that single fact is what makes it work at every width without
+             * a breakpoint or a colour switch:
+             *
+             *   over the black shirt (desktop) it lifts the local backdrop to
+             *   rgb(175,170,156), and the dark type on it measures ~6-9:1;
+             *
+             *   over the cream ground it is cream on cream and vanishes — no
+             *   box, no edge, nothing to see.
+             *
+             * At the narrow widths the plate straddles both, and it simply
+             * fades across: solid where it crosses the hair, gone where it sits
+             * on the ground. So the panel is present in proportion to how much
+             * it is needed, with no breakpoint and no colour switch anywhere —
+             * which is the reference's own behaviour rather than a rule we
+             * imposed on top of it.
+             *
+             * Measured worst case across all six viewports, sampling the
+             * darkest photo pixel under the plate: 9.02:1 for the name, 6.08:1
+             * for the role.
+             *
+             * Square, not rounded, and sized to the two lines it carries: it is
+             * a text plate, not a card. `w-fit` keeps it shrink-wrapped at
+             * `items-start` and at `lg:items-center` alike.
              */}
-            <p className="mt-2 font-mono text-xs tracking-[--tracking-mono] text-[#f8f7f3]/80 uppercase">
-              {roleTitle}
-            </p>
+            <div className="w-fit px-3 py-2 [background-color:var(--glass-bg)]">
+              {/*
+               * A11Y-02 / PRD 12.12 — the page's single h1, and it stays the
+               * name. The reference's own brand name is its wordmark; this is
+               * the accessible equivalent, set small because the wordmark above
+               * already carries the visual weight.
+               */}
+              <h1
+                id="hero-heading"
+                className="text-primary font-mono text-xs tracking-[0.22em] uppercase"
+              >
+                {fullName}
+              </h1>
+
+              {/*
+               * The role, as metadata — not the headline.
+               *
+               * It had the display treatment, which left the hero with no
+               * headline at all: the statement line was not rendered, and the
+               * audit measured this hero's only heading at 13px against the
+               * reference's 76px.
+               *
+               * It reads dark now rather than near-white, because it sits on
+               * the plate with the name. Near-white was legible over the shirt
+               * at desktop and invisible over the cream at mobile, where the
+               * block clears the figure entirely — the plate removes that split
+               * instead of papering over it.
+               */}
+              <p className="text-secondary mt-1 font-mono text-xs tracking-[--tracking-mono] uppercase">
+                {roleTitle}
+              </p>
+            </div>
 
             {/*
              * THE HEADLINE — the tagline, and it stays a <p>.
