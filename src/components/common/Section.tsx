@@ -48,7 +48,13 @@ export function Section({
       id={id}
       aria-labelledby={labelledBy}
       data-chapter={chapter}
-      className={cn('scroll-mt-24 py-12 md:py-16 lg:py-24', className)}
+      /*
+       * Vertical rhythm measured from the reference: its sections carry 144-216px
+       * of top padding and run 1000-3600px tall. Ours were a uniform 96px, and
+       * the whole document came to 9,662px against the reference's 13,863px —
+       * the page read as compressed rather than spacious.
+       */
+      className={cn('scroll-mt-24 py-16 md:py-24 lg:py-36', className)}
     >
       <div className="container-page">
         <RouteErrorBoundary
@@ -115,7 +121,21 @@ export function SectionHeading({
 
       <div className="border-subtle flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b pb-4">
         {/* A11Y-02 — every section heading is an h2; levels never skip. */}
-        <h2 id={id} className="text-primary text-2xl md:text-3xl">
+        {/*
+         * Sized from the reference, not from taste. Measured at 1440 its
+         * section headings are 65.95px at weight 500; ours were 38px at weight
+         * 600 — a 1.7x gap, and the largest single visual difference below the
+         * hero once the palette matched.
+         *
+         * `--text-5xl` clamps to 48-68px, landing on the measured value at
+         * 1440 and scaling down sensibly. Weight drops to 500 to match; the
+         * reference's display type is medium, not semibold, which is part of
+         * why it reads as editorial rather than as a product page.
+         */}
+        <h2
+          id={id}
+          className="text-primary font-display text-[length:var(--text-3xl)] leading-[1.05] font-medium text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]"
+        >
           {title}
         </h2>
         {meta && (
