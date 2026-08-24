@@ -7,6 +7,7 @@ import { CapabilitiesSection } from '@/sections/CapabilitiesSection'
 import { ContactCtaSection } from '@/sections/ContactCtaSection'
 import { EducationSection } from '@/sections/EducationSection'
 import { ExperienceSection } from '@/sections/ExperienceSection'
+import { FaqSection } from '@/sections/FaqSection'
 import { FeaturedProjectsSection } from '@/sections/FeaturedProjectsSection'
 import { HeroSection } from '@/sections/HeroSection'
 import { ImpactSection } from '@/sections/ImpactSection'
@@ -87,30 +88,51 @@ export default function HomePage() {
        * contact. Chapters 02 and 05 are new; the rest already existed and are
        * reused rather than rebuilt.
        */}
+      {/*
+       * Ordered to follow the reference's storytelling rhythm:
+       *
+       *   hero -> statement -> capabilities -> work -> method
+       *        -> journey -> evidence -> stack -> FAQ -> contact
+       *
+       * ONLY THE NON-CHAPTER SECTIONS MOVED. The seven sections carrying
+       * `data-chapter` are in the same DOM order as `CHAPTERS`, and
+       * `buildChapterBands` sorts by `CHAPTERS.indexOf` — reordering those
+       * would silently reassign camera bands and change the choreography. So
+       * Impact, Experience, Skills, Education and the new FAQ are the pieces
+       * that were rearranged; the chapters were left exactly where they are.
+       *
+       * That is also why Capabilities still sits BEFORE the work section while
+       * the reference puts its equivalent after: moving it is a motion change,
+       * not a layout one, and it is not worth the choreography to match an
+       * ordering detail.
+       */}
       <HeroSection />
       <IntroductionSection />
       <CapabilitiesSection />
+
+      {/* SELECTED WORK, then the method behind it. */}
       <FeaturedProjectsSection />
       <ProcessSection />
-      <AboutSection />
 
       {/*
-       * Not chapters, and kept deliberately.
+       * JOURNEY — one narrative in three parts.
        *
-       * Impact, Experience, Skills and Education are not part of the seven-act
-       * structure, but they are published content — Education in particular is
-       * asserted by a passing check — and dropping them to fit a narrative
-       * would silently delete work. They sit after the narrative and before the
-       * closing CTA, where they read as an appendix rather than an interruption.
-       *
-       * Flagged for the Phase 1 review: Experience and Skills also have their
-       * own routes, so they could move there entirely. Education has no route
-       * and would need one first.
+       * About opens it and carries the chapter; experience and education
+       * continue it. They were previously split by Impact, which read as an
+       * interruption in the middle of a personal history.
+       */}
+      <AboutSection />
+      <ExperienceSection variant="summary" />
+      <EducationSection />
+
+      {/*
+       * The reference's testimonial slot. No testimonials exist, so this is
+       * evidence of problems solved rather than invented quotes.
        */}
       <ImpactSection />
-      <ExperienceSection variant="summary" />
+
       <SkillsSection />
-      <EducationSection />
+      <FaqSection />
 
       <ContactCtaSection />
     </>

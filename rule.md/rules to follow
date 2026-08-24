@@ -1,0 +1,29 @@
+IMPORTANT — GIT COMMIT RULE
+
+NEVER automatically create, amend, or execute a Git commit.
+
+You may:
+- Modify files
+- Create new files
+- Run tests, lint, typecheck, and builds
+- Inspect git status and git diff
+- Suggest a commit message
+
+But you MUST NOT:
+- Run `git commit`
+- Run `git commit --amend`
+- Run `git push`
+- Commit changes automatically after completing a task
+
+When the work is complete:
+1. Show me what changed.
+2. Show the relevant git status/diff summary.
+3. Suggest a clear commit message.
+4. STOP and wait for my explicit approval.
+
+Only create a commit if I explicitly say something like:
+"commit this", "make the commit", or "commit these changes".
+
+Do not interpret "finish", "complete", "done", "fix it", or "apply the changes" as permission to commit.
+
+GIT COMMITS MUST ALWAYS REQUIRE EXPLICIT USER APPROVAL.

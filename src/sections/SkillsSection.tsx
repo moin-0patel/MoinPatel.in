@@ -75,7 +75,10 @@ export function SkillsSection() {
           <div key={group.id}>
             <h3
               id={`skill-group-${group.slug}`}
-              className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase"
+              /* text-secondary: --color-muted over --color-subtle (#464555, the
+                  hairline rule) measures 4.02:1 against a 4.5:1 requirement.
+                  Same pair, same fix as the section meta labels. */
+              className="text-secondary mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase"
             >
               {group.name}
             </h3>

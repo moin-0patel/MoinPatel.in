@@ -43,9 +43,10 @@ export function ImpactSection() {
     <Section id="impact" labelledBy="impact-heading" className="bg-surface/30">
       <SectionHeading
         id="impact-heading"
-        eyebrow="How it helps businesses"
+        eyebrow="Built for real problems"
+        meta="EVIDENCE"
         title="What these systems are for"
-        description="Outcomes, described in the terms an operator would use."
+        description="The reference site proves itself with client testimonials. There are none to show here, so this shows the problems the work actually addresses instead of borrowing credibility that has not been earned yet."
       />
 
       <ul className="grid gap-x-8 gap-y-6 md:grid-cols-2 lg:grid-cols-3">

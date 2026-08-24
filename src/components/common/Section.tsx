@@ -121,7 +121,16 @@ export function SectionHeading({
         {meta && (
           <p
             aria-hidden="true"
-            className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase"
+            /*
+             * `text-secondary`, not `text-muted` — a contrast fix, not an
+             * emphasis change. This label is the smallest text in a heading and
+             * sits at the right edge, which is where the Core glow and the
+             * hairline rules land. On --color-muted over --color-subtle
+             * (#464555) it measured 4.02:1 against a 4.5:1 requirement. One
+             * step up clears it while staying visually subordinate: still mono,
+             * still 12px, still quieter than the title beside it.
+             */
+            className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase"
           >
             {meta}
           </p>

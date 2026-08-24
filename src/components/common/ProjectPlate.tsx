@@ -101,7 +101,19 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
            * clickable. Nesting them inside the title's anchor would be invalid
            * HTML and would strand them for keyboard users.
            */}
-          <h3 className="text-primary font-display mt-3 text-[length:var(--text-3xl)] leading-[--leading-snug] font-semibold tracking-[--tracking-tight] text-balance lg:text-[length:var(--text-5xl)]">
+          {/*
+           * THE TITLE LANE — measured, not stylistic.
+           *
+           * At display scale a long project title reaches the right edge, and
+           * during the projects chapter that leaves the Core's framing search
+           * no clear region: a technology chip measured 1.31:1 against the lit
+           * sphere (#b1a5e4) at 1280x900.
+           *
+           * Capping the measure hands roughly a third of the frame back as
+           * deliberate negative space, which is where the Core then sits. It is
+           * composition rather than a scrim, a panel, or a dimmed Core.
+           */}
+          <h3 className="text-primary font-display mt-3 text-[length:var(--text-3xl)] leading-[--leading-snug] font-semibold tracking-[--tracking-tight] text-balance lg:max-w-[16ch] lg:text-[length:var(--text-5xl)]">
             <Link
               to={caseStudyPath(project.slug)}
               className="after:absolute after:inset-0 after:content-[''] hover:text-accent focus-visible:text-accent transition-colors duration-[--duration-hover] ease-[--ease-out]"
@@ -110,7 +122,13 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
             </Link>
           </h3>
 
-          <p className="text-secondary measure mt-4 text-[length:var(--text-lg)]">
+          {/*
+           * 46ch rather than `measure` (72ch). `measure` is FR-CASE-10's width
+           * for case-study copy with nothing rendered behind it; this sits over
+           * the scene, and full-width prose leaves the framing search nowhere
+           * to move to.
+           */}
+          <p className="text-secondary mt-4 max-w-[46ch] text-[length:var(--text-lg)]">
             {project.summary}
           </p>
 
@@ -138,7 +156,7 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
            * them one plane says so.
            */}
           {(claims.length > 0 || project.technologies.length > 0) && (
-            <div className="border-subtle bg-surface mt-6 border p-5">
+            <div className="border-subtle bg-surface mt-6 border p-5 lg:max-w-[44rem]">
               {claims.length > 0 && (
                 <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2 xl:grid-cols-3">
                   {claims.map((claim) => (
@@ -146,7 +164,7 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
                       <p className="text-primary font-mono text-xs tracking-[--tracking-mono] uppercase">
                         {claim.label}
                       </p>
-                      <p className="text-muted mt-1 text-sm">{claim.detail}</p>
+                      <p className="text-secondary mt-1 text-sm">{claim.detail}</p>
                     </li>
                   ))}
                 </ul>

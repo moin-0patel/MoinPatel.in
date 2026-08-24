@@ -37,7 +37,26 @@ export function ContactCtaSection() {
           'border-subtle border',
           // 32.1 — gradients appear in the CTA band and the process-line motif
           // only, single direction, low opacity.
-          'from-indigo-deep/40 to-base bg-gradient-to-br via-[--color-surface]',
+          /*
+           * `bg-surface` UNDER the gradient, and that is a contrast fix.
+           *
+           * The gradient's first stop is `indigo-deep/40` — 40% alpha — so the
+           * 3D scene showed straight through the card and the actions
+           * composited against the lit Core rather than against the card. At
+           * 390px "Email me" measured 4.18:1 on #715eac, which is the sphere.
+           *
+           * A solid colour beneath means the translucent gradient now blends
+           * with a known surface instead of with whatever the scene is doing.
+           * The band looks the same; it just stops being a window.
+           *
+           * Written as an arbitrary property, NOT `bg-surface`. `cn()` runs
+           * tailwind-merge, which groups `bg-surface` and `bg-gradient-to-br`
+           * as conflicting background utilities and keeps only the last one —
+           * so `bg-surface` was silently dropped from the class list. The
+           * utility was present in the CSS bundle and absent from the element,
+           * which is why the first two attempts at this fix changed nothing.
+           */
+          '[background-color:var(--color-surface)] from-indigo-deep to-base bg-gradient-to-br via-[--color-surface]',
         )}
       >
         <h2 id="contact-cta-heading" className="text-primary text-balance">
