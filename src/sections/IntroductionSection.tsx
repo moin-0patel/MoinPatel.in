@@ -37,7 +37,16 @@ export function IntroductionSection() {
 
         <h2
           id="introduction-heading"
-          className="text-primary font-display text-3xl leading-[1.1] font-semibold tracking-[-0.03em] text-balance md:text-4xl lg:text-5xl"
+          /*
+           * Weight 500, matching every other section heading and the measured
+           * reference. This was semibold — the only display heading on the page
+           * still a step heavier, because it predates the shared primitive.
+           *
+           * It keeps its own markup rather than adopting `SectionHeading`: the
+           * four statement lines are <span>s inside one h2 so the sentence is
+           * announced once, and that structure is the point of the section.
+           */
+          className="text-primary font-display text-[length:var(--text-3xl)] leading-[1.05] font-medium tracking-[-0.03em] text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]"
         >
           {LINES.map((line, index) => (
             <span

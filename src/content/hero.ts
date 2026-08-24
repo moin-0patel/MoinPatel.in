@@ -19,7 +19,22 @@ export const HERO_FALLBACK = {
   // with profiles.role_title so a slow network cannot flash a stale title.
   // The database remains the source of truth.
   roleTitle: 'AI Developer & Automation Engineer',
-  // Approved, verbatim (PRD 2, 8.3).
+  /*
+   * The hero's large statement, and the only short-form line on the page.
+   *
+   * It maps to `profiles.tagline` — a real, admin-editable column that is
+   * currently null. So this is not a hard-coded headline standing in for a
+   * database value; it is the default for an empty optional field, and the
+   * moment a tagline is saved the row wins, exactly like every other line here.
+   *
+   * It is a compression of the approved positioning line below, not a new
+   * claim: the same assertion, cut to the length the composition needs. The
+   * full sentence is unchanged and still renders in the footer and as the page
+   * description.
+   */
+  tagline: 'Building AI that works.',
+  // Approved, verbatim (PRD 2, 8.3). Still rendered in the footer and used as
+  // the SEO description fallback; the hero now leads with the tagline.
   positioningLine:
     'Building AI-powered systems that automate work, save time, and reduce business costs.',
   location: 'Surat, Gujarat, India',

@@ -87,6 +87,7 @@ export function SectionHeading({
   title,
   description,
   meta,
+  scale = 'default',
   className,
 }: {
   id: string
@@ -99,6 +100,16 @@ export function SectionHeading({
    * Decorative, so it is hidden from assistive tech like the eyebrow.
    */
   meta?: string
+  /**
+   * Heading scale. `default` is the shared 68px/500 every section uses.
+   *
+   * `display` is the reference's one oversized heading — measured at 180px on
+   * its "What You Get?" section, roughly 2.7x the others. It exists as a prop
+   * rather than a second component because everything else about the heading —
+   * eyebrow, rule, meta, description — is identical, and forking the component
+   * to change one font size is how two components drift apart.
+   */
+  scale?: 'default' | 'display'
   className?: string
 }) {
   return (
@@ -134,7 +145,17 @@ export function SectionHeading({
          */}
         <h2
           id={id}
-          className="text-primary font-display text-[length:var(--text-3xl)] leading-[1.05] font-medium text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]"
+          className={cn(
+            'text-primary font-display leading-[1.05] font-medium text-balance',
+            scale === 'display'
+              ? // Steps to --text-7xl (up to 120px). The reference runs 180px
+                // here, but it sets two short words; "Where that shows up" is
+                // four, and at 180px it wrapped to three lines and pushed the
+                // capability grid off the first screen at 1024. This is the
+                // largest step that holds the composition.
+                'text-[length:var(--text-4xl)] md:text-[length:var(--text-5xl)] lg:text-[length:var(--text-7xl)]'
+              : 'text-[length:var(--text-3xl)] md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]',
+          )}
         >
           {title}
         </h2>

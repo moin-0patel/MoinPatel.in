@@ -39,6 +39,9 @@ export function CapabilitiesSection() {
         <div className="min-w-0 flex-1">
           <SectionHeading
             id="capabilities-heading"
+            // The reference's single oversized section heading (measured 180px
+            // against 66px elsewhere). This is the equivalent slot.
+            scale="display"
             eyebrow="Capabilities"
             meta="CORE_SYSTEMS"
             title="What I work on"

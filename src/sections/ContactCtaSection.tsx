@@ -59,7 +59,23 @@ export function ContactCtaSection() {
           '[background-color:var(--color-surface)] from-indigo-deep to-base bg-gradient-to-br via-[--color-surface]',
         )}
       >
-        <h2 id="contact-cta-heading" className="text-primary text-balance">
+        {/*
+         * Matched to the shared section scale — 68px / weight 500 at 1440.
+         *
+         * This heading was the last on the page still at 38px/600, because it
+         * hand-rolls its own h2 instead of routing through `SectionHeading`.
+         * The measured reference sets every section heading at 65.95px/500, and
+         * the closing statement is the worst place to be a step smaller.
+         *
+         * It stays a bare h2 rather than adopting `SectionHeading` wholesale:
+         * that component renders an eyebrow, a hairline rule and a right-hand
+         * meta label, and this section is a centred CTA band with none of them.
+         * Only the type scale needed to agree.
+         */}
+        <h2
+          id="contact-cta-heading"
+          className="text-primary font-display text-[length:var(--text-3xl)] leading-[1.05] font-medium text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]"
+        >
           Have a manual process worth automating?
         </h2>
 

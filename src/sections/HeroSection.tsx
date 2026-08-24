@@ -43,6 +43,21 @@ export function HeroSection() {
 
   const fullName = profile?.fullName ?? HERO_FALLBACK.fullName
   const roleTitle = profile?.roleTitle ?? HERO_FALLBACK.roleTitle
+  /*
+   * The large statement is the TAGLINE, not the positioning line.
+   *
+   * The positioning line is 14 words. Set at the reference's headline size it
+   * wrapped to six lines across the portrait's face — the composition inverted,
+   * with the type burying the figure instead of crossing it. The reference's own
+   * headline is three words for exactly this reason.
+   *
+   * `tagline` is an existing, admin-editable `profiles` column, currently null,
+   * and it was not consumed anywhere on the public site. So the fix is a
+   * content-shape change, not a layout one: the same slot, a shorter string,
+   * still database-owned. The full positioning line is untouched and still
+   * renders in the footer and as the page description.
+   */
+  const headline = profile?.tagline ?? HERO_FALLBACK.tagline
   const location = profile?.location ?? HERO_FALLBACK.location
   const availabilityLabel = settings?.availabilityLabel
   const showAvailability = Boolean(profile?.availableForWork && availabilityLabel)
@@ -180,8 +195,33 @@ export function HeroSection() {
              * is set over the figure exactly as the reference sets it. Black
              * here was unreadable: the headline lands on a black t-shirt.
              */}
-            <p className="font-display mt-3 text-[length:var(--text-4xl)] leading-[0.98] font-bold tracking-[-0.03em] text-balance text-[#f8f7f3] lg:text-[length:var(--text-5xl)]">
+            {/*
+             * The role, as metadata — not the headline.
+             *
+             * It had the display treatment, which left the hero with no
+             * headline at all: the positioning line was not rendered, and the
+             * audit measured this hero's only heading at 13px against the
+             * reference's 76px.
+             */}
+            <p className="mt-2 font-mono text-xs tracking-[--tracking-mono] text-[#f8f7f3]/80 uppercase">
               {roleTitle}
+            </p>
+
+            {/*
+             * THE HEADLINE — the tagline, and it stays a <p>.
+             *
+             * PRD 12.12 is explicit on both halves: the name is the single h1,
+             * and the statement line is "never a heading". So the visual
+             * hierarchy the reference wants is achieved with type rather than
+             * with markup — this carries the display weight while the h1 above
+             * stays the accessible name. Changing the h1 to match the
+             * reference's markup would break 12.12 and A11Y-02.
+             *
+             * #f8f7f3 is the reference's own measured headline colour, set over
+             * the figure exactly as it sets it.
+             */}
+            <p className="font-display mt-3 text-[length:var(--text-4xl)] leading-[0.98] font-bold tracking-[-0.03em] text-balance text-[#f8f7f3] lg:text-[length:var(--text-5xl)]">
+              {headline}
             </p>
 
             {/*
