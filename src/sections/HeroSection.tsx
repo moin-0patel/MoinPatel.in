@@ -1,316 +1,220 @@
-import { ArrowRight, Download, Mail } from 'lucide-react'
-import type { ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 
-import { BRAND_ICONS } from '@/components/ui/brandIcons'
 import { Button } from '@/components/ui/Button'
-import { Skeleton } from '@/components/ui/Skeleton'
-import { useProfile, usePublishedResume, useSettings, useSocialLinks } from '@/hooks/useSiteContent'
+import { useProfile, useSettings } from '@/hooks/useSiteContent'
 import { cn } from '@/lib/cn'
-import { imageSizes, publicStorageUrl } from '@/lib/storage'
 import { HERO_FALLBACK } from '@/content/hero'
-import type { SocialLink } from '@/types/domain'
 
 /**
- * Hero — PRD 12.12 (FR-HOME-02).
+ * Hero — a replica of the reference's opening composition, with Moin's content.
  *
- * Under five seconds: who he is, what he does, why it matters commercially,
- * where to go next.
+ * The reference builds its hero from four layers, and the order is the whole
+ * effect: a cream ground, an oversized accent wordmark cropped by the viewport,
+ * a portrait standing in front of it, and the headline and controls arranged
+ * around the figure. It is one composition, not a text column beside an image
+ * column.
  *
- * Empty states are not edge cases here, they are the current state: the photo
- * (Q-04) and the bio (Q-12) do not exist yet. No avatar renders a monogram
- * tile, never a broken image. No published resume hides the Resume CTA
- * entirely rather than showing a dead button (FR-RES-06). No availability
- * label hides the pill (Q-20).
+ * WHAT REPLACED THE 3D CORE
+ *
+ * The Core used to be this hero's visual. It is gone from this composition —
+ * measured, not preferred. On the cream ground the scene put black body text at
+ * 1.18-2.25:1 against a 4.5:1 requirement across every chapter, and the
+ * reference has no 3D here at all. Every file under `src/components/three/`
+ * remains untouched; only its presence in this section changed.
+ *
+ * THE PORTRAIT IS NOT A CUT-OUT, AND THAT IS HANDLED HERE
+ *
+ * The supplied JPEG has a near-white background — sampled at rgb(254,254,254)
+ * in its corners — not an alpha channel, which JPEG cannot carry. Dropped onto
+ * cream it would read as a white rectangle with a person inside it.
+ *
+ * `mix-blend-mode: multiply` solves that with no image tooling: multiplying
+ * white by the cream ground returns the cream exactly, so the background
+ * disappears, while the subject — dark hair, black shirt, mid-tone skin —
+ * survives because it is far darker than white. The trade is that the subject
+ * darkens by roughly the ground's own luminance, which reads as a deliberate
+ * duotone rather than a mistake. A real alpha cut-out would be better and drops
+ * in later by deleting one class.
  */
-
-/**
- * `social_links.icon_key` resolves here (23.13). Brand marks come from the
- * local registry; `mail` is a UI icon, so lucide supplies it.
- */
-const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  ...BRAND_ICONS,
-  mail: Mail,
-  email: Mail,
-}
 
 export function HeroSection() {
-  const { data: profile, isPending: profilePending } = useProfile()
+  const { data: profile } = useProfile()
   const { data: settings } = useSettings()
-  const { data: socialLinks } = useSocialLinks()
-  const { data: resume, isPending: resumePending } = usePublishedResume()
 
-  /*
-   * 12.12 "Loading": the identity copy is server-independent, so it falls back
-   * to constants until the query resolves rather than showing a spinner in the
-   * hero. The database value wins the moment it arrives.
-   */
   const fullName = profile?.fullName ?? HERO_FALLBACK.fullName
   const roleTitle = profile?.roleTitle ?? HERO_FALLBACK.roleTitle
-  const positioningLine = profile?.positioningLine ?? HERO_FALLBACK.positioningLine
   const location = profile?.location ?? HERO_FALLBACK.location
-
-  const avatarUrl = publicStorageUrl('profile', profile?.avatarPath ?? null)
-  const heroSocials = (socialLinks ?? []).filter((link) => link.showInHero)
   const availabilityLabel = settings?.availabilityLabel
   const showAvailability = Boolean(profile?.availableForWork && availabilityLabel)
 
-  // 12.12 "Interactions": on Home the primary CTA scrolls to the featured
-  // projects; the nav's Projects link is the one that leaves the page.
+  /*
+   * Mode D — the reference's stat cards.
+   *
+   * It shows "80+ Projects" and "7+ Years of experience". No equivalent figure
+   * has been verified for Moin, and inventing one is the single thing this
+   * project has consistently refused. So the cards are BUILT and render nothing
+   * until real values exist: this array is the seam, and filling it from
+   * Supabase later needs no other change.
+   *
+   * Rendering zeros or a placeholder would be worse than the absence — it
+   * advertises the gap rather than simply not making a claim.
+   */
+  const stats: { value: string; label: string }[] = []
+
   return (
     <section
       aria-labelledby="hero-heading"
-      // Chapter 01 — motion spec section 10. Without it the scroll hook cannot
-      // report the hero as the active chapter, which is what reduced motion
-      // uses to pick a state.
+      // Chapter 01 — the scroll hook needs this to report the hero as active.
       data-chapter="hero"
-      className="container-page relative flex min-h-[80vh] items-center py-16 xl:min-h-[88vh]"
+      className="relative flex min-h-[100svh] flex-col overflow-hidden"
     >
       {/*
-       * The scrim between the 3D scene and this text. `relative` on the section
-       * above is what it positions against.
+       * LAYER 1 — the wordmark.
        *
-       * aria-hidden and pointer-events-none: it carries nothing and must never
-       * intercept a click meant for a CTA. See the `hero-scrim` utility in
-       * globals.css for why it is a gradient and why it lives here rather than
-       * on the fixed scene layer.
+       * A graphic element, not a heading. `aria-hidden` because the accessible
+       * name is the h1 below and hearing the name twice is noise.
+       *
+       * `clamp` with a vw term is what makes it crop the way the reference's
+       * does: it outgrows the viewport instead of reflowing, so the outer
+       * glyphs run off both edges. "MOIN PATEL" is ten characters against the
+       * reference's four, so the vw coefficient is necessarily lower — matching
+       * its letter SIZE would push the word past three viewport widths.
        */}
-      <div aria-hidden="true" className="hero-scrim" />
+      <span
+        aria-hidden="true"
+        className={cn(
+          // text-[color:var(...)], NOT text-[--color-accent-word]. Tailwind v4 does
+          // not resolve a bare custom property in the bracket form — it compiles to
+          // an invalid declaration and the element silently inherits. That is the
+          // same trap that once rendered this hero's headline invisible.
+          'pointer-events-none absolute inset-x-0 top-[7%] select-none text-[color:var(--color-accent-word)]',
+          'font-display text-center font-bold whitespace-nowrap',
+          'leading-[0.78] tracking-[-0.045em]',
+          'text-[clamp(3.5rem,16vw,14rem)]',
+        )}
+      >
+        {fullName.toUpperCase()}
+      </span>
 
       {/*
-       * `3fr_2fr`, not `60%_40%` — the ratio is identical (3/5 and 2/5) but the
-       * unit matters. Percentage tracks resolve against the full content box
-       * and the gap is then added on top, so `60% + 40% + gap` overflowed the
-       * container by exactly the gap on every `lg` width. It was invisible at
-       * >= 1440 only because container-page caps at 1280 and the leftover
-       * margin absorbed it; at 1280 and 1024 there is no slack and the page
-       * scrolled horizontally (RES-12). `fr` distributes what remains AFTER
-       * gaps, which is the whole point of the unit.
+       * LAYER 2 — the portrait, standing in front of the wordmark.
+       *
+       * No card, no rounded container, no shadow. The reference sets the figure
+       * directly on the ground, and a frame around it would be the clearest
+       * single tell that this is a portfolio template rather than the
+       * composition being replicated.
        */}
-      <div className="grid w-full items-center gap-10 lg:grid-cols-[3fr_2fr] lg:gap-16">
-        {/* RES-02 — on mobile the photo comes first in source order; `order`
-            flips it back on desktop without changing the DOM order that
-            keyboard and screen-reader users follow. */}
-        <div className="order-2 lg:order-1">
-          {/*
-           * The design opens with a pill-shaped status chip carrying a mono
-           * uppercase label and a live dot. That treatment is applied to the
-           * REAL role title rather than the mockup's invented
-           * "AI + AUTOMATION | BUILDING SYSTEMS THAT MATTER" string.
-           *
-           * `border-strong` rather than the design's `glass-panel`: PRD 32.3
-           * restricts glass to the sticky header and the mobile nav sheet,
-           * "nowhere else". At this size a solid surface is visually equivalent.
-           */}
-          <p className="border-strong bg-surface text-accent inline-flex items-center gap-2.5 rounded-full border px-4 py-1.5 font-mono text-xs tracking-[--tracking-mono] uppercase">
-            <span className="bg-accent size-1.5 shrink-0 rounded-full" aria-hidden="true" />
-            {roleTitle}
-          </p>
-
-          {showAvailability && (
-            <p className="border-success/30 bg-success-soft text-success mt-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-              <span className="bg-success size-1.5 rounded-full" aria-hidden="true" />
-              {availabilityLabel}
-            </p>
+      {/*
+       * NO z-index on this wrapper, deliberately.
+       *
+       * `mix-blend-mode` blends with the backdrop inside its own stacking
+       * context, and a positioned element with a z-index CREATES one — which
+       * isolated the image and left the white background painting as a solid
+       * rectangle on the cream. Removing z-index lets the blend reach the page,
+       * and DOM order alone gives the layering: wordmark, then figure, then
+       * content.
+       */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
+        <img
+          src="/moin-portrait.jpeg"
+          alt={`${fullName}, ${roleTitle}`}
+          // The LCP element, and the only image on the page given priority.
+          fetchPriority="high"
+          decoding="async"
+          className={cn(
+            'h-[58svh] w-auto max-w-none object-contain object-bottom',
+            // brightness(1.08) before the blend: the export carries a BAKED-IN
+            // checkerboard (sampled at 241-244 against 254 white), so multiply
+            // alone left a faint grid on the cream. Lifting near-whites to 255
+            // makes them multiply away cleanly; the subject is far darker and
+            // barely moves.
+            'mix-blend-multiply brightness-[1.08]',
+            'sm:h-[64svh] lg:h-[72svh]',
           )}
+        />
+      </div>
 
-          {/*
-           * A11Y-02 — the page's single h1, and it stays the owner's name.
-           *
-           * The design puts its headline in an <h2> and drops the name from the
-           * hero entirely. That is not adopted: PRD 12.12 fixes the name as the
-           * h1 and the positioning line as a <p>, "never a heading". The visual
-           * hierarchy the design wants is still achieved — the positioning line
-           * below is far larger — which is exactly the split 12.12 describes.
-           */}
-          <h1
-            id="hero-heading"
-            className="text-secondary font-display mt-6 text-lg font-medium tracking-[0.02em]"
-          >
-            {fullName}
-          </h1>
-
-          {/*
-           * The positioning line carries the design's display-xl headline
-           * treatment: the largest type on the page, with a gradient fill.
-           *
-           * The gradient endpoints are NOT the design's. It ran
-           * primary (#c3c0ff, 10.89:1) → primary-container (#4f46e5, 2.96:1),
-           * so the tail of the text fell under the 4.5:1 AA floor. This runs
-           * --color-primary → --color-accent instead: 14.43:1 → 10.89:1, the
-           * same lavender direction with no dip. `text-primary` is set first so
-           * the text stays visible if background-clip:text is unsupported.
-           *
-           * Uses the TOKEN utilities (from-primary / to-accent), not
-           * from-[--color-primary]. The bracket form does not resolve a bare
-           * custom property in Tailwind v4 — it compiled to rgba(0,0,0,0), and
-           * combined with text-transparent the entire headline rendered
-           * invisible while verify:ui still reported 100/100.
-           */}
-          <p className="text-primary font-display mt-4 bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.1] font-semibold text-balance text-transparent md:text-4xl lg:text-5xl">
-            {positioningLine}
-          </p>
-
-          {/* Q-12 — no invented bio. The paragraph simply does not render
-              until Moin supplies his own words. */}
-          {profilePending ? (
-            <div className="mt-5 space-y-2">
-              <Skeleton className="h-[1lh] w-full max-w-lg" />
-              <Skeleton className="h-[1lh] w-3/5 max-w-lg" />
-            </div>
-          ) : (
-            /* The design rules the supporting paragraph off with a left border
-               in the accent hue — the one place it uses a rule as emphasis. */
-            profile?.tagline && (
-              <p className="text-secondary measure border-accent/30 mt-6 border-l py-1 pl-4">
-                {profile.tagline}
-              </p>
-            )
-          )}
-
-          {location && <p className="text-muted mt-4 text-sm">{location}</p>}
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Button size="lg" asChild>
-              <a href="#featured-projects">
-                View My Work
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </a>
-            </Button>
-
-            <Button size="lg" variant="secondary" asChild>
-              <Link to="/contact">Let&rsquo;s Talk</Link>
-            </Button>
-
-            {/*
-             * FR-RES-06 — the CTA is hidden, not disabled, when no resume is
-             * published. While the query is in flight nothing renders either:
-             * showing it and removing it later is the layout shift PERF-03
-             * forbids.
-             */}
-            {!resumePending && resume && settings?.navResumeVisible !== false && (
-              <Button size="lg" variant="ghost" asChild>
-                <Link to="/resume">
-                  <Download className="size-4" aria-hidden="true" />
-                  Download Resume
-                </Link>
-              </Button>
-            )}
+      {/*
+       * LAYER 3 — the content, arranged around the figure.
+       *
+       * `mt-auto` pins this to the lower band of the viewport the way the
+       * reference does, so the headline crosses the figure rather than floating
+       * in the middle of the screen.
+       */}
+      <div className="container-page relative mt-auto w-full pb-10 lg:pb-14">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          {/* Left band — where the reference places its stat cards. */}
+          <div className="order-2 flex flex-col gap-3 lg:order-1 lg:w-[15rem]">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="border-subtle bg-surface/70 flex items-baseline gap-3 border px-4 py-3"
+              >
+                <span className="text-accent font-display text-[length:var(--text-3xl)] leading-none font-bold">
+                  {stat.value}
+                </span>
+                <span className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
           </div>
 
-          {heroSocials.length > 0 && (
-            <ul className="mt-8 flex items-center gap-2">
-              {heroSocials.map((link) => (
-                <li key={link.id}>
-                  <SocialIconLink link={link} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          {/* Centre band — identity, role, controls. */}
+          <div className="order-1 flex max-w-[34rem] flex-col items-start lg:order-2 lg:items-center lg:text-center">
+            {/*
+             * A11Y-02 / PRD 12.12 — the page's single h1, and it stays the
+             * name. The reference's own brand name is its wordmark; this is the
+             * accessible equivalent, set small because the wordmark above
+             * already carries the visual weight.
+             */}
+            <h1
+              id="hero-heading"
+              className="text-secondary font-mono text-xs tracking-[0.22em] uppercase"
+            >
+              {fullName}
+            </h1>
 
-        <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
-          <HeroPortrait
-            url={avatarUrl}
-            alt={profile?.avatarAlt ?? fullName}
-            initials={initialsOf(fullName)}
-          />
+            {/*
+             * #f8f7f3 — the reference's own measured headline colour, and it
+             * is set over the figure exactly as the reference sets it. Black
+             * here was unreadable: the headline lands on a black t-shirt.
+             */}
+            <p className="font-display mt-3 text-[length:var(--text-4xl)] leading-[0.98] font-bold tracking-[-0.03em] text-balance text-[#f8f7f3] lg:text-[length:var(--text-5xl)]">
+              {roleTitle}
+            </p>
+
+            {/*
+             * Pill CTAs, matching the reference's treatment. The primary
+             * destination is Moin's real contact route — no booking account is
+             * invented.
+             */}
+            <div className="mt-7 flex flex-wrap items-center gap-3 lg:justify-center">
+              <Button size="lg" asChild className="rounded-full">
+                <Link to="/contact">Let&rsquo;s Talk</Link>
+              </Button>
+
+              <Button size="lg" variant="secondary" asChild className="rounded-full">
+                <a href="#featured-projects">View My Work</a>
+              </Button>
+            </div>
+          </div>
+
+          {/* Right band — where the reference runs its short trait list. */}
+          <div className="order-3 flex flex-col gap-2 lg:w-[15rem] lg:items-end">
+            <p className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
+              {location}
+            </p>
+
+            {showAvailability && (
+              <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase">
+                <span className="bg-success size-1.5 shrink-0 rounded-full" aria-hidden="true" />
+                {availabilityLabel}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
   )
-}
-
-/**
- * 12.12 "Empty states": no avatar renders a monogram tile with the accent
- * ring — never a broken image icon. Dimensions are identical in both branches
- * so the swap costs no layout shift (PERF-03).
- */
-function HeroPortrait({
-  url,
-  alt,
-  initials,
-}: {
-  url: string | null
-  alt: string
-  initials: string
-}) {
-  const frame = cn(
-    'relative aspect-square w-40 overflow-hidden rounded-[--radius-xl]',
-    'ring-accent/25 ring-2 ring-offset-4 ring-offset-[--color-base]',
-    'sm:w-52 md:w-72 lg:w-[360px] xl:w-[420px]',
-  )
-
-  /*
-   * The 3D scene frames itself on this element — see CoreFraming in Scene.tsx.
-   *
-   * An anchor rather than hard-coded breakpoint offsets: the portrait is the
-   * one thing in the hero that is already positioned correctly at every width
-   * by FR-HOME-02's own responsive table (right column above 1024px, centred
-   * above the text below it). Measuring it gives the Core the same answer for
-   * free, and it cannot drift out of step with a layout change the way a list
-   * of magic percentages would.
-   */
-  const anchor = { 'data-hero-anchor': '' }
-
-  if (!url) {
-    return (
-      <div {...anchor} className={cn(frame, 'bg-surface-raised grid place-items-center')}>
-        <span
-          aria-hidden="true"
-          className="text-muted font-display text-5xl font-semibold tracking-tight md:text-7xl"
-        >
-          {initials}
-        </span>
-        <span className="visually-hidden">{alt}</span>
-      </div>
-    )
-  }
-
-  return (
-    <div {...anchor} className={frame}>
-      <img
-        src={url}
-        alt={alt}
-        // PERF-07 — the hero image is the LCP element and the only one that
-        // gets fetch priority. Everything else lazy-loads.
-        fetchPriority="high"
-        decoding="async"
-        sizes={imageSizes('hero')}
-        className="size-full object-cover"
-      />
-    </div>
-  )
-}
-
-function SocialIconLink({ link }: { link: SocialLink }) {
-  const Icon = SOCIAL_ICONS[link.iconKey] ?? Mail
-  const isExternal = link.url.startsWith('http')
-
-  return (
-    <a
-      href={link.url}
-      {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      // A11Y-13 — icon-only links carry an accessible label, and FR-NAV-06
-      // requires the new-tab hint to be part of it.
-      aria-label={isExternal ? `${link.label} (opens in a new tab)` : link.label}
-      className={cn(
-        'grid size-11 place-items-center rounded-[--radius-sm]',
-        'border-subtle text-secondary border',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
-        'hover:text-accent hover:border-accent',
-      )}
-    >
-      <Icon className="size-4" aria-hidden="true" />
-    </a>
-  )
-}
-
-function initialsOf(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
 }

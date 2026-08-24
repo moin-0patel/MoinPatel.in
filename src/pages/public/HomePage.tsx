@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
 
 import { SEO } from '@/components/common/SEO'
-import { SceneContainer } from '@/components/three/SceneContainer'
 import { AboutSection } from '@/sections/AboutSection'
 import { CapabilitiesSection } from '@/sections/CapabilitiesSection'
 import { ContactCtaSection } from '@/sections/ContactCtaSection'
@@ -66,7 +65,17 @@ export default function HomePage() {
 
   return (
     <>
-      <SceneContainer />
+      {/*
+       * The 3D scene is no longer rendered on the homepage.
+       *
+       * The hero is now the reference's photo-led composition, and the scene
+       * has nowhere left to sit: on the cream ground it put black body text at
+       * 1.18-2.25:1 across every chapter, and the reference has no 3D at all.
+       *
+       * Every file under src/components/three/, plus chapters.ts, motion.ts and
+       * coreFraming.ts, is intact and untouched — this is one removed element,
+       * not a deleted system, and restoring it is a one-line change.
+       */}
 
       {!reducedMotion && (
         <Suspense fallback={null}>

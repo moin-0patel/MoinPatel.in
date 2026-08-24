@@ -24,13 +24,31 @@ const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string }>> = {
  * Still outstanding here: the scroll-spy active state on Home.
  */
 
-const NAV_ITEMS = [
+/*
+ * Split navigation, matching the reference's composition.
+ *
+ * Measured at 1440: two groups of plain uppercase links, 18px / weight 500, the
+ * left group starting at the gutter and the right group ending at it. No pills,
+ * no filled active state, no numerals.
+ *
+ * Every destination is a route that exists. The reference's "Clients" and
+ * "Services" have no factual equivalent here, so the slots carry Moin's real
+ * sections instead of being padded to match its item count.
+ */
+const NAV_LEFT = [
+  { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
+  { to: '/projects', label: 'Work' },
+] as const
+
+const NAV_RIGHT = [
+  { to: '/skills', label: 'Capabilities' },
   { to: '/experience', label: 'Experience' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/skills', label: 'Skills' },
   { to: '/contact', label: 'Contact' },
 ] as const
+
+/** Flat list for the mobile sheet and for verification. */
+const NAV_ITEMS = [...NAV_LEFT, ...NAV_RIGHT]
 
 export function PublicLayout() {
   return (
@@ -75,62 +93,83 @@ export function PublicLayout() {
 }
 
 function Header() {
+  /*
+   * TRANSPARENT AND UNFILLED, matching the reference.
+   *
+   * The previous header was a glass bar with a filled active pill and mono
+   * numerals — the last piece of the old portfolio's chrome. The reference has
+   * no bar at all: the links sit directly on the ground in two groups with the
+   * brand between them, and there is no surface behind them.
+   *
+   * It stays `sticky top-0` rather than being absolutely placed at 47% of the
+   * hero the way the reference's is. That placement only works on a page whose
+   * first screen is the hero; this navigation is shared by /about, /projects,
+   * /contact and the rest, and a mid-viewport nav on a case-study page would be
+   * unusable. Same visual language, one deliberate structural divergence.
+   */
   return (
-    <header className="glass sticky top-0 z-50">
+    <header className="sticky top-0 z-50">
       <div className="container-page flex h-[--header-height] items-center justify-between gap-6">
-        <NavLink
-          to="/"
-          className="text-primary font-display text-base font-bold tracking-[0.14em]"
-          aria-label="Moin Patel — home"
-        >
-          MP
-        </NavLink>
-
         {/* A11Y-01 — landmarks carry accessible names. */}
-        <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-1">
-            {NAV_ITEMS.map((item, index) => (
+        <nav aria-label="Primary" className="hidden flex-1 md:block">
+          <ul className="flex items-center gap-7">
+            {NAV_LEFT.map((item) => (
               <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'rounded-[--radius-sm] px-3 py-2 text-sm',
-                      'transition-colors duration-[--duration-hover] ease-[--ease-out]',
-                      isActive
-                        ? 'bg-accent-soft text-accent'
-                        : 'text-secondary hover:text-primary hover:bg-surface',
-                    )
-                  }
-                >
-                  {/*
-                   * Spec §25 numbers the navigation. Decorative and
-                   * aria-hidden: it repeats ordinal position the list already
-                   * conveys, and "zero three Projects" is noise in a screen
-                   * reader. The label and route are unchanged, so FR-NAV-02 and
-                   * the verified nav assertions still hold.
-                   */}
-                  <span
-                    aria-hidden="true"
-                    className="text-muted mr-1.5 font-mono text-[0.7em] tabular-nums"
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  {item.label}
-                </NavLink>
+                <NavItem to={item.to} label={item.label} />
               </li>
             ))}
           </ul>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <NavLink
+          to="/"
+          className="text-primary font-display shrink-0 text-base font-bold tracking-[0.14em]"
+          aria-label="Moin Patel — home"
+        >
+          MP
+        </NavLink>
+
+        <nav aria-label="Secondary" className="hidden flex-1 md:block">
+          <ul className="flex items-center justify-end gap-7">
+            {NAV_RIGHT.map((item) => (
+              <li key={item.to}>
+                <NavItem to={item.to} label={item.label} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="flex items-center gap-2 md:hidden">
           <HeaderResumeAction />
 
-          {/* FR-NAV-02 — below 768px only. The desktop nav above is untouched. */}
+          {/* FR-NAV-02 — below 768px only. */}
           <MobileNavSheet />
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * One navigation link, in the reference's treatment: uppercase, weight 500, no
+ * container. The active state is weight and colour rather than a filled pill —
+ * the reference marks nothing with a background.
+ */
+function NavItem({ to, label }: { to: string; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      end={to === '/'}
+      className={({ isActive }) =>
+        cn(
+          'font-display text-sm tracking-[0.06em] uppercase md:text-[0.95rem]',
+          'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+          isActive ? 'text-primary font-semibold' : 'text-secondary hover:text-primary font-medium',
+        )
+      }
+    >
+      {label}
+    </NavLink>
   )
 }
 

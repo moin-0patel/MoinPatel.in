@@ -81,7 +81,10 @@ const TRIGGER = 'button[aria-label="Open navigation menu"]'
 const PANEL_ID = 'mobile-nav-panel'
 const DIALOG = `#${PANEL_ID}`
 const OVERLAY = 'div[class*="backdrop-blur"]'
-const NAV_LABELS = ['About', 'Experience', 'Projects', 'Skills', 'Contact']
+// Follows the navigation's new split structure. Labels changed with the
+// reference replication (Projects -> Work, Skills -> Capabilities, Home added);
+// the assertion itself is unchanged — every nav link must appear in the sheet.
+const NAV_LABELS = ['Home', 'About', 'Work', 'Capabilities', 'Experience', 'Contact']
 
 /* --- harness --------------------------------------------------------------- */
 
@@ -1134,7 +1137,9 @@ try {
   if (await page.locator(DIALOG).count()) await page.keyboard.press('Escape')
   await trigger.click()
   await page.waitForSelector(DIALOG, { state: 'visible' })
-  await page.locator(`${DIALOG} a`, { hasText: 'Skills' }).first().click()
+  // Retargeted from 'Skills' to 'Capabilities' — same destination (/skills),
+  // renamed label. The assertion still checks that a link navigates AND closes.
+  await page.locator(`${DIALOG} a`, { hasText: 'Capabilities' }).first().click()
   await page.waitForTimeout(700)
   check(
     'clicking a link navigates and closes the sheet',

@@ -92,7 +92,18 @@
    */
   --color-accent: #084a54; /* accent AS TEXT on cream — clears 4.5:1 on base AND surface */
   --color-accent-ink: #000000; /* what sits ON the accent — 8.9:1 */
-  --color-accent-fill: #00c2d4; /* bright cyan FILL: wordmark, CTA pills, glyphs */
+  --color-accent-fill: #00c2d4; /* bright cyan FILL: CTA pills, glyphs — sits under BLACK ink */
+  /*
+   * A separate, darker cyan for the giant wordmark.
+   *
+   * The reference sets its wordmark in a highlighter yellow that is ~1.4:1 on
+   * the cream — decorative by intent, but axe reads it as large text and it
+   * fails 3:1. The brief requires both the bright wordmark AND 138/0 with no
+   * suppression, so the wordmark takes the darkest cyan that still clears the
+   * large-text threshold: #0b7d8c is 3.12:1. It stays unmistakably cyan and
+   * unmistakably the dominant graphic; it is simply legible as well.
+   */
+  --color-accent-word: #0b7d8c;
   --color-accent-strong: #00a8b8; /* pressed / stronger fill */
   --color-accent-deep: #008d9b; /* filled hover */
   /*

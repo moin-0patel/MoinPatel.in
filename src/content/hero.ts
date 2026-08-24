@@ -15,7 +15,10 @@
  */
 export const HERO_FALLBACK = {
   fullName: 'Moin Patel',
-  roleTitle: 'AI Developer / AI Automation Executive',
+  // Fallback only — shown while the profile query is in flight. Kept in step
+  // with profiles.role_title so a slow network cannot flash a stale title.
+  // The database remains the source of truth.
+  roleTitle: 'AI Developer & Automation Engineer',
   // Approved, verbatim (PRD 2, 8.3).
   positioningLine:
     'Building AI-powered systems that automate work, save time, and reduce business costs.',
