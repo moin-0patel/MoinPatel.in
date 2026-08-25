@@ -45,31 +45,67 @@ export function CapabilitiesSection() {
             eyebrow="Capabilities"
             meta="CORE_SYSTEMS"
             title="What I work on"
-            description="Four areas that show up in every system I build, usually all at once."
           />
 
           {/*
-           * The process-line motif from the section this replaces: it encodes
-           * the subject matter (pipelines), so it is structural rather than
-           * ornament. aria-hidden — it carries nothing the text does not.
+           * THE STATEMENT — the reference's "What You Get?" moment, measured
+           * live: after its 180px/700 heading it sets one large line at
+           * 67.97px/700, solid line-height, in an 896px column, and that pair
+           * IS the section — the capability names float around it as pills
+           * with no detail behind them.
+           *
+           * The sentence is the section's existing approved description,
+           * promoted from the small under-rule slot to the statement scale.
+           * It steps to --text-5xl rather than the measured 68px-at-1440
+           * because our display heading above is capped at --text-7xl (its
+           * 180px wraps our longer words); the reference's statement matches
+           * its SECTION-HEADING scale, and --text-5xl is exactly ours.
+           *
+           * Left-aligned, not centered: the reference centers this whole
+           * section while every other of its sections is left-set. Ours holds
+           * the site-wide left axis — one alignment grammar, already locked.
            */}
-          <div className="relative">
-            <div
-              aria-hidden="true"
-              className="via-accent/30 absolute top-0 right-0 left-0 hidden h-px bg-gradient-to-r from-transparent to-transparent xl:block"
-            />
+          <p className="font-display max-w-[56rem] text-[length:var(--text-3xl)] leading-[1.02] font-bold text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]">
+            Four areas that show up in every system I build, usually all at once.
+          </p>
 
-            <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {CAPABILITIES.map((capability, index) => (
-                <li key={capability.title} data-capability={index} className="flex min-w-0">
-                  <CapabilityCard
-                    capability={capability}
-                    hasProjects={capability.category !== null && populated.has(capability.category)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/*
+           * THE CARDS — the reference's SERVICE-card anatomy, from its
+           * "Solutions That Deliver" section, measured live:
+           *
+           *   card     358 wide, bg rgb(206,205,187), radius 8.06px — which is
+           *            exactly our --radius-lg and close to --color-surface
+           *   title    22.03px/500
+           *   body     16.99px/400
+           *   items    a dotted list, each led by a small accent RING
+           *   footer   a closing line, and a price-or-CTA slot
+           *
+           * TWO REFERENCE SECTIONS, ONE OF OURS — deliberate. The reference
+           * splits "What You Get?" (statement + title pills, no detail) from
+           * "Services" (detail columns with prices). Both draw on one idea:
+           * what working with him gets you. Our equivalent is one verified
+           * dataset — these four capabilities — so the statement above takes
+           * the first section's job and these cards take the second's.
+           * Floating title pills AND detail cards would say every capability
+           * twice in one screen.
+           *
+           * WHAT THE PRICE SLOT HOLDS: nothing. The reference prices two of
+           * its three cards ($3,000, $5,000) and its own third card puts
+           * "Book a Call" where the price goes. There is no verified pricing
+           * data, so no number is shown; the card's action slot carries the
+           * real evidence link instead — "See it built", straight into the
+           * filtered project list, which is a stronger claim than a figure.
+           */}
+          <ul className="mt-10 grid gap-4 md:grid-cols-2 lg:mt-14 xl:grid-cols-4">
+            {CAPABILITIES.map((capability, index) => (
+              <li key={capability.title} data-capability={index} className="flex min-w-0">
+                <CapabilityCard
+                  capability={capability}
+                  hasProjects={capability.category !== null && populated.has(capability.category)}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </Chapter>
@@ -84,22 +120,30 @@ function CapabilityCard({
   hasProjects: boolean
 }) {
   return (
-    <Card as="article" interactive className="flex h-full min-w-0 flex-col">
+    <Card as="article" interactive className="flex h-full min-w-0 flex-col px-5 py-6">
       <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
         {capability.eyebrow}
       </p>
 
       {/* A11Y-02 — h3 under the chapter's h2; levels never skip. */}
-      <h3 className="text-primary mt-2 text-lg font-semibold">{capability.title}</h3>
+      {/* 22.03px/500 measured on the reference's service-card title. */}
+      <h3 className="text-primary font-display mt-2 text-[length:var(--text-xl)] font-medium">
+        {capability.title}
+      </h3>
 
-      <p className="text-secondary mt-2 text-sm">{capability.description}</p>
+      <p className="text-secondary mt-3 text-sm leading-[1.5]">{capability.description}</p>
 
-      <ul className="mt-4 space-y-1.5">
+      <ul className="mt-5 space-y-2">
         {capability.items.map((item) => (
-          <li key={item} className="text-muted flex gap-2 text-sm">
-            <span aria-hidden="true" className="text-accent/60">
-              ·
-            </span>
+          <li key={item} className="text-secondary flex gap-2.5 text-sm">
+            {/*
+             * The reference's list marker: a small open RING, its accent on
+             * cream. Cyan for yellow, as everywhere. Decorative.
+             */}
+            <span
+              aria-hidden="true"
+              className="border-accent mt-1.5 size-2 shrink-0 rounded-full border"
+            />
             {item}
           </li>
         ))}
@@ -108,7 +152,7 @@ function CapabilityCard({
       {hasProjects && capability.category && (
         <Link
           to={`/projects?category=${capability.category}`}
-          className="text-accent hover:text-primary mt-4 inline-flex text-sm font-medium"
+          className="text-accent hover:text-primary mt-auto inline-flex pt-5 text-sm font-medium transition-colors duration-[--duration-hover] ease-[--ease-reference]"
         >
           See it built
           <span className="visually-hidden"> — {capability.title} projects</span>
