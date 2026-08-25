@@ -113,18 +113,6 @@
    * the old pairing failed at 4.34:1 on raised.
    */
   --color-accent-soft: oklch(from #00c2d4 l c h / 0.16);
-  /*
-   * ON ITS WAY OUT — two consumers left, both CTA bands, both Phase 3.
-   *
-   * This is a leftover from the indigo palette and it is a SECOND accent hue on
-   * a cream/cyan site, which the accent comment above calls a design regression
-   * in as many words. The project-card placeholder tile has already moved to
-   * `accent-soft`; `ContactCtaSection` and the case study's closing band still
-   * anchor their gradients here and are rebuilt when those sections are
-   * restyled. Delete the token with the second of them — not before, or two
-   * files lose their background mid-phase.
-   */
-  --color-indigo-deep: #1d00a5;
 
   /* Status — always paired with text, never colour alone (A11Y-09) */
   /*

@@ -38,16 +38,22 @@ export function ContactCtaSection() {
           // 32.1 — gradients appear in the CTA band and the process-line motif
           // only, single direction, low opacity.
           /*
-           * `bg-surface` UNDER the gradient, and that is a contrast fix.
+           * THE INDIGO IS GONE. `--color-indigo-deep` (#1d00a5) anchored this
+           * gradient and was the last survivor of the pre-inversion palette —
+           * a second accent hue on a site whose token file calls a second
+           * accent "a design regression" in as many words. The band now runs
+           * inside the one hue family it is allowed: a low-opacity cyan wash
+           * over the panel surface, falling to the page ground.
            *
-           * The gradient's first stop is `indigo-deep/40` — 40% alpha — so the
-           * 3D scene showed straight through the card and the actions
-           * composited against the lit Core rather than against the card. At
-           * 390px "Email me" measured 4.18:1 on #715eac, which is the sphere.
+           * `accent-soft` rather than `accent-fill`, because this is a large
+           * area behind black type. The bright cyan is a 1.5:1 foreground and
+           * is only ever a small FILL under dark ink; at band size it would
+           * take the heading to roughly that ratio.
            *
-           * A solid colour beneath means the translucent gradient now blends
-           * with a known surface instead of with whatever the scene is doing.
-           * The band looks the same; it just stops being a window.
+           * `bg-surface` UNDER the gradient, and that stays a contrast fix.
+           * The stops are translucent, so without a solid colour beneath, the
+           * band composites against whatever is behind it rather than against
+           * a known surface. It is the reason "Email me" once measured 4.18:1.
            *
            * Written as an arbitrary property, NOT `bg-surface`. `cn()` runs
            * tailwind-merge, which groups `bg-surface` and `bg-gradient-to-br`
@@ -55,8 +61,9 @@ export function ContactCtaSection() {
            * so `bg-surface` was silently dropped from the class list. The
            * utility was present in the CSS bundle and absent from the element,
            * which is why the first two attempts at this fix changed nothing.
+           * Do not "tidy" it back into `bg-surface`.
            */
-          '[background-color:var(--color-surface)] from-indigo-deep to-base bg-gradient-to-br via-[--color-surface]',
+          '[background-color:var(--color-surface)] from-accent-soft to-base bg-gradient-to-br via-[--color-surface]',
         )}
       >
         {/*
@@ -85,13 +92,13 @@ export function ContactCtaSection() {
         </p>
 
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button size="lg" asChild>
+          <Button size="lg" shape="pill" asChild>
             <Link to="/contact">Let&rsquo;s Talk</Link>
           </Button>
 
           {/* 12.10 "Empty": with no public email, only the primary CTA shows. */}
           {email && (
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" variant="secondary" shape="pill" asChild>
               <a href={`mailto:${email}`}>Email me</a>
             </Button>
           )}

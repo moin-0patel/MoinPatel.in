@@ -119,9 +119,10 @@ export default function ContactPage() {
 
       <div className="container-page py-12 md:py-20">
         <header className="mb-10">
-          {/* Design's display treatment; the accessible gradient pair, and
-              text-primary first so it survives without background-clip. */}
-          <h1 className="text-primary font-display bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.1] font-bold tracking-[-0.03em] text-transparent md:text-4xl lg:text-5xl">
+          {/* Flat ink. This carried the old palette's black -> cyan gradient
+              through the glyphs; the reference uses no gradient type at all.
+              See the matching note on the case-study title. */}
+          <h1 className="text-primary font-display text-3xl leading-[1.1] font-bold tracking-[-0.03em] md:text-4xl lg:text-5xl">
             Let&rsquo;s Talk
           </h1>
           <p className="text-secondary measure mt-4">

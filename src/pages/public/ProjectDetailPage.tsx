@@ -140,13 +140,21 @@ function CaseStudy({
           </div>
 
           {/*
-           * The design sets the case-study title as the page's largest type,
-           * uppercase, with the same lavender gradient as the home hero.
-           * Endpoints are the accessible pair (14.43:1 -> 10.89:1); the design's
-           * own gradient ran into #4f46e5 at 2.96:1. text-primary is set first
-           * so the title stays visible if background-clip:text is unsupported.
+           * The case-study title is the page's largest type, uppercase — and
+           * FLAT INK, not gradient text.
+           *
+           * It used to run black -> dark cyan through the glyphs, which was the
+           * old dark palette's display treatment carried over from the home
+           * hero. The reference sets every heading in one colour and uses no
+           * gradient type anywhere, so this was the last piece of a look the
+           * site no longer has.
+           *
+           * Dropping it also removes a measurement special case: `bg-clip-text`
+           * paints through the glyph shapes, so the computed `color` is
+           * `transparent` and verify-ui has to reconstruct the ratio from the
+           * gradient stops rather than simply reading it.
            */}
-          <h1 className="text-primary font-display bg-gradient-to-br from-primary to-accent bg-clip-text text-3xl leading-[1.05] font-bold tracking-[-0.03em] text-transparent uppercase md:text-4xl lg:text-5xl">
+          <h1 className="text-primary font-display text-3xl leading-[1.05] font-bold tracking-[-0.03em] uppercase md:text-4xl lg:text-5xl">
             {project.title}
           </h1>
 
@@ -333,12 +341,12 @@ function CaseStudy({
           <section className="border-subtle mt-16 border-t pt-10">
             {/* FR-CASE-09 — deep-links to /contact with the service type mapped
                 from the project's category, so the form arrives prefilled. */}
-            <div className="from-indigo-deep/30 to-base border-subtle rounded-[--radius-lg] border bg-gradient-to-br p-6 text-center">
+            <div className="from-accent-soft to-base border-subtle rounded-[--radius-lg] border bg-gradient-to-br p-6 text-center">
               <h2 className="text-primary text-xl">Have a process like this one?</h2>
               <p className="text-secondary measure mx-auto mt-2 text-sm">
                 If your team is doing something similar by hand, it can probably be replaced.
               </p>
-              <Button className="mt-5" asChild>
+              <Button className="mt-5" shape="pill" asChild>
                 <Link to={`/contact?service=${serviceTypeForCategory(project.category)}`}>
                   Discuss a similar system
                 </Link>

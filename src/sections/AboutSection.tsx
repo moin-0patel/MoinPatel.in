@@ -46,11 +46,26 @@ export function AboutSection() {
 
         {profile.location && <p className="text-muted mt-4 text-sm">{profile.location}</p>}
 
-        {/* Only offered when /about actually has more to show than this. */}
+        {/*
+         * Only offered when /about actually has more to show than this.
+         *
+         * HOVER DARKENS, and that was a real defect rather than a preference.
+         * It used to be `hover:text-accent-strong` (#00a8b8), which was correct
+         * on the old near-black ground: pointing at a link lit it up. On cream
+         * the same move runs the wrong way — measured, the link went from
+         * 6.37:1 at rest to 1.85:1 on hover, so it very nearly disappeared at
+         * exactly the moment someone was trying to click it.
+         *
+         * Nothing in the bright half of the accent ramp can be the answer:
+         * accent-deep is 2.55:1 and accent-fill 1.40:1 on this ground. Those
+         * are FILL tones that carry dark ink on top, never type. So the hover
+         * goes to `--color-primary` at 13.50:1 — on a light ground, emphasis is
+         * darker, not brighter.
+         */}
         {profile.longBioMd && (
           <Link
             to="/about"
-            className="text-accent hover:text-accent-strong mt-6 inline-flex items-center gap-1 font-medium"
+            className="text-accent hover:text-primary mt-6 inline-flex items-center gap-1 font-medium transition-colors duration-[--duration-hover] ease-[--ease-reference]"
           >
             Read more
             <ArrowRight className="size-4" aria-hidden="true" />
