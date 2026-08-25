@@ -27,8 +27,12 @@ export function Chip({
         'inline-flex h-7 items-center rounded-[--radius-sm] px-2.5',
         // Uppercase per the design's tag treatment (LLM, AGENTS, API…).
         'font-mono text-xs tracking-[--tracking-mono] whitespace-nowrap uppercase',
+        // 45%, for the same measured reason as the Badge: `accent/25` on cream
+        // composited to a 1.1:1 edge — a border that existed only in the
+        // stylesheet. Accent text on the soft fill measures 5.00:1 on the
+        // tightest card surface.
         emphasis === 'core'
-          ? 'bg-accent-soft text-accent border border-accent/25'
+          ? 'bg-accent-soft text-accent border-accent/45 border'
           : 'border-subtle text-secondary border bg-transparent',
         className,
       )}

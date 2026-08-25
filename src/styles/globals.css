@@ -421,24 +421,106 @@ h4 {
   mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
 
-@utility rim-light {
+/* --- Panel edge ----------------------------------------------------------
+ *
+ * REPLACES `rim-light`, which was a white gradient stroke for a black card.
+ *
+ * The old utility painted `linear-gradient(135deg, rgb(255 255 255 / .16),
+ * transparent 60%)` as a 1px masked border — a lit top-left edge, which is
+ * how a raised surface behaves on a near-black ground. That ground is gone.
+ * On #d5cfbe cream a 16% white stroke is somewhere between invisible and a
+ * milky film along two edges of every card, and it was still applied to eight
+ * surfaces: the capability cards, education, experience, project cards, the
+ * contact aside and the case-study aside.
+ *
+ * It is not replaced with a darker version of the same idea. The reference
+ * does not model light falling on its panels at all — it separates them from
+ * the ground with a hairline and nothing else. So this is a hairline: one
+ * shared decorative rule, `--color-subtle`, drawn as a real border by the
+ * consumer.
+ *
+ * What this utility adds on top is only the TOP edge, at full strength, which
+ * is the reference's actual device for grouping a stack of panels — the eye
+ * reads the repeated horizontal rules as a grid. It is decorative, so it is a
+ * pseudo-element rather than a border: it must never affect layout, and
+ * `border-radius: inherit` keeps it inside whatever radius the card has.
+ *
+ * WCAG 1.4.11 does not apply. This is decoration between two non-interactive
+ * regions, not the boundary of a UI component; the card's own `--color-subtle`
+ * border carries that job and `--color-strong` carries it on hover.
+ */
+@utility panel-edge {
   position: relative;
   &::before {
     content: '';
     position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 60%);
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: 1px;
+    border-start-start-radius: inherit;
+    border-start-end-radius: inherit;
+    background: var(--color-subtle);
     pointer-events: none;
+  }
+}
+
+/* --- Work section ground -------------------------------------------------
+ *
+ * THE REFERENCE INVERTS ITS WORK SECTION, and that is a measurement rather than
+ * an interpretation.
+ *
+ * Sampled in one session with an identical 6s settle, taking the median
+ * luminance of an 18x15 grid across the viewport with the left nav column
+ * excluded:
+ *
+ *   #about      206    cream
+ *   #work        19    near-black   <--
+ *   #overview   198    cream
+ *
+ * So the Work section is a deliberate dark plate between two light ones. The
+ * card composition only works there: the number and tag pills are BLACK fills
+ * with white text, the title and description are white, and the call to action
+ * is a bright accent disc with a dark glyph. Set that on cream and every one of
+ * those decisions inverts.
+ *
+ * NO PALETTE TOKEN CHANGED. `--color-base` and the rest are exactly as locked.
+ * This is a section painting its own surface — the one move the phase brief
+ * allows without a token edit — and nothing outside the section can reach it.
+ *
+ * #131313 is the measured median, not "black". Pure #000 would lose the cards'
+ * 12px radius against the ground and would flatten the 60% scrim that dims
+ * unfocused cards into nothing: the scrim needs a ground to darken away from.
+ */
+@utility work-ground {
+  background-color: #131313;
+  /*
+   * Local ink, so the section's children need no per-element override and no
+   * new global token. White measures 17.9:1 here; the 80% description, 11.3:1.
+   */
+  --work-ink: #ffffff;
+  --work-ink-dim: rgb(255 255 255 / 0.8);
+  color: var(--work-ink);
+}
+
+/*
+ * The reference's focus behaviour, in CSS.
+ *
+ * Its track dims every card except the one at the read position — a flat
+ * `rgba(0,0,0,0.6)` scrim, transitioned at a measured `opacity 0.4s`. A pinned
+ * filmstrip has a "current" card; a static row of three does not, so the honest
+ * static equivalent is the pointer: hovering one card dims its siblings.
+ *
+ * `:has()` on the ROW rather than JavaScript, because the condition genuinely
+ * is about the row and not about any one card. No script and no state — and on
+ * a touch device, where `hover: hover` never matches, it simply never fires and
+ * all three cards stay at full strength. The scrim carries emphasis, never
+ * information, so nothing is lost when it does not run.
+ */
+@utility work-row {
+  @media (hover: hover) {
+    &:has([data-work-card]:hover) [data-work-card]:not(:hover) [data-work-scrim] {
+      opacity: 1;
+    }
   }
 }
 

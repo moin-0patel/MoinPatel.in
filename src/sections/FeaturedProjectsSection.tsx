@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { ProjectPlate } from '@/components/common/ProjectPlate'
+import { WorkCard } from '@/components/common/WorkCard'
 import { Section, SectionHeading } from '@/components/common/Section'
 import { EmptyState, ErrorState } from '@/components/common/States'
 import { Button } from '@/components/ui/Button'
@@ -16,18 +16,37 @@ import { env } from '@/lib/env'
  * fallback of using the three most recent published projects when nothing is
  * explicitly featured.
  *
- * ONE PROJECT PER COMPOSITION, not a three-column grid. The grid made every
- * project the same size as every other and the same size as a thumbnail, which
- * is the wrong claim: these are products someone can open, not images. Each
- * plate gets the full measure — display-scale title, the verified claim band,
- * technology, and a live link where one exists.
+ * THE REFERENCE'S COMPOSITION, MEASURED
  *
- * The live URL is the primary action. Today every project is
- * `visibility_mode = 'case_study_only'` with a null `live_url`, so every plate
- * currently renders its documented-only state instead. That is the honest
- * state of the data, not a placeholder: the path is wired end to end, and the
- * moment a URL is added through the admin and the mode is widened, the link
- * appears with no code change.
+ * Captured from the live reference at 1440x900 with real wheel events — the
+ * site drives Lenis and ScrollTrigger, and `window.scrollTo` leaves it
+ * mid-timeline rendering a state no visitor ever sees, which is how an earlier
+ * pass came away with the wrong background colour.
+ *
+ *   section       #work, 1440 x 3600, padding 0
+ *   ground        near-black. Median luminance across the viewport: About 206,
+ *                 Work 19, Overview 198 — a dark plate between two cream ones
+ *   heading       65.95px / 500, white, left, with a body paragraph in a
+ *                 narrow column top-right beside it
+ *   cards         389 x 550, radius 11.95px, 30px apart, in a 1118px window
+ *   mechanism     pinned for 2700px while a nine-card track slides from
+ *                 translateX(-539px) to translateX(-3235px)
+ *
+ * WHAT DIFFERS HERE, AND WHY
+ *
+ * The pin. It exists to spend 2623px of horizontal travel; three cards have
+ * none to spend, so the row is static at the same proportions. See the row's
+ * own comment.
+ *
+ * Nine cards become three, because three is how many published projects exist.
+ * The brief is explicit that the count is not the thing being replicated.
+ *
+ * The live URL is still the primary action. Today every project is
+ * `visibility_mode = 'case_study_only'` with a null `live_url`, so every card
+ * points at its case study instead. That is the honest state of the data, not
+ * a placeholder: `resolveCardLinks` is wired end to end, and the moment a URL
+ * is added through the admin and the mode widened, the card retargets with no
+ * code change.
  *
  * 12.6 "Empty": with zero published projects the section hides ENTIRELY rather
  * than rendering an apologetic placeholder. That is the current state — all
@@ -40,12 +59,17 @@ export function FeaturedProjectsSection() {
 
   if (isPending) {
     return (
-      <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
+      <Section
+        id="featured-projects"
+        labelledBy="featured-projects-heading"
+        chapter="projects"
+        className="work-ground"
+      >
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
-          meta="MODULES_LOADED"
           title="Recent systems"
+          tone="inverse"
         />
         <LoadingRegion
           label="Loading projects"
@@ -61,12 +85,17 @@ export function FeaturedProjectsSection() {
 
   if (isError) {
     return (
-      <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
+      <Section
+        id="featured-projects"
+        labelledBy="featured-projects-heading"
+        chapter="projects"
+        className="work-ground"
+      >
         <SectionHeading
           id="featured-projects-heading"
           eyebrow="Selected work"
-          meta="MODULES_LOADED"
           title="Recent systems"
+          tone="inverse"
         />
         <ErrorState error={error} onRetry={() => void refetch()} />
       </Section>
@@ -86,37 +115,80 @@ export function FeaturedProjectsSection() {
   }
 
   return (
-    <Section id="featured-projects" labelledBy="featured-projects-heading" chapter="projects">
-      <div className="flex flex-wrap items-end justify-between gap-6">
+    <Section
+      id="featured-projects"
+      labelledBy="featured-projects-heading"
+      chapter="projects"
+      className="work-ground"
+    >
+      {/*
+       * HEADING LEFT, INTRO RIGHT — the reference's own arrangement. Measured at
+       * 1440 its h2 sits at x=302 with a body paragraph in a narrow column at
+       * x=1053, top-aligned with the heading rather than stacked under it.
+       *
+       * `items-start` and not `items-end`: the reference top-aligns the two,
+       * which is what lets the paragraph read as an aside to the heading instead
+       * of as a caption beneath it.
+       */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
         <SectionHeading
           id="featured-projects-heading"
-          eyebrow="Selected systems"
-          meta="SYSTEMS_INDEX"
+          eyebrow="Selected work"
           title="Systems I've built"
-          description="Each one solved a real operational problem. The problem, the mechanism, and what changed."
+          tone="inverse"
           className="mb-0"
         />
-        <Button variant="ghost" asChild className="mb-1">
+
+        {/*
+         * The reference's intro paragraph. Kept out of SectionHeading's
+         * `description` slot on purpose — that slot renders BELOW the rule, and
+         * here it belongs beside it.
+         */}
+        <p className="max-w-[26rem] shrink-0 text-[length:var(--text-base)] leading-[1.5] text-[color:var(--work-ink-dim)] lg:pt-2">
+          Each one solved a real operational problem. The problem, the mechanism, and what actually
+          changed.
+        </p>
+      </div>
+
+      {/*
+       * THREE CARDS, NOT A PINNED FILMSTRIP — and that is a measurement, not a
+       * shortcut.
+       *
+       * The reference pins this section for 2700px and slides a nine-card track
+       * from translateX(-539px) to translateX(-3235px) as you scroll. Both
+       * numbers were read off the live site. That mechanism exists because it
+       * has nine cards in a 1118px window: 9 x 389 + 8 x 30 = 3741px of track,
+       * so there is 2623px of travel to spend the pin on.
+       *
+       * Three cards at the same 389px are 1207px in a 1200px measure. The
+       * travel is ~0px. Pinning 2700px of scroll to move nothing is a defect,
+       * not a replication — so the row is static and the cards take the width
+       * the reference's proportions give them: (1200 - 2 x 30) / 3 = 380px, at
+       * the measured 389/550 ratio. Within 9px of the reference's own card.
+       *
+       * `work-row` carries the reference's focus behaviour: hovering one card
+       * dims the others through the same 60% scrim, at the measured 0.4s.
+       *
+       * An <ol>, because the 01/02/03 numerals ARE the list position. That is
+       * what lets each numeral be `aria-hidden` on the card without losing the
+       * ordering for a screen reader.
+       */}
+      <ol className="work-row mt-10 grid gap-[30px] sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
+        {projects.map((project, index) => (
+          <li key={project.id} className="min-w-0">
+            <WorkCard project={project} index={index} />
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-10 flex lg:mt-14">
+        <Button variant="secondary" shape="pill" asChild className="border-white/30 text-white">
           <Link to="/projects">
             All projects
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>
       </div>
-
-      {/*
-       * An ordered list, because the numbering is real: these are presented in
-       * a deliberate order and the numerals on each plate are decorative
-       * duplicates of it. `ol` gives that to a screen reader for free, which is
-       * why the visible numeral can be aria-hidden.
-       */}
-      <ol className="mt-[--section-gap] flex flex-col gap-[--section-gap]">
-        {projects.map((project, index) => (
-          <li key={project.id} className="min-w-0">
-            <ProjectPlate project={project} index={index} />
-          </li>
-        ))}
-      </ol>
     </Section>
   )
 }

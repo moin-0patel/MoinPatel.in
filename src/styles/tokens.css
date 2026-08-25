@@ -113,7 +113,18 @@
    * the old pairing failed at 4.34:1 on raised.
    */
   --color-accent-soft: oklch(from #00c2d4 l c h / 0.16);
-  --color-indigo-deep: #1d00a5; /* CTA band gradient anchor only — not an accent shade */
+  /*
+   * ON ITS WAY OUT — two consumers left, both CTA bands, both Phase 3.
+   *
+   * This is a leftover from the indigo palette and it is a SECOND accent hue on
+   * a cream/cyan site, which the accent comment above calls a design regression
+   * in as many words. The project-card placeholder tile has already moved to
+   * `accent-soft`; `ContactCtaSection` and the case study's closing band still
+   * anchor their gradients here and are rebuilt when those sections are
+   * restyled. Delete the token with the second of them — not before, or two
+   * files lose their background mid-phase.
+   */
+  --color-indigo-deep: #1d00a5;
 
   /* Status — always paired with text, never colour alone (A11Y-09) */
   /*
@@ -123,11 +134,40 @@
    * text. 4.5:1 there needs L >= 0.423; #5cc79a is L ~0.446.
    */
   --color-success: #0f4630; /* on cream. Must clear 4.5:1 against its OWN soft background (#bbc1ad), not just the page — the badge composites on success-soft. */
-  --color-warning: #5c3d08; /* must clear 4.5:1 on warning-soft (#c8bea6), not just on the page */
-  --color-danger: #a11a1f; /* darkened for the cream ground */
+  /*
+   * Both darkened again, and both were real failures rather than tightenings.
+   *
+   * The palette inversion recomputed these against the PAGE. A badge does not
+   * sit on the page: it sits on its own soft fill, which sits on a card, which
+   * is `--color-surface` or `--color-surface-raised`. Measured on the tightest
+   * of those three grounds, composited properly:
+   *
+   *   danger    3.39:1   FAIL   ->  #741316   4.81:1
+   *   warning   4.33:1   FAIL   ->  #523607   4.81:1
+   *
+   * `warning` is public — `StatusBadge` maps `in_progress` to it (FR-PROJ-08),
+   * so it renders on every unfinished project card. `danger` is admin-only
+   * today as a Button fill, where the change is strictly an improvement: white
+   * on the old red was 5.9:1 and is 11.4:1 on this one.
+   *
+   * Solved numerically against all three grounds, not chosen: these are the
+   * LIGHTEST values in the same hue that clear 4.8:1 everywhere they can land.
+   */
+  --color-warning: #523607;
+  --color-danger: #741316;
+  /*
+   * Each soft fill is its own status colour at 14%, and the hex MUST track the
+   * token above it. They are written as literals because `@theme` resolves
+   * these at build time and a `var()` origin in relative-colour syntax is not
+   * something to discover is unsupported in a shipped stylesheet.
+   *
+   * The pairing is the whole point: the contrast figures recorded above are
+   * text-on-its-own-fill. If one of these drifts from the value it mirrors, the
+   * badge stops matching the number that justified it.
+   */
   --color-success-soft: oklch(from #0f4630 l c h / 0.14);
-  --color-warning-soft: oklch(from #5c3d08 l c h / 0.14);
-  --color-danger-soft: oklch(from #a11a1f l c h / 0.14);
+  --color-warning-soft: oklch(from #523607 l c h / 0.14);
+  --color-danger-soft: oklch(from #741316 l c h / 0.14);
 
   /* Shifted into the accent hue family with the palette. 6.45:1 on the
      tightest surface, well clear of 1.4.11's 3:1 for a focus indicator. */
@@ -176,13 +216,33 @@
   --leading-body: 1.6;
   --leading-ui: 1.5;
 
-  --tracking-display: -0.02em;
+  /*
+   * NORMAL, not -0.02em, and this is a measurement rather than a preference.
+   *
+   * Phase 0 audit, "Type scale": "Tracking is `normal` throughout — the
+   * reference does not use negative tracking on display type, which our tokens
+   * currently do."
+   *
+   * It matters more than it sounds. This value reaches every h1-h6 on the site
+   * through typography.css, so a tightening chosen for a dark editorial page was
+   * quietly compressing every heading in a replica of a page that does not
+   * tighten at all. At the 68px section-heading size, -0.02em pulls 1.4px out
+   * of every letter gap.
+   *
+   * The hero is unaffected. It is locked, and it sets its own
+   * `tracking-[-0.045em]` inline on the wordmark rather than through this token.
+   */
+  --tracking-display: normal;
   --tracking-mono: 0.02em;
 
   /*
-   * Optical tracking. One value cannot serve 1.5rem and 8rem: letterforms need
-   * progressively less space as they grow, and display type set at body
-   * tracking reads loose and amateur. These are for the 6xl-8xl steps.
+   * Optical tracking, kept — but no longer anything's default. See
+   * --tracking-display above.
+   *
+   * One value cannot serve 1.5rem and 8rem: letterforms need progressively less
+   * space as they grow. These stay for the 6xl-8xl steps, where the reference's
+   * own oversized wordmark does visibly tighten. Reaching for one on a section
+   * heading is exactly what the audit caught.
    */
   --tracking-tight: -0.03em;
   --tracking-tighter: -0.045em;
@@ -208,15 +268,51 @@
   /* DESIGN.md rounded scale: sm 0.25rem, md 0.75rem, lg 1rem, xl 1.5rem. */
   --radius-sm: 4px; /* chips, inputs */
   --radius-md: 12px; /* buttons */
-  --radius-lg: 16px; /* cards */
+  /*
+   * 8px, halved from 16px. The reference's panels — its stat cards, its trait
+   * list, the plates set over the figure — are near-square. 16px is a Material 3
+   * container radius, and at card size it is the single detail that most makes
+   * a page read as a product UI rather than as an editorial one.
+   */
+  --radius-lg: 8px; /* cards */
   --radius-xl: 24px; /* modals, hero photo frame */
 
-  /* --- 32.3 Elevation — three levels only; no hard drop shadows ---------- */
-  --shadow-raised: 0 8px 24px -8px rgb(0 0 0 / 0.5);
-  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 0.65);
+  /* --- 32.3 Elevation ----------------------------------------------------
+   *
+   * REBUILT FOR A CREAM GROUND.
+   *
+   * Both values were tuned against #08090c, where a 50%-black shadow reads as
+   * depth. On #d5cfbe the same shadow is a grey smear — and the reference has
+   * no drop shadow anywhere in its section content at all.
+   *
+   * The opacities drop by roughly an order of magnitude because a shadow is a
+   * darkening, and a light ground has far less headroom to darken into before
+   * it stops looking like shade and starts looking like dirt.
+   *
+   * `--shadow-raised` survives only for genuinely floating UI — the lightbox,
+   * the admin's popovers. CARDS NO LONGER USE IT: hovering a card moves its
+   * border, not its elevation. See the Card primitive.
+   */
+  --shadow-raised: 0 6px 18px -10px rgb(0 0 0 / 0.18);
+  --shadow-overlay: 0 24px 64px -20px rgb(0 0 0 / 0.28);
 
   /* --- 32.5 Motion ------------------------------------------------------- */
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /*
+   * THE REFERENCE'S OWN CURVE, extracted rather than approximated.
+   *
+   * Phase 0 motion inventory records exactly one reveal pair across the whole
+   * site: `transform, opacity` at 0.4s/0.2s on
+   * cubic-bezier(0.25, 0.46, 0.45, 0.94). REQ-MOT-1 asks for easing "matched
+   * exactly where extractable", and it was extractable, so this is that value
+   * verbatim — not the nearest of the four curves we already had.
+   *
+   * It is a gentler ease-out than --ease-out and noticeably gentler than
+   * --ease-entrance. Substituting either changes the character of every reveal
+   * on the page, which is the difference REQ-MOT-1 is about.
+   */
+  --ease-reference: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   /*
    * Three more, because one curve cannot express three intents. Entrance
@@ -238,7 +334,25 @@
 
 /* Values that are not Tailwind utility namespaces but are still tokens. */
 :root {
-  --duration-hover: 140ms;
+  /*
+   * 220ms, up from 140ms.
+   *
+   * Phase 0 measured the reference's microinteractions in a tight band —
+   * colour at 0.2s and 0.25s, background-color and opacity at 0.3s, the
+   * variable-weight shift at 0.4s. 140ms sits below all of them; hovers landed
+   * snappier than the reference's and read as a different, more clipped
+   * interaction language. 220ms is the middle of the measured band and inside
+   * REQ-MOT-1's +/-50ms tolerance for every value in it.
+   */
+  --duration-hover: 220ms;
+  /*
+   * The reveal pair, both halves of it. Phase 0: `transform, opacity` at
+   * 0.4s / 0.2s — the transform runs the full 400ms while opacity resolves in
+   * half that, which is why the reference's reveals read as arriving rather
+   * than as fading in. One duration cannot express that.
+   */
+  --duration-reveal: 400ms;
+  --duration-reveal-fade: 200ms;
   --duration-entry: 200ms;
   --duration-page: 150ms;
   --duration-modal-in: 200ms;

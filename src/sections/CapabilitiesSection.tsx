@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom'
 
 import { Chapter, ChapterNumber } from '@/components/common/Chapter'
 import { SectionHeading } from '@/components/common/Section'
+import { Card } from '@/components/ui/Card'
 import { CAPABILITIES, type Capability } from '@/content/capabilities'
 import { useProjects } from '@/hooks/useProjects'
-import { cn } from '@/lib/cn'
 
 /**
  * Chapter 03 — Capabilities, spec §9.
@@ -84,12 +84,7 @@ function CapabilityCard({
   hasProjects: boolean
 }) {
   return (
-    <article
-      className={cn(
-        'rim-light border-subtle bg-surface hover:border-accent/40 flex h-full min-w-0 flex-col rounded-[--radius-lg] border p-5',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
-      )}
-    >
+    <Card as="article" interactive className="flex h-full min-w-0 flex-col">
       <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
         {capability.eyebrow}
       </p>
@@ -119,6 +114,6 @@ function CapabilityCard({
           <span className="visually-hidden"> — {capability.title} projects</span>
         </Link>
       )}
-    </article>
+    </Card>
   )
 }

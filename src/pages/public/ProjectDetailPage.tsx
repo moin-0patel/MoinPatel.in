@@ -10,6 +10,7 @@ import { SEO } from '@/components/common/SEO'
 import { StatusBadge } from '@/components/ui/Badge'
 import { GithubIcon } from '@/components/ui/BrandIcon'
 import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 import { Chip } from '@/components/ui/Chip'
 import { LoadingRegion, Skeleton, SkeletonText } from '@/components/ui/Skeleton'
 import { useProject, useNextProject } from '@/hooks/useProjects'
@@ -401,15 +402,12 @@ function ClaimBand({ slug }: { slug: string }) {
       </h2>
       <ul className="grid gap-3 sm:grid-cols-3">
         {claims.map((claim) => (
-          <li
-            key={claim.label}
-            className="rim-light border-subtle bg-surface min-w-0 rounded-[--radius-lg] border p-5"
-          >
+          <Card as="li" key={claim.label} className="min-w-0">
             <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
               {claim.label}
             </p>
             <p className="text-secondary mt-2 text-sm">{claim.detail}</p>
-          </li>
+          </Card>
         ))}
       </ul>
     </section>

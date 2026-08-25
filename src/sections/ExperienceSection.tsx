@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom'
 import { Section, SectionHeading } from '@/components/common/Section'
 import { ErrorState } from '@/components/common/States'
 import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Chip, ChipRow } from '@/components/ui/Chip'
 import { LoadingRegion, Skeleton } from '@/components/ui/Skeleton'
 import { useExperience } from '@/hooks/useSiteContent'
-import { cn } from '@/lib/cn'
 import { formatDateRange, formatDateRangeLabel, toDateTimeAttr } from '@/lib/dates'
 import type { ExperienceRecord } from '@/types/domain'
 
@@ -108,14 +108,22 @@ export function ExperienceSection({
   )
 }
 
+/*
+ * A card on a phone and a bare timeline row from `md` up — which is why this is
+ * the one Card on the site with `edge={false}`.
+ *
+ * The top hairline is a grouping device for a GRID of panels. This is a
+ * chronology: the rule that groups it is the timeline's own spine, and a second
+ * horizontal rule per entry fights it.
+ *
+ * Dropping it also repairs a latent bug. `rim-light` drew its stroke as a
+ * masked ::before, so `md:border-0` never removed it — from `md` up the row was
+ * borderless and transparent with a white gradient hairline still painted
+ * around where its edges used to be.
+ */
 function TimelineItem({ record }: { record: ExperienceRecord }) {
   return (
-    <article
-      className={cn(
-        'rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] rounded-[--radius-lg] border p-5',
-        'md:border-0 md:bg-transparent md:p-0',
-      )}
-    >
+    <Card as="article" interactive edge={false} className="md:border-0 md:bg-transparent md:p-0">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-primary text-lg">
           {record.companyUrl ? (
@@ -185,7 +193,7 @@ function TimelineItem({ record }: { record: ExperienceRecord }) {
           ))}
         </ChipRow>
       )}
-    </article>
+    </Card>
   )
 }
 

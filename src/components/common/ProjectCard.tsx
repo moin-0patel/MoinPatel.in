@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { StatusBadge } from '@/components/ui/Badge'
 import { GithubIcon } from '@/components/ui/BrandIcon'
 import { Chip, ChipRow } from '@/components/ui/Chip'
+import { Card } from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { CATEGORY_LABEL } from '@/lib/labels'
 import { imageSizes, publicStorageUrl } from '@/lib/storage'
@@ -52,7 +53,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
           // title; never a broken-image icon."
           <div
             aria-hidden="true"
-            className="from-surface-raised to-indigo-deep/40 grid size-full place-items-center bg-gradient-to-br"
+            className="from-surface-raised to-accent-soft grid size-full place-items-center bg-gradient-to-br"
           >
             <span className="text-muted px-4 text-center font-mono text-xs">{project.title}</span>
           </div>
@@ -88,11 +89,24 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
     </>
   )
 
-  const cardClass = cn(
-    'group rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] relative flex flex-col overflow-hidden',
-    'rounded-[--radius-lg] border',
-    'transition-colors duration-[--duration-hover] ease-[--ease-out]',
-    'hover:border-strong hover:shadow-[--shadow-raised]',
+  /*
+   * The surface, the border and the hover now come from `Card`. What stays here
+   * is what is specific to a project card:
+   *
+   *   `padding="none"` and `edge={false}` — this card opens with an
+   *   edge-to-edge cover image, so it has its own inner padding below it and a
+   *   top hairline would be drawn across the picture.
+   *
+   *   `hover:shadow-[--shadow-raised]` is GONE. It was
+   *   `0 8px 24px -8px rgb(0 0 0 / .5)`, a shadow drawn for a #08090c ground;
+   *   on cream it read as a grey bruise under the card, and the reference has
+   *   no drop shadow on any panel. The hover is the border move Card gives
+   *   every interactive card, plus the existing 1.02 cover scale.
+   *
+   *   The duplicated `transition-colors` is gone too — it was listed twice.
+   */
+  const cardExtras = cn(
+    'group relative flex flex-col overflow-hidden',
     // A11Y-04 — the ring is on the card itself, not just the inner text.
     'focus-within:outline-focus-ring focus-within:outline-2 focus-within:outline-offset-2',
   )
@@ -103,11 +117,15 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
    * is wrong — render the card inert rather than linking nowhere.
    */
   if (target.kind === 'none') {
-    return <article className={cardClass}>{cardBody}</article>
+    return (
+      <Card as="article" interactive edge={false} padding="none" className={cardExtras}>
+        {cardBody}
+      </Card>
+    )
   }
 
   return (
-    <article className={cardClass}>
+    <Card as="article" interactive edge={false} padding="none" className={cardExtras}>
       {target.kind === 'case-study' ? (
         // The stretched-link pattern: one real <a> covering the card, so the
         // accessible name is the title alone rather than every word inside it.
@@ -143,7 +161,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
           )}
         </div>
       )}
-    </article>
+    </Card>
   )
 }
 

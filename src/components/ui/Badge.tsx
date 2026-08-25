@@ -15,12 +15,28 @@ import type { ProjectStatus, PublicationState } from '@/types/domain'
 
 export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'accent' | 'outline'
 
+/*
+ * BORDERS AT 45%, NOT 30% — measured, not nudged.
+ *
+ * On the old near-black ground a 30% tint of a bright status colour was a clear
+ * edge. On cream it is not: `accent/30` composites to rgb(144,197,190), which
+ * is 1.14:1 against the card it sits on. The badge had a border in the CSS and
+ * no visible edge on the screen, so every tone read as a floating tint.
+ *
+ * 45% of a status colour that is now genuinely dark (see the token file — both
+ * danger and warning were re-solved) lands the edge where it can be seen
+ * without turning the badge into an outlined chip.
+ *
+ * The text ratios, composited on each tone's own fill over the tightest card
+ * surface: neutral 7.53, success 4.68, warning 4.81, danger 4.81, accent 5.00,
+ * outline 5.10. All clear 4.5.
+ */
 const TONE: Record<BadgeTone, string> = {
   neutral: 'bg-surface-raised text-secondary border-subtle',
-  success: 'bg-success-soft text-success border-success/30',
-  warning: 'bg-warning-soft text-warning border-warning/30',
-  danger: 'bg-danger-soft text-danger border-danger/30',
-  accent: 'bg-accent-soft text-accent border-accent/30',
+  success: 'bg-success-soft text-success border-success/45',
+  warning: 'bg-warning-soft text-warning border-warning/45',
+  danger: 'bg-danger-soft text-danger border-danger/45',
+  accent: 'bg-accent-soft text-accent border-accent/45',
   outline: 'bg-transparent text-muted border-strong',
 }
 

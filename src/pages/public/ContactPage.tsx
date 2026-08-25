@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { SEO } from '@/components/common/SEO'
 import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 import { FormField, HoneypotField, Input, Select, Textarea } from '@/components/ui/Field'
 import { useContactForm } from '@/hooks/useContactForm'
 import { describedBy } from '@/lib/fieldA11y'
@@ -340,10 +341,7 @@ function DirectChannels({
   if (!email && !phone && !location) return null
 
   return (
-    <aside
-      aria-labelledby="direct-channels-heading"
-      className="rim-light border-subtle bg-surface rounded-[--radius-lg] border p-5"
-    >
+    <Card as="aside" aria-labelledby="direct-channels-heading">
       {/* Design's live-status chip. Decorative, so it is hidden from AT. */}
       <p
         aria-hidden="true"
@@ -388,6 +386,6 @@ function DirectChannels({
           </li>
         )}
       </ul>
-    </aside>
+    </Card>
   )
 }

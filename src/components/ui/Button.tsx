@@ -16,6 +16,18 @@ import { cn } from '@/lib/cn'
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
+/**
+ * `pill` is fully rounded, which is what the reference does with every CTA it
+ * has — both hero buttons, and the ones in its section content.
+ *
+ * It is a PROP with `default` unchanged rather than a new value for
+ * `--radius-md`, and that is deliberate: this component is shared with the
+ * admin, where a form's Save and Cancel buttons sit in a row of square-ish
+ * inputs and would look wrong as pills. Changing the token would have restyled
+ * every admin screen, which is outside this work.
+ */
+export type ButtonShape = 'default' | 'pill'
+
 const VARIANT: Record<ButtonVariant, string> = {
   // Rests on accent-STRONG, not accent. --color-accent is the light TEXT tone
   // (#c3c0ff); the filled surface is --color-accent-strong (#4f46e5), which
@@ -50,15 +62,22 @@ const SIZE: Record<ButtonSize, string> = {
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant
   size?: ButtonSize
+  shape?: ButtonShape
   loading?: boolean
   asChild?: boolean
   children?: ReactNode
+}
+
+const SHAPE: Record<ButtonShape, string> = {
+  default: 'rounded-[--radius-md]',
+  pill: 'rounded-full',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     variant = 'primary',
     size = 'md',
+    shape = 'default',
     loading = false,
     asChild = false,
     disabled,
@@ -71,9 +90,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const isDisabled = disabled === true || loading
 
   const surface = cn(
-    'relative inline-flex items-center justify-center gap-2 rounded-[--radius-md]',
+    'relative inline-flex items-center justify-center gap-2',
     'font-medium whitespace-nowrap select-none',
-    'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+    /*
+     * The reference's own hover, from the Phase 0 motion inventory: alongside
+     * colour at 0.2-0.3s it runs `font-variation-settings` at 0.4s — the label
+     * gains weight under the pointer rather than only changing colour.
+     *
+     * Geist ships here as `geist-sans-variable.woff2`, so this is the real
+     * effect and not a synthesised bold; `font-synthesis-weight` is already off
+     * in typography.css, which is what would otherwise fake it and jump.
+     *
+     * Listed explicitly instead of `transition-colors` so the weight shift is
+     * actually transitioned — `transition-colors` does not cover it, and it
+     * would have snapped.
+     */
+    'transition-[color,background-color,border-color,font-variation-settings]',
+    'duration-[--duration-hover] ease-[--ease-out]',
+    SHAPE[shape],
     // 32.4: disabled is 45% opacity and never the only signal — the
     // aria-disabled below carries it for non-visual users.
     'disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45',

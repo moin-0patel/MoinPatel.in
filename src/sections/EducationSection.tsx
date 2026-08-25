@@ -1,5 +1,6 @@
 import { Section, SectionHeading } from '@/components/common/Section'
 import { Badge } from '@/components/ui/Badge'
+import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useEducation } from '@/hooks/useSiteContent'
 import { formatEducationStatus, toDateTimeAttr } from '@/lib/dates'
@@ -51,7 +52,7 @@ export function EducationSection() {
       <ul className="grid gap-4 lg:grid-cols-2">
         {education.map((record) => (
           <li key={record.id}>
-            <article className="rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] h-full rounded-[--radius-lg] border p-5">
+            <Card as="article" interactive className="h-full">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="text-primary text-lg">{record.qualification}</h3>
                 {/* FR-EDU-03 / AC-EDU-2 — "Expected 2027" is rendered as
@@ -77,7 +78,7 @@ export function EducationSection() {
               {record.description && (
                 <p className="text-secondary mt-3 text-sm">{record.description}</p>
               )}
-            </article>
+            </Card>
           </li>
         ))}
       </ul>

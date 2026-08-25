@@ -88,6 +88,7 @@ export function SectionHeading({
   description,
   meta,
   scale = 'default',
+  tone = 'default',
   className,
 }: {
   id: string
@@ -110,8 +111,23 @@ export function SectionHeading({
    * to change one font size is how two components drift apart.
    */
   scale?: 'default' | 'display'
+  /**
+   * Which ground this heading sits on.
+   *
+   * Added for the Work section, which the reference inverts to a near-black
+   * plate between two cream ones (measured median luminance 206 / 19 / 198
+   * across About, Work and Overview). Its heading is white at the same
+   * 65.95px/500 as every other, so the only thing that differs is ink.
+   *
+   * A prop rather than a second component, and additive rather than a change:
+   * `default` behaves exactly as before, so no existing caller moves. Forking
+   * SectionHeading to swap three colours is how two headings drift apart.
+   */
+  tone?: 'default' | 'inverse'
   className?: string
 }) {
+  const inverse = tone === 'inverse'
+
   return (
     // flex-1/min-w-0: several sections place this in a flex row beside a
     // link, where a content-sized block would cut the divider short.
@@ -123,14 +139,27 @@ export function SectionHeading({
       {eyebrow && (
         <p
           aria-hidden="true"
-          className="text-accent mb-3 flex items-center gap-2.5 font-mono text-xs tracking-[--tracking-mono] uppercase"
+          className={cn(
+            'mb-3 flex items-center gap-2.5 font-mono text-xs tracking-[--tracking-mono] uppercase',
+            inverse ? 'text-[color:var(--color-accent-fill)]' : 'text-accent',
+          )}
         >
-          <span className="bg-accent inline-block h-px w-6 shrink-0" />
+          <span
+            className={cn(
+              'inline-block h-px w-6 shrink-0',
+              inverse ? 'bg-[color:var(--color-accent-fill)]' : 'bg-accent',
+            )}
+          />
           {eyebrow}
         </p>
       )}
 
-      <div className="border-subtle flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b pb-4">
+      <div
+        className={cn(
+          'flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b pb-4',
+          inverse ? 'border-white/20' : 'border-subtle',
+        )}
+      >
         {/* A11Y-02 — every section heading is an h2; levels never skip. */}
         {/*
          * Sized from the reference, not from taste. Measured at 1440 its
@@ -146,7 +175,8 @@ export function SectionHeading({
         <h2
           id={id}
           className={cn(
-            'text-primary font-display leading-[1.05] font-medium text-balance',
+            'font-display leading-[1.05] font-medium text-balance',
+            inverse ? 'text-[color:var(--work-ink,#fff)]' : 'text-primary',
             scale === 'display'
               ? // Steps to --text-7xl (up to 120px). The reference runs 180px
                 // here, but it sets two short words; "Where that shows up" is
@@ -171,14 +201,21 @@ export function SectionHeading({
              * step up clears it while staying visually subordinate: still mono,
              * still 12px, still quieter than the title beside it.
              */
-            className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase"
+            className={cn(
+              'font-mono text-xs tracking-[--tracking-mono] uppercase',
+              inverse ? 'text-white/70' : 'text-secondary',
+            )}
           >
             {meta}
           </p>
         )}
       </div>
 
-      {description && <p className="text-secondary measure mt-4">{description}</p>}
+      {description && (
+        <p className={cn('measure mt-4', inverse ? 'text-white/80' : 'text-secondary')}>
+          {description}
+        </p>
+      )}
     </div>
   )
 }
