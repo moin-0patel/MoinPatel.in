@@ -22,19 +22,24 @@ import { HERO_FALLBACK } from '@/content/hero'
  * reference has no 3D here at all. Every file under `src/components/three/`
  * remains untouched; only its presence in this section changed.
  *
- * THE PORTRAIT IS NOT A CUT-OUT, AND THAT IS HANDLED HERE
+ * THE PORTRAIT IS A REAL CUT-OUT NOW
  *
- * The supplied JPEG has a near-white background — sampled at rgb(254,254,254)
- * in its corners — not an alpha channel, which JPEG cannot carry. Dropped onto
- * cream it would read as a white rectangle with a person inside it.
+ * It used to be the supplied JPEG under `mix-blend-mode: multiply`. That did
+ * clear the background — measured 1-3/255 between the pixels inside and
+ * outside the image box — but multiply cannot tell the background from the
+ * man: it multiplied the subject by the cream ground too, and the photograph
+ * rendered as a darkened duotone rather than as itself.
  *
- * `mix-blend-mode: multiply` solves that with no image tooling: multiplying
- * white by the cream ground returns the cream exactly, so the background
- * disappears, while the subject — dark hair, black shirt, mid-tone skin —
- * survives because it is far darker than white. The trade is that the subject
- * darkens by roughly the ground's own luminance, which reads as a deliberate
- * duotone rather than a mistake. A real alpha cut-out would be better and drops
- * in later by deleting one class.
+ * `public/moin-portrait.webp` is the same photograph with a real alpha
+ * channel, derived from the JPEG by `npm run assets:portrait`; that script
+ * carries the measurements and the method. Every fully-opaque pixel is the
+ * JPEG's own, so what renders here is Moin's actual photograph, at its actual
+ * colours, with nothing behind it.
+ *
+ * Two things follow from the swap, and both used to be worked around here:
+ * the `brightness(1.08)` that was flattening the source's baked-in
+ * checkerboard is gone, and so is the ban on `z-index` that `mix-blend-mode`
+ * imposed on this wrapper.
  */
 
 export function HeroSection() {
@@ -120,31 +125,51 @@ export function HeroSection() {
        * composition being replicated.
        */}
       {/*
-       * NO z-index on this wrapper, deliberately.
-       *
-       * `mix-blend-mode` blends with the backdrop inside its own stacking
-       * context, and a positioned element with a z-index CREATES one — which
-       * isolated the image and left the white background painting as a solid
-       * rectangle on the cream. Removing z-index lets the blend reach the page,
-       * and DOM order alone gives the layering: wordmark, then figure, then
-       * content.
+       * Layering is DOM order, and that is all it needs to be. The wordmark is
+       * painted before this, the content block after it, and nothing here
+       * creates a stacking context — so the figure stands in front of "MOIN
+       * PATEL" and behind the headline without a single z-index.
        */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
         <img
-          src="/moin-portrait.jpeg"
+          src="/moin-portrait.webp"
           alt={`${fullName}, ${roleTitle}`}
           // The LCP element, and the only image on the page given priority.
           fetchPriority="high"
           decoding="async"
           className={cn(
-            'h-[58svh] w-auto max-w-none object-contain object-bottom',
-            // brightness(1.08) before the blend: the export carries a BAKED-IN
-            // checkerboard (sampled at 241-244 against 254 white), so multiply
-            // alone left a faint grid on the cream. Lifting near-whites to 255
-            // makes them multiply away cleanly; the subject is far darker and
-            // barely moves.
-            'mix-blend-multiply brightness-[1.08]',
-            'sm:h-[64svh] lg:h-[72svh]',
+            // No `max-w-none` here — it does not work. The base `img` rule that
+            // caps media at 100% is unlayered and beats Tailwind's utilities
+            // layer, so the escape is written next to that rule in globals.css.
+            'w-auto shrink-0 object-contain object-bottom',
+            /*
+             * SIZED BY THE HEAD, matched to the reference at each width.
+             *
+             * The head is 41.8% of this photograph's height (hairline y=110,
+             * chin y=715, of 1448). The reference sets its own head to 38% of
+             * the viewport at 1440x900 and to 21.6% at 390x844 — it does not
+             * scale the figure linearly, it holds a portrait crop on desktop
+             * and lets the body fill the column on a phone.
+             *
+             * Dividing through gives 91svh on desktop, and that is what the
+             * figure is set to. It was at 72svh — a 30% head — which is the
+             * single biggest reason this composition read as a photo on a page
+             * rather than as the reference's hero, where the man IS the
+             * composition.
+             *
+             * The same arithmetic asks for 52svh on a phone and it is NOT used,
+             * because the two photographs are not the same crop. The
+             * reference's figure carries a half body: its head is a quarter of
+             * the visible figure and the torso fills the column to the bottom
+             * edge. This one is head-and-shoulders — the head is 42% of the
+             * frame — so 52svh reproduces the reference's HEAD and loses its
+             * composition, leaving 260px of empty ground between the wordmark
+             * and the hair. 80svh is where the figure fills the column the way
+             * the reference's does, which is the thing being replicated.
+             */
+            'h-[80svh] lg:h-[91svh]',
+            // The last few pixels — see the utility, which carries the geometry.
+            'portrait-matte',
           )}
         />
       </div>
@@ -278,17 +303,42 @@ export function HeroSection() {
           </div>
 
           {/* Right band — where the reference runs its short trait list. */}
-          <div className="order-3 flex flex-col gap-2 lg:w-[15rem] lg:items-end">
-            <p className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
-              {location}
-            </p>
-
-            {showAvailability && (
-              <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase">
-                <span className="bg-success size-1.5 shrink-0 rounded-full" aria-hidden="true" />
-                {availabilityLabel}
+          <div className="order-3 flex flex-col lg:w-[15rem] lg:items-end">
+            {/*
+             * THE SAME PLATE THE IDENTITY BLOCK USES, and for the same reason.
+             *
+             * At 390x844 and 375x812 this line sits at the very bottom of the
+             * column, which is where the figure is at its widest — the location
+             * rendered as #2e2b22 on the black shirt and effectively vanished.
+             * At 1440 it clears the figure entirely and sits on cream.
+             *
+             * That is one problem with two appearances, and the reference's own
+             * answer to it is already in this file: a `--glass-bg` panel, the
+             * page ground at 82%. Over the shirt it lifts the local backdrop to
+             * rgb(175,170,156) and the type measures 6.0:1; over the cream it is
+             * cream on cream and there is nothing to see. Where the plate
+             * straddles both it fades across.
+             *
+             * So no breakpoint, no second colour, and no `lg:text-*` override —
+             * the same treatment resolves both ends by itself, which is what
+             * the H1 fix established as this hero's way of handling text over
+             * the figure.
+             *
+             * `w-fit` shrink-wraps it at `items-start` and at `lg:items-end`
+             * alike, so it never draws a full-width band across the cream.
+             */}
+            <div className="flex w-fit flex-col gap-2 px-3 py-2 [background-color:var(--glass-bg)]">
+              <p className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
+                {location}
               </p>
-            )}
+
+              {showAvailability && (
+                <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase">
+                  <span className="bg-success size-1.5 shrink-0 rounded-full" aria-hidden="true" />
+                  {availabilityLabel}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

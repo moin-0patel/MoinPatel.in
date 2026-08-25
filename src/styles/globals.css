@@ -77,6 +77,29 @@ svg {
   max-inline-size: 100%;
 }
 
+/*
+ * The hero figure is the one image that is SUPPOSED to be wider than the
+ * column, and this exception has to live here rather than on the element.
+ *
+ * The rule above is unlayered, and unlayered declarations beat every
+ * `@layer` — including Tailwind's utilities. So `max-w-none` on the <img>
+ * silently lost: at 390px the figure was clamped from 519px to 390px, and
+ * because it is `object-contain`, the picture then letterboxed INSIDE its own
+ * box while `portrait-matte` kept masking the box. The mask and the photograph
+ * were describing different rectangles, which is a hard bug to see and an easy
+ * one to mistake for a bad mask.
+ *
+ * 33.1 is not weakened: the hero section is `overflow-hidden`, so the figure
+ * is clipped by the viewport instead of extending the document. Measured at
+ * every width in `verify:ui` — `documentElement.scrollWidth` is unchanged.
+ *
+ * Letting it overflow is also what the reference does at 390px, where the body
+ * runs off both edges of the screen rather than sitting inside a column.
+ */
+img.portrait-matte {
+  max-inline-size: none;
+}
+
 /* Inputs inherit type rather than falling back to the browser's default. */
 input,
 button,
@@ -331,6 +354,71 @@ h4 {
       oklch(from var(--color-base) l c h / 0) 76%
     );
   }
+}
+
+/* --- Portrait matte ------------------------------------------------------
+ *
+ * The last few pixels of the hero figure, and the reason it stops reading as
+ * a photograph placed on a page.
+ *
+ * WHAT IT IS FIXING
+ *
+ * `public/moin-portrait.webp` is a real cut-out, so the background is gone and
+ * the cream runs right up to the hair. That solves three of the four edges.
+ * The fourth is not a background problem at all: the SUBJECT leaves the frame.
+ * Measured on the source, the figure reaches the left edge of the photograph at
+ * y=1093 of 1448 (75.5%) and the right at y=1048 (72.4%) — below roughly three
+ * quarters, the arms and torso are cut off by the frame and the silhouette
+ * becomes a full-width block with two dead-straight vertical sides.
+ *
+ * That block is what the audit saw. No alpha channel can remove it; the pixels
+ * are the photograph, and the arms genuinely continue past the edge.
+ *
+ * WHY A MASK AND NOT A CROP OR A RESIZE
+ *
+ * Both were tried on paper first. To push the clipped band below the fold while
+ * keeping the head where the reference puts it, the figure would have to be
+ * ~1327px tall on a 900px viewport — a 555px head. To crop it away is to delete
+ * the shoulders. The band has to stay and stop being a rectangle instead.
+ *
+ * HORIZONTAL ONLY, AND THAT IS THE WHOLE DESIGN
+ *
+ * The first attempt was an ellipse anchored on the head, releasing in every
+ * direction. It read well but it could not tell the two edges apart: the
+ * CLIPPED left edge at 75.6% down and the REAL shoulder tip at 66% down sit at
+ * almost the same distance from the centre, so every setting that dissolved
+ * the cut also dissolved the shoulder. Measured: the cut still stood at 53%
+ * opacity — a straight line at rgb(110) against a rgb(206) ground — while the
+ * shoulder had already lost a third of itself.
+ *
+ * A left-to-right ramp separates them, because the difference between the two
+ * edges is horizontal, not radial. Only the outer 12% of the FRAME fades, at
+ * every height:
+ *
+ *   the clipped edges live at exactly x=0 and x=100%, so they reach zero;
+ *   the hair at its widest is 23% in, so the head is untouched at any height;
+ *   the body only enters the band below 62% of the frame, which is precisely
+ *     where it is running out of photograph;
+ *   the vertical structure is never touched, so the shirt stays fully opaque
+ *     behind the headline — #f8f7f3 is legible only because it is still there.
+ *
+ * The bottom edge needs nothing: the figure is anchored to the bottom of a
+ * 100svh section, so its own hard edge is already off the screen.
+ *
+ * It also costs nothing where it is not needed. At 390px the figure is 507px
+ * wide in a 390px viewport, so the band is almost entirely outside the screen —
+ * the visible edge sits at 96% opacity and the phone gets no vignette at all,
+ * while the arms leave the screen the way the reference's do.
+ */
+@utility portrait-matte {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
 
 @utility rim-light {

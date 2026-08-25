@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build && node scripts/prerender.mjs",
     "build:only": "tsc -b && vite build",
     "preview": "vite preview",
+    "assets:portrait": "node scripts/build-portrait-cutout.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,css,json,md}\"",
