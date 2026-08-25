@@ -334,13 +334,42 @@
    */
   --duration-hover: 220ms;
   /*
-   * The reveal pair, both halves of it. Phase 0: `transform, opacity` at
-   * 0.4s / 0.2s — the transform runs the full 400ms while opacity resolves in
-   * half that, which is why the reference's reveals read as arriving rather
-   * than as fading in. One duration cannot express that.
+   * OVERLAYS AND SCRIMS — 400ms.
+   *
+   * This value used to be called `--duration-reveal`, and that name was a
+   * mistake worth recording. Phase 0 found `transform, opacity` at 0.4s / 0.2s
+   * on `cubic-bezier(0.25, 0.46, 0.45, 0.94)` and filed it as "the reference's
+   * reveal". Re-measured on the live site, that spec is carried by exactly
+   * SEVEN elements and the representative one is `DIV.popup-card-wrap` — it is
+   * the POPUP transition. The scroll reveals are GSAP-driven and never touch a
+   * CSS transition at all, which is why they never showed up in that scan.
+   *
+   * 400ms is still correct for what it is now used for: the work card's scrim
+   * measures `opacity 0.4s` on the reference's own cards.
    */
-  --duration-reveal: 400ms;
-  --duration-reveal-fade: 200ms;
+  --duration-overlay: 400ms;
+  /*
+   * SCROLL REVEAL — 600ms, and this one is measured rather than inferred.
+   *
+   * Sampled frame by frame off the live reference with real wheel events, on
+   * a text line travelling one line-height (65.95px -> 0):
+   *
+   *   t+ 99ms  progress 0.428      t+393ms  progress 0.969
+   *   t+188ms  progress 0.681      t+539ms  progress 0.9996
+   *   t+292ms  progress 0.865
+   *
+   * Solving each point independently for duration under a cubic ease-out gives
+   * 582, 595, 600, 601 and 603ms — a tight enough agreement to call it 600 and
+   * an easeOutCubic. A quadratic ease does not fit: the same points yield
+   * 406 / 432 / 461 / 500ms, drifting, because the real curve has a longer
+   * tail than power2 can produce.
+   */
+  --duration-reveal: 600ms;
+  /*
+   * Stagger between revealing siblings — measured at 102, 102 and 112ms across
+   * two parallel groups of lines.
+   */
+  --stagger-reveal: 105ms;
   --duration-entry: 200ms;
   --duration-page: 150ms;
   --duration-modal-in: 200ms;

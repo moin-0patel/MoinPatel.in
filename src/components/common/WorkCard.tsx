@@ -118,7 +118,7 @@ export function WorkCard({ project, index }: { project: ProjectSummary; index: n
       <span
         aria-hidden="true"
         data-work-scrim=""
-        className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-[--duration-reveal] ease-[--ease-reference]"
+        className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-[--duration-overlay] ease-[--ease-reference]"
       />
 
       {/* --- the content layer ----------------------------------------- */}

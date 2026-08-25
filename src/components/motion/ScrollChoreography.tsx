@@ -41,12 +41,74 @@ import { buildChapterBands, type SectionMeasurement } from '@/lib/chapterTimelin
 
 gsap.registerPlugin(ScrollTrigger)
 
-/** Section 3.1 — one set of values, used by every text element on the page. */
-const REVEAL_FROM = { opacity: 0, y: 40, filter: 'blur(8px)' }
-const REVEAL_TO = { opacity: 1, y: 0, filter: 'blur(0px)', ease: 'power2.out', duration: 0.7 }
+/**
+ * THE REVEAL, RE-MEASURED OFF THE LIVE REFERENCE.
+ *
+ * Every value here replaced a guess, and the guess it replaced was wrong in a
+ * specific and instructive way. Phase 0 scanned computed styles for transition
+ * declarations, found `transform, opacity` at `0.4s / 0.2s` on
+ * `cubic-bezier(0.25, 0.46, 0.45, 0.94)`, and recorded it as the reference's
+ * reveal. Re-measured: that spec is carried by seven elements and the
+ * representative one is `DIV.popup-card-wrap`. It is the POPUP transition. The
+ * reference's scroll reveals are GSAP-driven and never touch a CSS transition,
+ * so a scan of computed styles could not see them by construction.
+ *
+ * These numbers come from sampling the animated properties frame by frame,
+ * driven with real wheel events, on a text line travelling one line-height:
+ *
+ *   DURATION 0.6s. Solving five independent sample points for duration under a
+ *   cubic ease-out gives 582, 595, 600, 601 and 603ms. Under a quadratic ease
+ *   the same points give 406, 432, 461 and 500ms — drifting upward, because
+ *   power2 cannot produce the tail the reference actually has. The old value
+ *   was 0.7s.
+ *
+ *   EASE power3.out, which is that cubic ease-out. Was power2.out.
+ *
+ *   NO BLUR. `filter` reads `none` on every reference element, before and
+ *   during its reveal. The old `blur(8px)` was invented here, and it is also
+ *   the most expensive part of the tween — it forces a filter pass per frame
+ *   on text.
+ *
+ *   STAGGER 0.105s, measured at 102, 102 and 112ms between consecutive
+ *   siblings across two parallel groups. Was 0.08.
+ *
+ * WHAT IS NOT COPIED, AND WHY
+ *
+ * The reference's text reveal is a MASKED slide: the line sits at
+ * translateY(1 line-height) inside an `overflow: hidden` parent and rides up
+ * with opacity pinned at 1 — it is never faded. Reproducing that means wrapping
+ * every revealing line in a clipping element, which changes the DOM of every
+ * text block on the page and risks clipping descenders and focus rings. That is
+ * a layout change, not a motion one, so this keeps a fade-and-rise and takes
+ * the reference's timing, easing and stagger. The distance stays 40px: the
+ * reference travels one line-height, which is 27-66px depending on the element.
+ */
+const REVEAL_FROM = { opacity: 0, y: 40 }
+const REVEAL_TO = { opacity: 1, y: 0, ease: 'power3.out', duration: 0.6 }
 
-/** Section 3.1 — stagger between siblings, as a fraction of the parent's range. */
-const STAGGER = 0.08
+/** Seconds between revealing siblings — see above. */
+const STAGGER = 0.105
+
+/**
+ * The most a group's stagger may spread, in seconds — and the reason it exists
+ * is that the measured 105ms was measured between FIVE siblings.
+ *
+ * Applied naively to the Process chapter's 27 targets, 105ms each is a 2.8s
+ * queue before the last element even starts, and this module's own
+ * non-negotiable is that a reveal is finished by the time the content can be
+ * read. Verified live: after a full settle, Process still had paragraphs at
+ * opacity 0.0-0.9 sitting in the middle of the viewport.
+ *
+ * The reference never staggers a group that large — its biggest measured group
+ * is five lines, a 420ms spread. So the per-sibling gap holds at 105ms for
+ * groups up to ~7 and compresses beyond that, keeping the total spread at what
+ * the reference's own largest group actually spends.
+ */
+const STAGGER_MAX_SPREAD = 0.63
+
+/** 105ms between siblings, until the group is large enough to cap. */
+const staggerFor = (count: number) =>
+  count > 1 ? Math.min(STAGGER, STAGGER_MAX_SPREAD / (count - 1)) : 0
 
 export function ScrollChoreography() {
   useEffect(() => {
@@ -162,9 +224,16 @@ export function ScrollChoreography() {
             if (!isLast) {
               // Lines 1-3 recede so the next one lands alone. Section 3.1
               // reversed: out is opacity 1 -> 0.
+              //
+              // `blur(6px)` removed here for the same reason it was removed
+              // from REVEAL_TO: the reference carries `filter: none` on every
+              // element through every reveal, so the blur was ours rather than
+              // its. It is also the one property in this tween that forces a
+              // per-frame filter pass, and this tween is SCRUBBED — it runs on
+              // every scroll event rather than once.
               timeline.to(
                 line,
-                { opacity: 0, y: -20, filter: 'blur(6px)', duration: share * 0.12 },
+                { opacity: 0, y: -20, ease: 'power3.out', duration: share * 0.12 },
                 at + share * 0.88,
               )
             }
@@ -187,7 +256,9 @@ export function ScrollChoreography() {
         if (capabilities.length > 0) {
           gsap.fromTo(capabilities, REVEAL_FROM, {
             ...REVEAL_TO,
-            stagger: STAGGER * 2,
+            // The card grid beats at double the text stagger, as before, but
+            // through the same cap so a future fifth card cannot stretch it.
+            stagger: Math.min(STAGGER * 2, staggerFor(capabilities.length) * 2),
             scrollTrigger: { trigger: capabilities[0], start: 'top 85%', once: true },
           })
         }
@@ -200,6 +271,33 @@ export function ScrollChoreography() {
          * kept that clause with the PRD rather than handing it to this timeline.
          * The hero is also the one composition already approved and verified;
          * animating it here would put it back in play.
+         *
+         * WHY IMPACT, EXPERIENCE, SKILLS, EDUCATION AND FAQ STAY STILL
+         *
+         * They carry no `data-chapter`, so this loop never reaches them, and
+         * that is deliberate rather than an oversight waiting to be tidied up.
+         *
+         * Counting elements that are pre-hidden or pre-transformed on the live
+         * reference BEFORE any scrolling — which is what a pending GSAP reveal
+         * looks like — gives:
+         *
+         *   about        27 hidden,  21 transformed
+         *   work         27 hidden,  36 transformed
+         *   projects     27 hidden,  36 transformed
+         *   overview      3 hidden,   0 transformed
+         *   services      0 hidden,   0 transformed
+         *   journey       0 hidden,   0 transformed
+         *   cta_column    0 hidden,   0 transformed
+         *
+         * The reference animates its narrative sections and lets its later
+         * reference sections simply be there. Ours divide the same way, so
+         * adding reveals to these five would not be replicating the reference —
+         * it would be inventing motion it does not have, which is the one thing
+         * the motion requirements name as a defect outright (REQ-MOT-2).
+         *
+         * If a future phase gives one of them a chapter — Journey is the likely
+         * candidate for Experience — it inherits this treatment by adding the
+         * attribute, with no change here. That is the extension point.
          */
         for (const chapter of CHAPTERS) {
           if (chapter === 'hero' || chapter === 'introduction') continue
@@ -216,7 +314,7 @@ export function ScrollChoreography() {
 
           gsap.fromTo(targets, REVEAL_FROM, {
             ...REVEAL_TO,
-            stagger: STAGGER,
+            stagger: staggerFor(targets.length),
             scrollTrigger: { trigger: section, start: 'top 85%', once: true },
           })
         }
