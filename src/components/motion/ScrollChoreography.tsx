@@ -264,6 +264,37 @@ export function ScrollChoreography() {
         }
 
         /*
+         * The journey cards — the reference's `.about-card` reveal.
+         *
+         * Measured on the live site: each card enters at opacity 0,
+         * scale(0.6), translated down ~34px, and settles over roughly 1.2s of
+         * damped, scroll-coupled motion. That mechanism (a scrubbed spring) is
+         * not this module's grammar, so the card takes the shared entrance
+         * tween instead — same values as everything else — plus the scale the
+         * reference demonstrably has. 0.94 rather than 0.6: the reference
+         * spreads its growth over a damped 1.2s, and 0.6 compressed into a
+         * 600ms entrance reads as a pop it does not have.
+         *
+         * Experience is not a chapter (the chapter list drives the 3D scene's
+         * camera bands and is not to be re-cut for a reveal), so this is the
+         * same explicit opt-in `data-capability` uses. This is also the
+         * extension point the chapter-loop comment promised Journey.
+         */
+        const journeyCards = gsap.utils.toArray<HTMLElement>('[data-journey-card]')
+        if (journeyCards.length > 0) {
+          gsap.fromTo(
+            journeyCards,
+            { ...REVEAL_FROM, scale: 0.94 },
+            {
+              ...REVEAL_TO,
+              scale: 1,
+              stagger: staggerFor(journeyCards.length),
+              scrollTrigger: { trigger: journeyCards[0], start: 'top 85%', once: true },
+            },
+          )
+        }
+
+        /*
          * Every other chapter — headings and copy, staggered on entry.
          *
          * Scoped to `[data-chapter]`, which excludes the hero: FR-HOME-02 owns

@@ -24,9 +24,9 @@ export function AboutSection() {
   if (isPending) {
     return (
       <Section id="about" labelledBy="about-heading" chapter="about">
-        <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="Who I am" />
+        <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="About me" />
         {/* Skeletons at the final line-height so nothing shifts (12.3). */}
-        <div className="measure space-y-2">
+        <div className="max-w-[24rem] space-y-2">
           <Skeleton className="h-[1lh] w-full" />
           <Skeleton className="h-[1lh] w-full" />
           <Skeleton className="h-[1lh] w-2/3" />
@@ -39,9 +39,16 @@ export function AboutSection() {
 
   return (
     <Section id="about" labelledBy="about-heading" chapter="about">
-      <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="Who I am" />
+      <SectionHeading id="about-heading" eyebrow="About" meta="SYS_PROFILE" title="About me" />
 
-      <div className="measure">
+      {/*
+       * A NARROW column, measured off the reference rather than our own 72ch
+       * habit. Its About intro sets a 16.99px paragraph in a 389px column
+       * directly under the 65.95px heading — the narrowness against the wide
+       * heading is the editorial gesture. `measure` (72ch ~ 700px) flattened
+       * that into an ordinary text block.
+       */}
+      <div className="max-w-[24rem]">
         <p className="text-secondary text-lg leading-[--leading-body]">{profile.shortBio}</p>
 
         {profile.location && <p className="text-muted mt-4 text-sm">{profile.location}</p>}
