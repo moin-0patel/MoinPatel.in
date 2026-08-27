@@ -567,6 +567,17 @@ try {
   const h2Count = await page.locator('h2').count()
   check('section headings rendered', h2Count >= 4, `${h2Count} <h2>`)
 
+  // REQ-TECH-3 — Geist and Geist Mono must be loaded, not merely declared:
+  // `document.fonts.check()` is true only for a face that is registered AND
+  // loaded, so a broken @font-face falling back to system-ui fails here.
+  await page.evaluate(() => document.fonts.ready)
+  for (const family of ['Geist', 'Geist Mono']) {
+    check(
+      `REQ-TECH-3: document.fonts.check() passes for ${family}`,
+      await page.evaluate((f) => document.fonts.check(`16px "${f}"`), family),
+    )
+  }
+
   if (failures.length > 0) {
     console.log(`\n${'─'.repeat(68)}`)
     console.log('ABORTED — Home did not render. Everything below asserts that things')
@@ -653,7 +664,7 @@ try {
        * which is precisely what the check exists to catch. This removes a
        * false positive without weakening the assertion.
        */
-      const transparent = /^rgba\(\d+,\d+,\d+,0(\.0+)?\)$/.test(cs.color.replace(/\s/g, ""))
+      const transparent = /^rgba\(\d+,\d+,\d+,0(\.0+)?\)$/.test(cs.color.replace(/\s/g, ''))
       if (transparent) {
         if (cs.backgroundClip !== 'text' && cs.webkitBackgroundClip !== 'text') {
           found.push(`${label} is transparent with no background-clip:text`)

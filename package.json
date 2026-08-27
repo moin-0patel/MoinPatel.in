@@ -27,7 +27,8 @@
     "db:diff": "supabase db diff",
     "db:verify:auth": "node scripts/verify-authenticated.mjs",
     "verify:ui": "node scripts/verify-ui.mjs",
-    "verify:admin": "node scripts/verify-admin.mjs"
+    "verify:admin": "node scripts/verify-admin.mjs",
+    "verify:perf": "node scripts/verify-perf.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.8.0",
