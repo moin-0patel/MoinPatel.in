@@ -87,37 +87,61 @@ export function FaqSection() {
        * question is already a heading and the disclosure already announces its
        * expanded state, so the list adds nothing except an invalid structure.
        */}
-      <div className="border-subtle mt-[--section-gap] border-t">
+      {/*
+       * THE REFERENCE'S ACCORDION ANATOMY, measured live at 1440x900:
+       *
+       *   panels    `.faq-toggle` rows on FILLED panels — bg
+       *             rgba(223,222,206,0.8), radius 9.94px, no border — not the
+       *             hairline-divided full-width rows this section used to be
+       *   question  19.01px/500 (our --text-lg lands on exactly 19 at 1440),
+       *             normal tracking
+       *   padding   18px 24px; rows 68px closed with 8px between them
+       *   columns   TWO independent 553px columns from desktop up, eight
+       *             questions split four and four
+       *   icon      a 32px square, radius 6px, holding a + that becomes a −
+       *   answer    16.99px, expanding inside the panel
+       *
+       * `items-start` is load-bearing: <details> grows when opened, and in a
+       * grid without it the open panel stretches its row partner to match —
+       * the reference's columns move independently.
+       *
+       * Four questions against the reference's eight: the count follows the
+       * truthful answers, as the note above records. The rhythm — panel, gap,
+       * two columns — is the reference's.
+       */}
+      <div className="mt-[--section-gap] grid items-start gap-2 lg:grid-cols-2">
         {items.map((faq) => (
-          <div key={faq.question} className="border-subtle border-b">
+          <div key={faq.question} className="bg-surface rounded-[10px]">
             <details className="group">
               <summary
                 className={[
-                  'text-primary font-display flex cursor-pointer items-center justify-between gap-6',
-                  'py-6 text-[length:var(--text-xl)] leading-[--leading-snug] font-medium',
-                  'tracking-[--tracking-tight] md:py-7 md:text-[length:var(--text-2xl)]',
-                  'hover:text-accent transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                  'text-primary flex cursor-pointer items-center justify-between gap-6',
+                  'px-6 py-[18px] text-[length:var(--text-lg)] leading-[--leading-snug] font-medium',
+                  'hover:text-accent transition-colors duration-[--duration-hover] ease-[--ease-reference]',
                   'marker:content-[""] [&::-webkit-details-marker]:hidden',
                 ].join(' ')}
               >
-                <h3 className="font-display font-medium">{faq.question}</h3>
+                <h3 className="font-display text-[length:var(--text-lg)] font-medium">
+                  {faq.question}
+                </h3>
 
                 {/*
-                 * A rotating rule rather than a chevron icon: the same hairline
-                 * vocabulary the rest of the page uses, and it needs no icon
-                 * import. `motion-reduce` stops the rotation for anyone who has
-                 * asked for less movement.
+                 * The reference's icon: + in a 32px rounded-6px square that
+                 * reads − when open. Built from the same hairline rules as
+                 * before — no icon import — with the square picking up a
+                 * light fill in the open state exactly as the reference's
+                 * does. `motion-reduce` stops the rotation.
                  */}
                 <span
                   aria-hidden="true"
-                  className="relative size-4 shrink-0 self-start md:mt-2"
+                  className="group-open:bg-base/80 relative grid size-8 shrink-0 place-items-center rounded-[6px] transition-colors duration-[--duration-hover]"
                 >
-                  <span className="bg-strong absolute top-1/2 left-0 h-px w-4" />
-                  <span className="bg-strong absolute top-1/2 left-0 h-px w-4 rotate-90 transition-transform duration-[--duration-hover] ease-[--ease-out] group-open:rotate-0 motion-reduce:transition-none" />
+                  <span className="bg-strong absolute h-px w-4" />
+                  <span className="bg-strong absolute h-px w-4 rotate-90 transition-transform duration-[--duration-hover] ease-[--ease-reference] group-open:rotate-0 motion-reduce:transition-none" />
                 </span>
               </summary>
 
-              <p className="text-secondary max-w-[62ch] pb-7 text-[length:var(--text-lg)]">
+              <p className="text-secondary max-w-[62ch] px-6 pb-6 text-[length:var(--text-base)] leading-[1.55]">
                 {faq.answer}
               </p>
             </details>

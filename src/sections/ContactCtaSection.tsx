@@ -31,67 +31,49 @@ export function ContactCtaSection() {
       data-chapter="contact"
       className="container-page py-12 md:py-20"
     >
-      <div
-        className={cn(
-          'relative overflow-hidden rounded-[--radius-xl] px-6 py-14 text-center md:px-12',
-          'border-subtle border',
-          // 32.1 — gradients appear in the CTA band and the process-line motif
-          // only, single direction, low opacity.
-          /*
-           * THE INDIGO IS GONE. `--color-indigo-deep` (#1d00a5) anchored this
-           * gradient and was the last survivor of the pre-inversion palette —
-           * a second accent hue on a site whose token file calls a second
-           * accent "a design regression" in as many words. The band now runs
-           * inside the one hue family it is allowed: a low-opacity cyan wash
-           * over the panel surface, falling to the page ground.
-           *
-           * `accent-soft` rather than `accent-fill`, because this is a large
-           * area behind black type. The bright cyan is a 1.5:1 foreground and
-           * is only ever a small FILL under dark ink; at band size it would
-           * take the heading to roughly that ratio.
-           *
-           * `bg-surface` UNDER the gradient, and that stays a contrast fix.
-           * The stops are translucent, so without a solid colour beneath, the
-           * band composites against whatever is behind it rather than against
-           * a known surface. It is the reason "Email me" once measured 4.18:1.
-           *
-           * Written as an arbitrary property, NOT `bg-surface`. `cn()` runs
-           * tailwind-merge, which groups `bg-surface` and `bg-gradient-to-br`
-           * as conflicting background utilities and keeps only the last one —
-           * so `bg-surface` was silently dropped from the class list. The
-           * utility was present in the CSS bundle and absent from the element,
-           * which is why the first two attempts at this fix changed nothing.
-           * Do not "tidy" it back into `bg-surface`.
-           */
-          '[background-color:var(--color-surface)] from-accent-soft to-base bg-gradient-to-br via-[--color-surface]',
-        )}
-      >
+      {/*
+       * AN OPEN COMPOSITION ON THE CREAM, NOT A BOXED BAND — measured, not
+       * assumed. The final-phase audit put real numbers on the reference's
+       * closing (#webflow_journey): a 110.02px/500 heading set left in the
+       * measure, a 16.99px paragraph, a small "Have something in mind?" line,
+       * and one CTA — no panel, no border, no background of its own. The
+       * boxed, centered, gradient-washed band this section carried was the
+       * previous design's shape, and this phase retires it.
+       *
+       * That also removes the last gradient below the hero. The cyan wash was
+       * Phase 3's honest re-toning of an indigo box; the measurement says the
+       * box itself was never the reference's.
+       */}
+      <div className="relative">
         {/*
-         * Matched to the shared section scale — 68px / weight 500 at 1440.
-         *
-         * This heading was the last on the page still at 38px/600, because it
-         * hand-rolls its own h2 instead of routing through `SectionHeading`.
-         * The measured reference sets every section heading at 65.95px/500, and
-         * the closing statement is the worst place to be a step smaller.
-         *
-         * It stays a bare h2 rather than adopting `SectionHeading` wholesale:
-         * that component renders an eyebrow, a hairline rule and a right-hand
-         * meta label, and this section is a centred CTA band with none of them.
-         * Only the type scale needed to agree.
+         * THE DISPLAY SCALE, left-set — the reference's closing heading is its
+         * page's largest text after the hero wordmark: 110.02px/500, start-
+         * aligned, wrapping over three lines. --text-7xl (up to 120px) is the
+         * statement step our scale reserves for exactly these moments; ours
+         * wraps the same way. It stays a bare h2 — no eyebrow, no rule, no
+         * meta — because the reference's closing carries none of them.
          */}
         <h2
           id="contact-cta-heading"
-          className="text-primary font-display text-[length:var(--text-3xl)] leading-[1.05] font-medium text-balance md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]"
+          className="text-primary font-display max-w-[18ch] text-[length:var(--text-4xl)] leading-[1.02] font-medium text-balance md:text-[length:var(--text-5xl)] lg:text-[length:var(--text-7xl)]"
         >
           Have a manual process worth automating?
         </h2>
 
-        <p className="text-secondary measure mx-auto mt-4">
+        {/* 16.99px in a narrow start-aligned column, as measured. */}
+        <p className="text-secondary mt-6 max-w-[26rem]">
           Describe what your team does by hand today, and I&rsquo;ll tell you whether it can be
           replaced with a system.
         </p>
 
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        {/*
+         * The reference sets a small "Have something in mind?" line above its
+         * button. Ours is the response note when one exists — the same slot,
+         * already database-owned (Q-19) — so nothing is invented to fill it.
+         */}
+        {responseNote && <p className="text-muted mt-8 text-sm">{responseNote}</p>}
+
+        <div className={cn('flex flex-wrap gap-3', responseNote ? 'mt-3' : 'mt-8')}>
           <Button size="lg" shape="pill" asChild>
             <Link to="/contact">Let&rsquo;s Talk</Link>
           </Button>
@@ -103,9 +85,6 @@ export function ContactCtaSection() {
             </Button>
           )}
         </div>
-
-        {/* Q-19. Hidden until Moin states a response time. */}
-        {responseNote && <p className="text-muted mt-6 text-sm">{responseNote}</p>}
       </div>
     </section>
   )

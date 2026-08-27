@@ -311,70 +311,101 @@ function Footer() {
   const footerSocials = (socialLinks ?? []).filter((link) => link.showInFooter)
 
   return (
-    <footer className="border-subtle mt-24 border-t" role="contentinfo">
-      <div className="container-page grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-3">
-        <div>
-          <p className="text-primary font-display text-lg font-semibold">
-            {profile?.fullName ?? 'Moin Patel'}
-          </p>
-          {/* The approved positioning line (PRD 2). */}
-          <p className="text-secondary measure mt-2 text-sm">
-            {profile?.positioningLine ??
-              'Building AI-powered systems that automate work, save time, and reduce business costs.'}
-          </p>
-        </div>
+    <footer className="mt-24" role="contentinfo">
+      {/*
+       * THE CLOSING WORDMARK — the reference's most distinctive sign-off.
+       *
+       * Before its FAQ and footer it sets its name once more at wordmark
+       * scale, brighter than anything else on the page and cropped by the
+       * viewport exactly as the hero's is. Measured on the final-phase audit;
+       * without it our page simply stopped, where the reference closes the
+       * loop it opened at the top.
+       *
+       * The same clamp, tracking and colour as the hero wordmark, so the two
+       * bookend the page as one voice. `aria-hidden` for the same reason the
+       * hero's is: the name is announced by the footer's own text below, and
+       * hearing it twice is noise. The name comes from the profile — nothing
+       * hardcoded beyond the same fallback the footer already used.
+       */}
+      <p
+        aria-hidden="true"
+        className={cn(
+          'pointer-events-none overflow-hidden text-center select-none',
+          'font-display font-bold whitespace-nowrap text-[color:var(--color-accent-word)]',
+          'leading-[0.78] tracking-[-0.045em]',
+          'text-[clamp(3.5rem,16vw,14rem)]',
+        )}
+      >
+        {(profile?.fullName ?? 'Moin Patel').toUpperCase()}
+      </p>
 
-        <nav aria-label="Footer">
-          <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
-            Pages
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.to}>
-                <NavLink to={item.to} className="text-secondary hover:text-primary text-sm">
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* 12.11 "Empty": the whole column is hidden when nothing is published.
-            That is the state today — LinkedIn and GitHub are unpublished
-            placeholders pending Q-02/Q-03. */}
-        {(footerSocials.length > 0 || profile?.emailPublic) && (
+      <div className="border-subtle border-t">
+        <div className="container-page grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-3">
           <div>
+            <p className="text-primary font-display text-lg font-semibold">
+              {profile?.fullName ?? 'Moin Patel'}
+            </p>
+            {/* The approved positioning line (PRD 2). */}
+            <p className="text-secondary measure mt-2 text-sm">
+              {profile?.positioningLine ??
+                'Building AI-powered systems that automate work, save time, and reduce business costs.'}
+            </p>
+          </div>
+
+          <nav aria-label="Footer">
             <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
-              Elsewhere
+              Pages
             </h2>
             <ul className="flex flex-col gap-2">
-              {footerSocials.map((link) => {
-                const Icon = SOCIAL_ICONS[link.iconKey] ?? Mail
-                const isExternal = link.url.startsWith('http')
-                return (
-                  <li key={link.id}>
-                    <a
-                      href={link.url}
-                      {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
-                    >
-                      <Icon className="size-4" />
-                      {link.label}
-                      {isExternal && <span className="visually-hidden">(opens in a new tab)</span>}
-                    </a>
-                  </li>
-                )
-              })}
+              {NAV_ITEMS.map((item) => (
+                <li key={item.to}>
+                  <NavLink to={item.to} className="text-secondary hover:text-primary text-sm">
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
-          </div>
-        )}
-      </div>
+          </nav>
 
-      <div className="container-page border-subtle text-muted flex flex-col gap-2 border-t py-6 text-xs md:flex-row md:justify-between">
-        {/* FR-NAV-03 — the year is dynamic, not a hard-coded string that
-            silently goes stale on 1 January. */}
-        <p>© {currentYear()} Moin Patel</p>
-        <p>Built with React, TypeScript and Supabase.</p>
+          {/* 12.11 "Empty": the whole column is hidden when nothing is published.
+            That is the state today — LinkedIn and GitHub are unpublished
+            placeholders pending Q-02/Q-03. */}
+          {(footerSocials.length > 0 || profile?.emailPublic) && (
+            <div>
+              <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
+                Elsewhere
+              </h2>
+              <ul className="flex flex-col gap-2">
+                {footerSocials.map((link) => {
+                  const Icon = SOCIAL_ICONS[link.iconKey] ?? Mail
+                  const isExternal = link.url.startsWith('http')
+                  return (
+                    <li key={link.id}>
+                      <a
+                        href={link.url}
+                        {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
+                      >
+                        <Icon className="size-4" />
+                        {link.label}
+                        {isExternal && (
+                          <span className="visually-hidden">(opens in a new tab)</span>
+                        )}
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="container-page border-subtle text-muted flex flex-col gap-2 border-t py-6 text-xs md:flex-row md:justify-between">
+          {/* FR-NAV-03 — the year is dynamic, not a hard-coded string that
+              silently goes stale on 1 January. */}
+          <p>© {currentYear()} Moin Patel</p>
+          <p>Built with React, TypeScript and Supabase.</p>
+        </div>
       </div>
     </footer>
   )
