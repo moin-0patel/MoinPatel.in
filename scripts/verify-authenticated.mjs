@@ -453,14 +453,35 @@ async function runVerification() {
     )
   }
 
+  /*
+   * The owner may have a REAL published resume (there is one since Aug 2026),
+   * and `resume_versions_one_published` rightly refuses a second. The suite
+   * validates around it rather than demanding an empty world: the test row
+   * stays a draft, the uniqueness probe collides with whichever row is
+   * published, and the signed-URL checks target the row the public actually
+   * resolves. With no real resume present, behaviour is exactly the original.
+   */
+  const { data: realPublished } = await admin
+    .from('resume_versions')
+    .select('storage_path')
+    .eq('is_published', true)
+    .not('storage_path', 'like', `${PREFIX}%`)
+    .maybeSingle()
+
   {
     const { error } = await admin.from('resume_versions').insert({
       storage_path: resumePath,
       file_name: 'verification.pdf',
       mime_type: 'application/pdf',
-      is_published: true,
+      is_published: !realPublished,
     })
-    check('resume_versions row inserts and publishes', !error, error?.message)
+    check(
+      realPublished
+        ? 'resume_versions row inserts (draft beside the real published resume)'
+        : 'resume_versions row inserts and publishes',
+      !error,
+      error?.message,
+    )
   }
 
   {
@@ -487,7 +508,8 @@ async function runVerification() {
   }
 
   {
-    const { data, error } = await anon.storage.from('resume').createSignedUrl(resumePath, 60)
+    const publishedPath = realPublished?.storage_path ?? resumePath
+    const { data, error } = await anon.storage.from('resume').createSignedUrl(publishedPath, 60)
     check(
       'FR-RES-03: anon can mint a signed URL for the published resume',
       !error && Boolean(data?.signedUrl),

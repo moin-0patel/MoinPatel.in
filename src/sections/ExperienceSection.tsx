@@ -208,7 +208,13 @@ function TimelineItem({ record }: { record: ExperienceRecord }) {
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-primary font-display text-[length:var(--text-2xl)] leading-tight font-medium">
+        {/*
+         * 24px, not the 29px text-2xl this once defaulted to: the frozen audit
+         * puts the reference's timeline entry titles at 24.05px/500 with a 1.1
+         * line-height, and §12.3 holds headings to ±10% of the measured scale.
+         * --text-xl lands on 23px at 1440 — inside the band.
+         */}
+        <h3 className="text-primary font-display text-[length:var(--text-xl)] leading-[1.1] font-medium">
           {record.companyUrl ? (
             <a
               href={record.companyUrl}
