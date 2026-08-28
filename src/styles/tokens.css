@@ -434,5 +434,8 @@
     --duration-modal-in: 0ms;
     --duration-modal-out: 0ms;
     --duration-process-line: 0ms;
+    /* Was missing from this list — the work-card scrim and the FAQ accordion
+       ride this token, and both must collapse with everything else. */
+    --duration-overlay: 0ms;
   }
 }

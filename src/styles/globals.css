@@ -532,3 +532,27 @@ h4 {
     transform: translate3d(0, -2%, 0) scale(1.06);
   }
 }
+
+/* --- FAQ accordion easing ---------------------------------------------------
+ *
+ * The reference's panels ease open; a native <details> pops. `::details-content`
+ * plus `interpolate-size` animates the toggle without giving up the element's
+ * semantics or its findability (hidden=until-found stays intact). Engines
+ * without the pseudo-element (Firefox, Safari today) keep the instant toggle —
+ * a fidelity loss, not a functional one. `interpolate-size` is set on the
+ * <details> itself rather than :root so keyword interpolation cannot leak into
+ * unrelated layout animation.
+ */
+details {
+  interpolate-size: allow-keywords;
+}
+details::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition:
+    content-visibility var(--duration-overlay) allow-discrete,
+    block-size var(--duration-overlay) var(--ease-reference);
+}
+details[open]::details-content {
+  block-size: auto;
+}

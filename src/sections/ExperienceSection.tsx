@@ -34,15 +34,26 @@ export function ExperienceSection({
 }) {
   const { data: experience, isPending, isError, error, refetch } = useExperience()
 
+  /*
+   * All three variants keep the heading at the SAME tree position — inside the
+   * flex wrapper the loaded variant needs for its "Full experience" button.
+   * The choreography arms elements with inline styles at build time, and if a
+   * slow query resolves after the build cap, React must REUSE the heading node
+   * for the armed state (and the tween target) to survive the swap. A heading
+   * that changes parents between variants is recreated instead, and its reveal
+   * silently dies.
+   */
   if (isPending) {
     return (
       <Section id="experience" labelledBy="experience-heading">
-        <SectionHeading
-          id="experience-heading"
-          eyebrow="Experience"
-          meta="SYS_EVOLUTION"
-          title="My journey"
-        />
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading
+            id="experience-heading"
+            eyebrow="Experience"
+            meta="SYS_EVOLUTION"
+            title="My journey"
+          />
+        </div>
         <LoadingRegion label="Loading experience" className="space-y-6">
           <Skeleton className="h-32 w-full rounded-[--radius-lg]" />
           <Skeleton className="h-24 w-full rounded-[--radius-lg]" />
@@ -54,12 +65,14 @@ export function ExperienceSection({
   if (isError) {
     return (
       <Section id="experience" labelledBy="experience-heading">
-        <SectionHeading
-          id="experience-heading"
-          eyebrow="Experience"
-          meta="SYS_EVOLUTION"
-          title="My journey"
-        />
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <SectionHeading
+            id="experience-heading"
+            eyebrow="Experience"
+            meta="SYS_EVOLUTION"
+            title="My journey"
+          />
+        </div>
         <ErrorState error={error} onRetry={() => void refetch()} />
       </Section>
     )

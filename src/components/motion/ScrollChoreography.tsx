@@ -302,46 +302,16 @@ export function ScrollChoreography() {
          * kept that clause with the PRD rather than handing it to this timeline.
          * The hero is also the one composition already approved and verified;
          * animating it here would put it back in play.
-         *
-         * WHY IMPACT, EXPERIENCE, SKILLS, EDUCATION AND FAQ STAY STILL
-         *
-         * They carry no `data-chapter`, so this loop never reaches them, and
-         * that is deliberate rather than an oversight waiting to be tidied up.
-         *
-         * Counting elements that are pre-hidden or pre-transformed on the live
-         * reference BEFORE any scrolling — which is what a pending GSAP reveal
-         * looks like — gives:
-         *
-         *   about        27 hidden,  21 transformed
-         *   work         27 hidden,  36 transformed
-         *   projects     27 hidden,  36 transformed
-         *   overview      3 hidden,   0 transformed
-         *   services      0 hidden,   0 transformed
-         *   journey       0 hidden,   0 transformed
-         *   cta_column    0 hidden,   0 transformed
-         *
-         * The reference animates its narrative sections and lets its later
-         * reference sections simply be there. Ours divide the same way, so
-         * adding reveals to these five would not be replicating the reference —
-         * it would be inventing motion it does not have, which is the one thing
-         * the motion requirements name as a defect outright (REQ-MOT-2).
-         *
-         * If a future phase gives one of them a chapter — Journey is the likely
-         * candidate for Experience — it inherits this treatment by adding the
-         * attribute, with no change here. That is the extension point.
          */
-        for (const chapter of CHAPTERS) {
-          if (chapter === 'hero' || chapter === 'introduction') continue
-          const section = document.querySelector<HTMLElement>(`[data-chapter="${chapter}"]`)
-          if (!section) continue
-
+        const reveal = (section: HTMLElement) => {
           const targets = gsap.utils
             .toArray<HTMLElement>(section.querySelectorAll('h2, h3, p, li, a'))
-            // Capability cards have their own beat above; animating them twice
-            // would leave whichever tween finished last holding the opacity.
-            .filter((el) => !el.closest('[data-capability]'))
+            // Capability and journey cards have their own beats above;
+            // animating their contents twice would leave whichever tween
+            // finished last holding the opacity.
+            .filter((el) => !el.closest('[data-capability]') && !el.closest('[data-journey-card]'))
 
-          if (targets.length === 0) continue
+          if (targets.length === 0) return
 
           gsap.fromTo(targets, REVEAL_FROM, {
             ...REVEAL_TO,
@@ -349,16 +319,39 @@ export function ScrollChoreography() {
             scrollTrigger: { trigger: section, start: 'top 85%', once: true },
           })
         }
+
+        for (const chapter of CHAPTERS) {
+          if (chapter === 'hero' || chapter === 'introduction') continue
+          const section = document.querySelector<HTMLElement>(`[data-chapter="${chapter}"]`)
+          if (section) reveal(section)
+        }
+
+        /*
+         * The remaining sections — Impact, Experience, Skills, Education, FAQ.
+         *
+         * An earlier ruling left these still, on a measurement showing the
+         * reference's own later sections carry no pending reveals. The owner
+         * overruled it (2026-08-27): every section takes the entrance grammar,
+         * so the page reads as one continuous choreography rather than motion
+         * that runs out two-thirds of the way down. The values stay the
+         * measured reference values — this extends coverage, not vocabulary.
+         */
+        for (const section of gsap.utils.toArray<HTMLElement>('main section:not([data-chapter])')) {
+          reveal(section)
+        }
       })
     }
 
     // Poll rather than observe: the condition is "nothing is loading", which is
     // the absence of an element, and MutationObserver is awkward at spotting
-    // absences. Capped so a stuck query cannot mean no choreography at all.
+    // absences. Capped so a stuck query cannot mean no choreography at all —
+    // but generously: a cold Supabase round-trip has been measured at ~3.3s,
+    // and a build that fires mid-load arms elements React is about to replace
+    // (see the variant-shape note in ExperienceSection).
     const started = Date.now()
     const waitForContent = window.setInterval(() => {
       const busy = document.querySelectorAll('[aria-busy="true"]').length > 0
-      if (busy && Date.now() - started < 4000) return
+      if (busy && Date.now() - started < 8000) return
       window.clearInterval(waitForContent)
       build()
       // Positions are computed during build; one refresh after layout settles
