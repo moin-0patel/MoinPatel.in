@@ -105,7 +105,7 @@ export default function AdminSettingsPage() {
     return (
       <div className="space-y-3 p-6 lg:p-8">
         <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-96 w-full rounded-[--radius-lg]" />
+        <Skeleton className="h-96 w-full rounded-(--radius-lg)" />
       </div>
     )
   }
@@ -365,7 +365,7 @@ function SettingsForm({ settings }: { settings: ReturnType<typeof useAdminSettin
           <div
             key={setting.key}
             className={cn(
-              'border-subtle rounded-[--radius-md] border p-4',
+              'border-subtle rounded-(--radius-md) border p-4',
               isDirty && 'border-warning/40',
             )}
           >
@@ -536,7 +536,7 @@ function AvatarField({
   const url = publicStorageUrl('profile', path || null)
 
   return (
-    <div className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+    <div className="border-subtle bg-surface rounded-(--radius-lg) border p-4">
       <p className="text-secondary text-sm font-medium">Profile photo</p>
       <p className="text-muted mt-1 text-xs">
         Q-04. Replaces the monogram tile in the hero. Resized to 1920px and converted to WebP in
@@ -550,7 +550,7 @@ function AvatarField({
             <img
               src={url}
               alt=""
-              className="border-subtle size-24 shrink-0 rounded-[--radius-md] border object-cover"
+              className="border-subtle size-24 shrink-0 rounded-(--radius-md) border object-cover"
             />
           )}
           <div className="min-w-0 flex-1">
@@ -570,7 +570,7 @@ function AvatarField({
                 aria-invalid={altText.trim() === '' || undefined}
                 aria-describedby="avatar-alt-hint"
                 placeholder="Moin Patel"
-                className="border-strong bg-base text-primary focus:border-accent w-full rounded-[--radius-sm] border px-3 py-2 text-sm focus:outline-none"
+                className="border-strong bg-base text-primary focus:border-accent w-full rounded-(--radius-sm) border px-3 py-2 text-sm focus:outline-none"
               />
               <p id="avatar-alt-hint" className="text-muted mt-1 text-xs">
                 Required once a photo is set — the database enforces it too. Your name is fine.

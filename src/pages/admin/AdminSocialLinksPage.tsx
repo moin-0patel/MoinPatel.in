@@ -216,7 +216,7 @@ function LinkEditor({
   }
 
   return (
-    <div className="border-accent/30 bg-surface mt-6 space-y-4 rounded-[--radius-lg] border p-5">
+    <div className="border-accent/30 bg-surface mt-6 space-y-4 rounded-(--radius-lg) border p-5">
       <h2 className="text-primary font-medium">{id ? 'Edit link' : 'New link'}</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -285,7 +285,7 @@ function LinkEditor({
       </div>
 
       {form.published && looksLikePlaceholder(form.url) && (
-        <p className="border-warning/30 bg-warning-soft text-warning rounded-[--radius-sm] border px-3 py-2 text-xs">
+        <p className="border-warning/30 bg-warning-soft text-warning rounded-(--radius-sm) border px-3 py-2 text-xs">
           This URL is still the seed placeholder. Publishing it puts a dead link on the site.
         </p>
       )}

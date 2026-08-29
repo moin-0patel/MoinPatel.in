@@ -34,7 +34,7 @@ export function PagePlaceholder({
         {/* A11Y-02 — exactly one h1 per page. */}
         <h1 className="text-primary">{heading}</h1>
         {description && <p className="text-secondary measure mt-4">{description}</p>}
-        <p className="border-subtle text-muted mt-10 inline-block rounded-[--radius-sm] border border-dashed px-3 py-1.5 font-mono text-xs">
+        <p className="border-subtle text-muted mt-10 inline-block rounded-(--radius-sm) border border-dashed px-3 py-1.5 font-mono text-xs">
           Scaffold · built in {phase}
         </p>
       </div>

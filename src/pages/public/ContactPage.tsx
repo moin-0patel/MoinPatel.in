@@ -151,7 +151,7 @@ export default function ContactPage() {
                 {mutation.isError && (
                   <div
                     role="alert"
-                    className="border-danger/30 bg-danger-soft rounded-[--radius-md] border p-4"
+                    className="border-danger/30 bg-danger-soft rounded-(--radius-md) border p-4"
                   >
                     <p className="text-danger text-sm font-medium">
                       {mutation.error instanceof AppError
@@ -306,7 +306,7 @@ function SuccessState({
     <div
       role="status"
       aria-live="polite"
-      className="border-success/30 bg-success-soft/40 rounded-[--radius-lg] border p-8 text-center"
+      className="border-success/30 bg-success-soft/40 rounded-(--radius-lg) border p-8 text-center"
     >
       <CheckCircle2 className="text-success mx-auto size-8" aria-hidden="true" />
       <h2 className="text-primary font-display mt-4 text-xl font-semibold">Message sent</h2>
@@ -346,14 +346,14 @@ function DirectChannels({
       {/* Design's live-status chip. Decorative, so it is hidden from AT. */}
       <p
         aria-hidden="true"
-        className="text-accent mb-4 flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase"
+        className="text-accent mb-4 flex items-center gap-2 font-mono text-xs tracking-(--tracking-mono) uppercase"
       >
         <span className="bg-success size-1.5 shrink-0 rounded-full" />
         Available
       </p>
       <h2
         id="direct-channels-heading"
-        className="text-muted mb-4 font-mono text-xs tracking-[--tracking-mono] uppercase"
+        className="text-muted mb-4 font-mono text-xs tracking-(--tracking-mono) uppercase"
       >
         Or reach me directly
       </h2>

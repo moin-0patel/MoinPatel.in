@@ -55,8 +55,8 @@ export function ExperienceSection({
           />
         </div>
         <LoadingRegion label="Loading experience" className="space-y-6">
-          <Skeleton className="h-32 w-full rounded-[--radius-lg]" />
-          <Skeleton className="h-24 w-full rounded-[--radius-lg]" />
+          <Skeleton className="h-32 w-full rounded-(--radius-lg)" />
+          <Skeleton className="h-24 w-full rounded-(--radius-lg)" />
         </LoadingRegion>
       </Section>
     )
@@ -312,7 +312,7 @@ function ItemList({
     <div className="mt-4">
       <h4
         id={headingId}
-        className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase"
+        className="text-muted font-mono text-xs tracking-(--tracking-mono) uppercase"
       >
         {heading}
       </h4>

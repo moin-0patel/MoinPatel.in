@@ -82,7 +82,7 @@ export default function AdminProjectsPage() {
               aria-pressed={stateFilter === state}
               onClick={() => setStateFilter(state)}
               className={cn(
-                'h-11 rounded-[--radius-sm] border px-3 text-sm capitalize md:h-9',
+                'h-11 rounded-(--radius-sm) border px-3 text-sm capitalize md:h-9',
                 stateFilter === state
                   ? 'border-accent bg-accent-soft text-accent'
                   : 'border-subtle text-secondary hover:border-strong',
@@ -98,7 +98,7 @@ export default function AdminProjectsPage() {
         {isPending ? (
           <div className="space-y-2" aria-hidden="true">
             {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-[--radius-lg]" />
+              <Skeleton key={i} className="h-24 w-full rounded-(--radius-lg)" />
             ))}
           </div>
         ) : isError ? (
@@ -157,7 +157,7 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
   }
 
   return (
-    <article className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+    <article className="border-subtle bg-surface rounded-(--radius-lg) border p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -240,14 +240,14 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
       <div className="border-subtle mt-3 flex items-center gap-2 border-t pt-3">
         <span
           id={`state-label-${project.id}`}
-          className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase"
+          className="text-muted font-mono text-xs tracking-(--tracking-mono) uppercase"
         >
           State
         </span>
         <div
           role="group"
           aria-labelledby={`state-label-${project.id}`}
-          className="border-subtle flex overflow-hidden rounded-[--radius-sm] border"
+          className="border-subtle flex overflow-hidden rounded-(--radius-sm) border"
         >
           {(['draft', 'published', 'archived'] as const).map((state) => {
             const isActive = project.publication_state === state
@@ -260,7 +260,7 @@ function ProjectRow({ project }: { project: AdminProjectRow }) {
                 onClick={() => handleStateChange(state)}
                 className={cn(
                   'px-3 py-1.5 text-xs capitalize',
-                  'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                  'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                   isActive
                     ? // accent-strong, not accent: --color-accent is the light text tone.

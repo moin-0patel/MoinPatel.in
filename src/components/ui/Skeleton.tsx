@@ -18,7 +18,7 @@ export function Skeleton({ className }: { className?: string }) {
     <span
       aria-hidden="true"
       className={cn(
-        'bg-surface-raised block animate-pulse rounded-[--radius-sm]',
+        'bg-surface-raised block animate-pulse rounded-(--radius-sm)',
         'motion-reduce:animate-none',
         className,
       )}
@@ -53,7 +53,7 @@ export function ProjectCardSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="border-subtle bg-surface overflow-hidden rounded-[--radius-lg] border"
+      className="border-subtle bg-surface overflow-hidden rounded-(--radius-lg) border"
     >
       <Skeleton className="aspect-video w-full rounded-none" />
       <div className="space-y-3 p-5">

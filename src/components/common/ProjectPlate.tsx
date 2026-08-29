@@ -67,6 +67,27 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
    */
   return (
     <article
+      /*
+       * The four bracket-var utilities below are dead (Tailwind v4 drops a
+       * bare custom property in brackets) and all compute 0.
+       *
+       * THIS WHOLE COMPONENT IS UNREFERENCED. `ProjectPlate` is exported and
+       * never imported: a repo-wide search finds only the declaration on line
+       * 45, and it does not appear in the built bundle at all (Rollup shakes
+       * it out). The homepage's Selected Systems showcase renders `WorkCard`
+       * instead — see FeaturedProjectsSection — since `f59a90d`.
+       *
+       * So correcting these four changes nothing on any route: there is no
+       * full-bleed tinted band to restore, because nothing mounts this. An
+       * earlier note here claimed the change was "a visible layout change to
+       * the case-study route"; that was wrong on both counts, and it is
+       * recorded so the next pass does not re-litigate it.
+       *
+       * The real question is whether this file should exist, which is a
+       * deletion decision rather than a syntax one. Fix the utilities if and
+       * when it is revived — at that point the `-mx`/`px` pair is what
+       * produces the full-bleed inset below lg.
+       */
       className={cn(
         'group border-subtle relative border-t pt-[--section-gap]',
         'bg-surface -mx-[--gutter] px-[--gutter] pb-[--section-gap]',
@@ -81,14 +102,14 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
          */}
         <p
           aria-hidden="true"
-          className="text-muted font-mono text-[length:var(--text-2xl)] leading-none tracking-[--tracking-mono] tabular-nums lg:text-[length:var(--text-4xl)]"
+          className="text-muted font-mono text-[length:var(--text-2xl)] leading-none tracking-(--tracking-mono) tabular-nums lg:text-[length:var(--text-4xl)]"
         >
           {indexLabel(index)}
         </p>
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
+            <p className="text-accent font-mono text-xs tracking-(--tracking-mono) uppercase">
               {CATEGORY_LABEL[project.category]}
             </p>
             <StatusBadge status={project.status} />
@@ -113,10 +134,10 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
            * deliberate negative space, which is where the Core then sits. It is
            * composition rather than a scrim, a panel, or a dimmed Core.
            */}
-          <h3 className="text-primary font-display mt-3 text-[length:var(--text-3xl)] leading-[--leading-snug] font-semibold tracking-[--tracking-tight] text-balance lg:max-w-[16ch] lg:text-[length:var(--text-5xl)]">
+          <h3 className="text-primary font-display mt-3 text-[length:var(--text-3xl)] leading-(--leading-snug) font-semibold tracking-(--tracking-tight) text-balance lg:max-w-[16ch] lg:text-[length:var(--text-5xl)]">
             <Link
               to={caseStudyPath(project.slug)}
-              className="after:absolute after:inset-0 after:content-[''] hover:text-accent focus-visible:text-accent transition-colors duration-[--duration-hover] ease-[--ease-out]"
+              className="after:absolute after:inset-0 after:content-[''] hover:text-accent focus-visible:text-accent transition-colors duration-(--duration-hover) ease-(--ease-out)"
             >
               {project.title}
             </Link>
@@ -161,7 +182,7 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
                 <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2 xl:grid-cols-3">
                   {claims.map((claim) => (
                     <li key={claim.label} className="min-w-0">
-                      <p className="text-primary font-mono text-xs tracking-[--tracking-mono] uppercase">
+                      <p className="text-primary font-mono text-xs tracking-(--tracking-mono) uppercase">
                         {claim.label}
                       </p>
                       <p className="text-secondary mt-1 text-sm">{claim.detail}</p>
@@ -197,12 +218,12 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
                 className={cn(
                   'text-primary hover:text-accent focus-visible:text-accent',
                   'font-display inline-flex items-center gap-2 text-[length:var(--text-lg)] font-medium',
-                  'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                  'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                 )}
               >
                 View live
                 <ArrowUpRight
-                  className="size-5 transition-transform duration-[--duration-hover] ease-[--ease-out] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none"
+                  className="size-5 transition-transform duration-(--duration-hover) ease-(--ease-out) group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:translate-none"
                   aria-hidden="true"
                 />
                 <span className="visually-hidden">— {project.title} (opens in a new tab)</span>
@@ -215,14 +236,14 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
                * because a control that cannot be operated should not be
                * reachable as though it can.
                */
-              <p className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase">
+              <p className="text-muted font-mono text-xs tracking-(--tracking-mono) uppercase">
                 {project.status === 'in_progress' ? 'Live demo coming soon' : 'Case study only'}
               </p>
             )}
 
             <Link
               to={caseStudyPath(project.slug)}
-              className="text-secondary hover:text-primary focus-visible:text-primary text-sm transition-colors duration-[--duration-hover] ease-[--ease-out]"
+              className="text-secondary hover:text-primary focus-visible:text-primary text-sm transition-colors duration-(--duration-hover) ease-(--ease-out)"
             >
               Read the case study
               <span className="visually-hidden"> — {project.title}</span>
@@ -233,7 +254,7 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-primary focus-visible:text-primary inline-flex items-center gap-2 text-sm transition-colors duration-[--duration-hover] ease-[--ease-out]"
+                className="text-muted hover:text-primary focus-visible:text-primary inline-flex items-center gap-2 text-sm transition-colors duration-(--duration-hover) ease-(--ease-out)"
               >
                 <GithubIcon className="size-4" aria-hidden="true" />
                 Source
@@ -259,7 +280,7 @@ export function ProjectPlate({ project, index }: { project: ProjectSummary; inde
             loading="lazy"
             decoding="async"
             sizes={imageSizes('card')}
-            className="aspect-[16/7] w-full object-cover transition-transform duration-[--duration-entry] ease-[--ease-out] group-hover:scale-[1.01] motion-reduce:transform-none"
+            className="aspect-[16/7] w-full object-cover transition-transform duration-(--duration-entry) ease-(--ease-out) group-hover:scale-[1.01] motion-reduce:scale-100"
           />
         </div>
       )}

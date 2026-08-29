@@ -39,7 +39,9 @@ const VARIANT: Record<ButtonVariant, string> = {
   primary:
     // Black on the accent fill, exactly as the reference does it: its yellow
     // CTA carries black type. White measured 1.69:1 on the cyan.
-    'bg-accent-fill text-accent-ink hover:bg-accent-strong',
+    // `accent-deep` on press is one further step down the same ramp the hover
+    // starts, so the pressed fill is always darker than the hovered one.
+    'bg-accent-fill text-accent-ink hover:bg-accent-strong active:bg-accent-deep',
   secondary:
     'border border-strong bg-transparent text-primary hover:border-accent hover:text-accent',
   ghost: 'bg-transparent text-secondary hover:text-primary hover:bg-surface',
@@ -69,7 +71,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const SHAPE: Record<ButtonShape, string> = {
-  default: 'rounded-[--radius-md]',
+  default: 'rounded-(--radius-md)',
   pill: 'rounded-full',
 }
 
@@ -105,8 +107,29 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
      * actually transitioned — `transition-colors` does not cover it, and it
      * would have snapped.
      */
-    'transition-[color,background-color,border-color,font-variation-settings]',
-    'duration-[--duration-hover] ease-[--ease-out]',
+    // `scale`, not `transform`: Tailwind v4 compiles `scale-*` to the STANDALONE
+    // scale property, so a list naming only `transform` would leave the press
+    // dip un-transitioned (measured — it snapped).
+    'transition-[color,background-color,border-color,font-variation-settings,scale]',
+    'duration-(--duration-hover) ease-(--ease-out)',
+    /*
+     * A distinct PRESSED state, not just a darker hover.
+     *
+     * Hover already changes the fill; without a separate active state a click
+     * gives no acknowledgement of its own — on touch, where hover never
+     * resolves, it gives none at all. The dip is deliberately small: at pill
+     * sizes anything deeper reads as the button wobbling.
+     *
+     * `press-dip` is a CSS utility, not `active:scale-[…] motion-reduce:…`,
+     * and that is a measured decision. Two Tailwind variants of equal
+     * specificity are resolved by stylesheet order, and `motion-reduce` sorts
+     * BEFORE `active` — so the reduced-motion guard lost and the dip still ran
+     * under `prefers-reduced-motion` (verified in a reduced-motion context).
+     * The utility declares the scale only inside
+     * `@media (prefers-reduced-motion: no-preference)`, so there is no rule to
+     * lose. The colour change still signals the press either way.
+     */
+    'press-dip',
     SHAPE[shape],
     // 32.4: disabled is 45% opacity and never the only signal — the
     // aria-disabled below carries it for non-visual users.

@@ -103,25 +103,24 @@
        * copy is a visible jump at hydration, so change them together.
        */
       .boot-shell {
-        /* The rendered header sits in flow above the hero: 27px tall at
-           desktop widths, 44px below the md breakpoint (measured, not the
-           64px design token — the compact chrome renders shorter). The hero
-           section therefore spans [offset, offset + 100svh]; the shell
-           reproduces that box so nothing moves when React takes over. */
-        --boot-top: 27px;
+        /* The header is `fixed` (PublicLayout), so NOTHING sits in flow above
+           the hero and this box starts at y=0 on every viewport. It therefore
+           spans exactly [0, 100svh] and needs no offset.
+
+           This used to carry a `--boot-top` of 27px (44px below md) to mirror
+           the height an in-flow header rendered at. That variable is gone with
+           the header's flow height: reintroducing an offset here without one
+           above would put the pre-hydration hero and the React hero in
+           different places, which is a visible jump at hydration and a CLS
+           regression on a metric measuring 0.0000. */
         position: relative;
-        min-height: calc(100svh + var(--boot-top));
+        min-height: 100svh;
         overflow: hidden;
-      }
-      @media (max-width: 767px) {
-        .boot-shell {
-          --boot-top: 44px;
-        }
       }
       .boot-shell__wordmark {
         position: absolute;
         inset-inline: 0;
-        top: calc(var(--boot-top) + 7svh);
+        top: 7svh;
         text-align: center;
         white-space: nowrap;
         font-family:

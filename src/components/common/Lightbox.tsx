@@ -44,8 +44,8 @@ export function Gallery({
                   onClick={() => setOpenIndex(index)}
                   className={cn(
                     'group border-subtle bg-surface block w-full overflow-hidden',
-                    'rounded-[--radius-lg] border',
-                    'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                    'rounded-(--radius-lg) border',
+                    'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                     'hover:border-strong',
                   )}
                   // The alt text is already the button's name via the <img>;
@@ -62,7 +62,7 @@ export function Gallery({
                     width={image.width ?? undefined}
                     height={image.height ?? undefined}
                     sizes={imageSizes('card')}
-                    className="aspect-video w-full object-cover transition-transform duration-[--duration-hover] group-hover:scale-[1.02] motion-reduce:transform-none"
+                    className="aspect-video w-full object-cover transition-transform duration-(--duration-hover) group-hover:scale-[1.02] motion-reduce:scale-100"
                   />
                 </button>
                 {image.caption && (
@@ -148,14 +148,14 @@ function Lightbox({
           <div className="flex items-center justify-between gap-4">
             {/* A11Y-16 — position announced, not just displayed. */}
             <p
-              className="text-muted font-mono text-xs tracking-[--tracking-mono]"
+              className="text-muted font-mono text-xs tracking-(--tracking-mono)"
               role="status"
               aria-live="polite"
             >
               Image {index + 1} of {count}
             </p>
             <Dialog.Close
-              className="text-secondary hover:text-primary grid size-11 place-items-center rounded-[--radius-sm]"
+              className="text-secondary hover:text-primary grid size-11 place-items-center rounded-(--radius-sm)"
               aria-label="Close image viewer"
             >
               <X className="size-5" aria-hidden="true" />
@@ -173,7 +173,7 @@ function Lightbox({
               <img
                 src={url}
                 alt={image.altText}
-                className="max-h-full max-w-full rounded-[--radius-lg] object-contain"
+                className="max-h-full max-w-full rounded-(--radius-lg) object-contain"
               />
             )}
 
@@ -215,7 +215,7 @@ function NavButton({
         // RES-07 — 44px touch target.
         'border-subtle bg-surface/80 text-secondary grid size-11 shrink-0 place-items-center',
         'rounded-full border backdrop-blur-sm',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
         'hover:text-primary hover:border-strong',
       )}
     >

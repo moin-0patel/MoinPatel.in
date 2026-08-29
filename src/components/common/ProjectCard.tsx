@@ -44,8 +44,8 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
             sizes={imageSizes('card')}
             className={cn(
               'size-full object-cover',
-              'transition-transform duration-[--duration-hover] ease-[--ease-out]',
-              'group-hover:scale-[1.02] motion-reduce:transform-none',
+              'transition-transform duration-(--duration-hover) ease-(--ease-out)',
+              'group-hover:scale-[1.02] motion-reduce:scale-100',
             )}
           />
         ) : (
@@ -66,11 +66,11 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <p className="text-muted font-mono text-xs tracking-[--tracking-mono]">
+        <p className="text-muted font-mono text-xs tracking-(--tracking-mono)">
           {CATEGORY_LABEL[project.category]}
         </p>
 
-        <h3 className="text-primary group-hover:text-accent transition-colors duration-[--duration-hover]">
+        <h3 className="text-primary group-hover:text-accent transition-colors duration-(--duration-hover)">
           {project.title}
         </h3>
 
@@ -183,9 +183,9 @@ function IconLink({
       aria-label={`${label} (opens in a new tab)`}
       onClick={(event) => event.stopPropagation()}
       className={cn(
-        'grid size-9 place-items-center rounded-[--radius-sm]',
+        'grid size-9 place-items-center rounded-(--radius-sm)',
         'border-subtle bg-base/80 text-secondary border backdrop-blur-sm',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
         'hover:text-primary hover:border-strong',
       )}
     >

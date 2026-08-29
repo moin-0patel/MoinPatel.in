@@ -121,7 +121,7 @@ function CapabilityCard({
 }) {
   return (
     <Card as="article" interactive className="flex h-full min-w-0 flex-col px-5 py-6">
-      <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
+      <p className="text-accent font-mono text-xs tracking-(--tracking-mono) uppercase">
         {capability.eyebrow}
       </p>
 
@@ -152,7 +152,7 @@ function CapabilityCard({
       {hasProjects && capability.category && (
         <Link
           to={`/projects?category=${capability.category}`}
-          className="text-accent hover:text-primary mt-auto inline-flex pt-5 text-sm font-medium transition-colors duration-[--duration-hover] ease-[--ease-reference]"
+          className="text-accent hover:text-primary mt-auto inline-flex pt-5 text-sm font-medium transition-colors duration-(--duration-hover) ease-(--ease-reference)"
         >
           See it built
           <span className="visually-hidden"> — {capability.title} projects</span>

@@ -63,8 +63,8 @@ function BuildTypeCard({ buildType, hasProjects }: { buildType: BuildType; hasPr
   return (
     <article
       className={cn(
-        'rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-[--duration-hover] ease-[--ease-out] flex h-full flex-col rounded-[--radius-lg] border p-5',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+        'rim-light border-subtle bg-surface hover:border-accent/40 transition-colors duration-(--duration-hover) ease-(--ease-out) flex h-full flex-col rounded-(--radius-lg) border p-5',
+        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
         'hover:border-strong',
       )}
     >

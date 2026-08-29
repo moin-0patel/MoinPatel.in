@@ -156,8 +156,8 @@ function AdminNavLink({
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-2.5 rounded-[--radius-sm] px-2 py-2 text-sm',
-          'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+          'flex items-center gap-2.5 rounded-(--radius-sm) px-2 py-2 text-sm',
+          'transition-colors duration-(--duration-hover) ease-(--ease-out)',
           isActive
             ? // A solid pill, not a tint. `bg-accent-soft text-accent` put accent
               // text on a tinted RAISED surface, which composites to #191f30 and

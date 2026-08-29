@@ -82,7 +82,7 @@ export function ImpactSection() {
                 {/* A11Y — decorative; the text carries all meaning. */}
                 <span
                   aria-hidden="true"
-                  className="bg-accent-soft text-accent absolute top-6 right-6 grid size-9 place-items-center rounded-[--radius-sm]"
+                  className="bg-accent-soft text-accent absolute top-6 right-6 grid size-9 place-items-center rounded-(--radius-sm)"
                 >
                   <Icon className="size-4" />
                 </span>

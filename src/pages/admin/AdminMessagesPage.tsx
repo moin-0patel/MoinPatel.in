@@ -62,7 +62,7 @@ export default function AdminMessagesPage() {
             aria-pressed={filter === option.value}
             onClick={() => setFilter(option.value)}
             className={cn(
-              'h-11 rounded-[--radius-sm] border px-3 text-sm md:h-9',
+              'h-11 rounded-(--radius-sm) border px-3 text-sm md:h-9',
               filter === option.value
                 ? 'border-accent bg-accent-soft text-accent'
                 : 'border-subtle text-secondary hover:border-strong',
@@ -77,7 +77,7 @@ export default function AdminMessagesPage() {
         {isPending ? (
           <div className="space-y-2" aria-hidden="true">
             {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-28 w-full rounded-[--radius-lg]" />
+              <Skeleton key={i} className="h-28 w-full rounded-(--radius-lg)" />
             ))}
           </div>
         ) : isError ? (
@@ -140,7 +140,7 @@ function MessageCard({ message }: { message: ContactMessage }) {
   return (
     <article
       className={cn(
-        'rounded-[--radius-lg] border p-4',
+        'rounded-(--radius-lg) border p-4',
         message.status === 'new'
           ? 'border-accent/30 bg-accent-soft/30'
           : 'border-subtle bg-surface',

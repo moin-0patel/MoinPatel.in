@@ -15,7 +15,7 @@ export default function ServerErrorPage({ onReload }: { onReload?: () => void })
     <>
       <SEO title="Something went wrong · Moin Patel" noindex />
       <div className="container-page flex min-h-[60dvh] flex-col items-center justify-center py-20 text-center">
-        <p className="text-muted font-mono text-sm tracking-[--tracking-mono]">500</p>
+        <p className="text-muted font-mono text-sm tracking-(--tracking-mono)">500</p>
         <h1 className="text-primary mt-4 text-4xl">Something went wrong</h1>
         <p className="text-secondary measure mt-4">
           An unexpected error stopped this page from loading. Reloading usually fixes it.

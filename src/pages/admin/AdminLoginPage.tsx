@@ -88,7 +88,7 @@ export default function AdminLoginPage() {
               <p
                 id={errorId}
                 role="alert"
-                className="border-danger/30 bg-danger-soft text-danger rounded-[--radius-sm] border px-3 py-2 text-sm"
+                className="border-danger/30 bg-danger-soft text-danger rounded-(--radius-sm) border px-3 py-2 text-sm"
               >
                 {error}
               </p>
@@ -205,8 +205,8 @@ function Field({ id, label, children }: { id: string; label: string; children: R
 }
 
 const inputClass = cn(
-  'bg-surface border-subtle text-primary w-full rounded-[--radius-sm] border',
+  'bg-surface border-subtle text-primary w-full rounded-(--radius-sm) border',
   'h-11 px-3 text-sm', // RES-07 — 44px minimum
-  'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+  'transition-colors duration-(--duration-hover) ease-(--ease-out)',
   'focus:border-accent',
 )

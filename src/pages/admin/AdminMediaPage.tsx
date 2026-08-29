@@ -57,8 +57,8 @@ export default function AdminMediaPage() {
       <header>
         <h1 className="text-primary">Media</h1>
         <p className="text-secondary measure mt-2 text-sm">
-          Everything stored in the public buckets. Images are converted to WebP and capped at
-          1920px before upload, so what is here is already optimised.
+          Everything stored in the public buckets. Images are converted to WebP and capped at 1920px
+          before upload, so what is here is already optimised.
         </p>
       </header>
 
@@ -72,8 +72,8 @@ export default function AdminMediaPage() {
             aria-checked={bucket === entry.id}
             onClick={() => setBucket(entry.id)}
             className={cn(
-              'rounded-[--radius-md] px-3 py-1.5 text-sm',
-              'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+              'rounded-(--radius-md) px-3 py-1.5 text-sm',
+              'transition-colors duration-(--duration-hover) ease-(--ease-out)',
               bucket === entry.id
                 ? 'bg-accent-strong text-accent-ink'
                 : 'text-secondary hover:text-primary hover:bg-surface-raised',
@@ -88,7 +88,7 @@ export default function AdminMediaPage() {
             type="checkbox"
             checked={showOrphansOnly}
             onChange={(event) => setShowOrphansOnly(event.target.checked)}
-            className="accent-[--color-accent]"
+            className="accent-(--color-accent)"
           />
           Unreferenced only
         </label>
@@ -112,7 +112,7 @@ export default function AdminMediaPage() {
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <div className="border-subtle mt-8 rounded-[--radius-lg] border border-dashed py-16 text-center">
+        <div className="border-subtle mt-8 rounded-(--radius-lg) border border-dashed py-16 text-center">
           <ImageOff className="text-muted mx-auto size-8" aria-hidden="true" />
           <p className="text-secondary mt-3 text-sm">
             {showOrphansOnly
@@ -131,7 +131,7 @@ export default function AdminMediaPage() {
               // exactly the kind of content that triggers it.
               <li
                 key={object.path}
-                className="border-subtle bg-surface min-w-0 overflow-hidden rounded-[--radius-lg] border"
+                className="border-subtle bg-surface min-w-0 overflow-hidden rounded-(--radius-lg) border"
               >
                 <div className="bg-surface-raised aspect-video overflow-hidden">
                   {url && (

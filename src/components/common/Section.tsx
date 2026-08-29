@@ -140,7 +140,7 @@ export function SectionHeading({
         <p
           aria-hidden="true"
           className={cn(
-            'mb-3 flex items-center gap-2.5 font-mono text-xs tracking-[--tracking-mono] uppercase',
+            'mb-3 flex items-center gap-2.5 font-mono text-xs tracking-(--tracking-mono) uppercase',
             inverse ? 'text-[color:var(--color-accent-fill)]' : 'text-accent',
           )}
         >
@@ -187,7 +187,19 @@ export function SectionHeading({
               : 'text-[length:var(--text-3xl)] md:text-[length:var(--text-4xl)] lg:text-[length:var(--text-5xl)]',
           )}
         >
-          {title}
+          {/*
+           * The slide target for the masked reveal — see ScrollChoreography.
+           *
+           * The reference's headings do not fade in; they ride up from below
+           * their own baseline inside a clipping parent, at full opacity. That
+           * needs an inner element to move independently of the clip, which is
+           * this span. `block` so it takes the h2's full width and cannot
+           * introduce an inline-layout difference; with no tween running it is
+           * visually identical to the bare text it replaced.
+           */}
+          <span data-reveal-mask="" className="block">
+            {title}
+          </span>
         </h2>
         {meta && (
           <p
@@ -202,7 +214,7 @@ export function SectionHeading({
              * still 12px, still quieter than the title beside it.
              */
             className={cn(
-              'font-mono text-xs tracking-[--tracking-mono] uppercase',
+              'font-mono text-xs tracking-(--tracking-mono) uppercase',
               inverse ? 'text-white/70' : 'text-secondary',
             )}
           >

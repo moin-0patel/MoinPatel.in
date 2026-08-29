@@ -142,7 +142,7 @@ export default function ResumePage() {
          * when the plugin is unavailable, which is exactly the mobile case,
          * and it needs no feature detection to get right.
          */}
-        <div className="border-subtle bg-surface mt-8 overflow-hidden rounded-[--radius-lg] border">
+        <div className="border-subtle bg-surface mt-8 overflow-hidden rounded-(--radius-lg) border">
           {embedUrl && !embedFailed ? (
             <object
               data={embedUrl}

@@ -159,7 +159,7 @@ function ToastCard({
       onBlur={onResume}
       className={cn(
         'pointer-events-auto flex w-full max-w-sm items-start gap-3',
-        'rounded-[--radius-md] border p-3.5 shadow-[--shadow-overlay]',
+        'rounded-(--radius-md) border p-3.5 shadow-(--shadow-overlay)',
         TONE_STYLE[toast.tone],
       )}
     >

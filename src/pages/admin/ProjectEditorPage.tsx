@@ -336,7 +336,7 @@ export default function ProjectEditorPage() {
     return (
       <div className="space-y-3 p-6 lg:p-8">
         <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-96 w-full rounded-[--radius-lg]" />
+        <Skeleton className="h-96 w-full rounded-(--radius-lg)" />
       </div>
     )
   }
@@ -374,7 +374,7 @@ export default function ProjectEditorPage() {
       {/* FR-ADM-11 — the blockers are listed as a checklist, not hidden behind
           a disabled button with no explanation. */}
       {form.publicationState === 'published' && blockers.length > 0 && (
-        <div className="border-danger/30 bg-danger-soft mt-5 rounded-[--radius-md] border p-4">
+        <div className="border-danger/30 bg-danger-soft mt-5 rounded-(--radius-md) border p-4">
           <p className="text-danger text-sm font-medium">
             Not ready to publish — {blockers.length} thing{blockers.length === 1 ? '' : 's'} to fix:
           </p>
@@ -396,7 +396,7 @@ export default function ProjectEditorPage() {
 
       {/* R-02 — a flag hides the client field, not the prose around it. */}
       {confidentialityReminder && (
-        <div className="border-warning/30 bg-warning-soft mt-5 flex items-start gap-2.5 rounded-[--radius-md] border p-4">
+        <div className="border-warning/30 bg-warning-soft mt-5 flex items-start gap-2.5 rounded-(--radius-md) border p-4">
           <AlertTriangle className="text-warning mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <p className="text-secondary text-sm">{confidentialityReminder}</p>
         </div>
@@ -414,7 +414,7 @@ export default function ProjectEditorPage() {
             aria-selected={section === tab.id}
             onClick={() => setSection(tab.id)}
             className={cn(
-              'h-11 rounded-[--radius-sm] border px-3 text-sm md:h-9',
+              'h-11 rounded-(--radius-sm) border px-3 text-sm md:h-9',
               section === tab.id
                 ? 'border-accent bg-accent-soft text-accent'
                 : 'border-subtle text-secondary hover:border-strong',
@@ -684,14 +684,14 @@ function PipelineSection({ form, set }: { form: FormState; set: SetField }) {
       </p>
 
       {steps.length === 0 && (
-        <p className="border-subtle text-muted rounded-[--radius-md] border border-dashed p-4 text-sm">
+        <p className="border-subtle text-muted rounded-(--radius-md) border border-dashed p-4 text-sm">
           No steps yet. Add one for each stage of the workflow.
         </p>
       )}
 
       <ol className="space-y-3">
         {steps.map((step, index) => (
-          <li key={index} className="border-subtle bg-surface rounded-[--radius-md] border p-4">
+          <li key={index} className="border-subtle bg-surface rounded-(--radius-md) border p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <span className="text-accent font-mono text-xs">
                 <GripVertical className="mr-1 inline size-3.5" aria-hidden="true" />
@@ -814,7 +814,7 @@ function TechnologySection({
                   aria-pressed={selected}
                   onClick={() => toggle(tech.id)}
                   className={cn(
-                    'h-9 rounded-[--radius-sm] border px-3 font-mono text-xs',
+                    'h-9 rounded-(--radius-sm) border px-3 font-mono text-xs',
                     selected
                       ? 'border-accent bg-accent-soft text-accent'
                       : 'border-subtle text-secondary hover:border-strong',
@@ -876,12 +876,12 @@ function MediaSection({
         </p>
 
         {form.coverImagePath ? (
-          <div className="border-subtle bg-surface mt-4 flex gap-4 rounded-[--radius-lg] border p-4">
+          <div className="border-subtle bg-surface mt-4 flex gap-4 rounded-(--radius-lg) border p-4">
             {coverUrl && (
               <img
                 src={coverUrl}
                 alt=""
-                className="border-subtle size-24 shrink-0 rounded-[--radius-md] border object-cover"
+                className="border-subtle size-24 shrink-0 rounded-(--radius-md) border object-cover"
               />
             )}
             <div className="min-w-0 flex-1">
@@ -933,7 +933,7 @@ function MediaSection({
         </p>
 
         {!projectId ? (
-          <p className="text-muted border-subtle mt-4 rounded-[--radius-lg] border border-dashed p-6 text-sm">
+          <p className="text-muted border-subtle mt-4 rounded-(--radius-lg) border border-dashed p-6 text-sm">
             Save this project once before adding gallery images — they attach to its id.
           </p>
         ) : (
@@ -945,13 +945,13 @@ function MediaSection({
                   return (
                     <li
                       key={image.id}
-                      className="border-subtle bg-surface flex min-w-0 gap-3 rounded-[--radius-lg] border p-3"
+                      className="border-subtle bg-surface flex min-w-0 gap-3 rounded-(--radius-lg) border p-3"
                     >
                       {url && (
                         <img
                           src={url}
                           alt=""
-                          className="size-16 shrink-0 rounded-[--radius-sm] object-cover"
+                          className="size-16 shrink-0 rounded-(--radius-sm) object-cover"
                         />
                       )}
                       <div className="min-w-0 flex-1">
@@ -1050,7 +1050,7 @@ function LinksSection({ form, set }: { form: FormState; set: SetField }) {
 function ConfidentialitySection({ form, set }: { form: FormState; set: SetField }) {
   return (
     <>
-      <div className="border-warning/30 bg-warning-soft rounded-[--radius-md] border p-4">
+      <div className="border-warning/30 bg-warning-soft rounded-(--radius-md) border p-4">
         <p className="text-secondary text-sm">
           When the client is not disclosed, their name must not appear anywhere in this
           project&rsquo;s content — including inside screenshots. Do not upload images containing
@@ -1251,7 +1251,7 @@ function UnsavedChangesDialog({ guard }: { guard: ReturnType<typeof useUnsavedCh
     <Dialog.Root open={guard.isBlocked} onOpenChange={(open) => !open && guard.cancel()}>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-base/80 fixed inset-0 z-50 backdrop-blur-sm" />
-        <Dialog.Content className="bg-surface-raised border-subtle fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[--radius-xl] border p-6 shadow-[--shadow-overlay]">
+        <Dialog.Content className="bg-surface-raised border-subtle fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--radius-xl) border p-6 shadow-(--shadow-overlay)">
           <Dialog.Title className="text-primary font-display text-lg font-semibold">
             Leave without saving?
           </Dialog.Title>

@@ -78,7 +78,7 @@ export function SkillsSection() {
               /* text-secondary: --color-muted over --color-subtle (#464555, the
                   hairline rule) measures 4.02:1 against a 4.5:1 requirement.
                   Same pair, same fix as the section meta labels. */
-              className="text-secondary mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase"
+              className="text-secondary mb-3 font-mono text-xs tracking-(--tracking-mono) uppercase"
             >
               {group.name}
             </h3>

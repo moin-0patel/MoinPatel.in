@@ -57,9 +57,9 @@ export function ConfirmDialog({
         <Dialog.Overlay className="bg-base/80 fixed inset-0 z-50 backdrop-blur-sm" />
         {/* A11Y-11 — Radix supplies role=dialog, aria-modal, the focus trap,
             Esc, and focus restoration to the trigger. */}
-        <Dialog.Content className="bg-surface-raised border-subtle fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[--radius-xl] border p-6 shadow-[--shadow-overlay]">
+        <Dialog.Content className="bg-surface-raised border-subtle fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-(--radius-xl) border p-6 shadow-(--shadow-overlay)">
           <div className="flex items-start gap-3">
-            <span className="bg-danger-soft text-danger grid size-9 shrink-0 place-items-center rounded-[--radius-sm]">
+            <span className="bg-danger-soft text-danger grid size-9 shrink-0 place-items-center rounded-(--radius-sm)">
               <AlertTriangle className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -73,12 +73,12 @@ export function ConfirmDialog({
           </div>
 
           {/* The record, named. */}
-          <p className="border-subtle bg-base text-primary mt-4 truncate rounded-[--radius-sm] border px-3 py-2 font-mono text-sm">
+          <p className="border-subtle bg-base text-primary mt-4 truncate rounded-(--radius-sm) border px-3 py-2 font-mono text-sm">
             {recordName}
           </p>
 
           {cascadeNote && (
-            <p className="text-warning border-warning/30 bg-warning-soft mt-3 rounded-[--radius-sm] border px-3 py-2 text-xs">
+            <p className="text-warning border-warning/30 bg-warning-soft mt-3 rounded-(--radius-sm) border px-3 py-2 text-xs">
               {cascadeNote}
             </p>
           )}

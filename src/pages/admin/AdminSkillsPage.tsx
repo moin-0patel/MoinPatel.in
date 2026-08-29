@@ -66,7 +66,7 @@ export default function AdminSkillsPage() {
         {isPending ? (
           <div className="space-y-3" aria-hidden="true">
             {Array.from({ length: 3 }, (_, i) => (
-              <Skeleton key={i} className="h-40 w-full rounded-[--radius-lg]" />
+              <Skeleton key={i} className="h-40 w-full rounded-(--radius-lg)" />
             ))}
           </div>
         ) : isError ? (
@@ -120,7 +120,7 @@ function CategoryCard({ category }: { category: AdminSkillCategory }) {
     )
 
   return (
-    <section className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+    <section className="border-subtle bg-surface rounded-(--radius-lg) border p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-primary font-medium">{category.name}</h2>
@@ -246,7 +246,7 @@ function SkillChip({ skill }: { skill: AdminSkillCategory['skills'][number] }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-[--radius-sm] border px-2 py-1',
+        'inline-flex items-center gap-1.5 rounded-(--radius-sm) border px-2 py-1',
         skill.published ? 'border-subtle' : 'border-subtle/50 opacity-50',
         skill.is_core && skill.published && 'border-accent/30 bg-accent-soft',
       )}
@@ -342,7 +342,7 @@ function CategoryEditor({
     )
 
   return (
-    <div className="border-accent/30 bg-base mt-4 space-y-3 rounded-[--radius-md] border p-4">
+    <div className="border-accent/30 bg-base mt-4 space-y-3 rounded-(--radius-md) border p-4">
       <FormField id={id} label="Category name" required>
         <Input id={id} value={name} onChange={(e) => setName(e.target.value)} />
       </FormField>
@@ -404,7 +404,7 @@ function SkillEditor({
     )
 
   return (
-    <div className="border-accent/30 bg-base mt-3 space-y-3 rounded-[--radius-md] border p-4">
+    <div className="border-accent/30 bg-base mt-3 space-y-3 rounded-(--radius-md) border p-4">
       <FormField id={nameId} label="Skill name" required>
         <Input
           id={nameId}

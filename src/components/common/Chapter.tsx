@@ -58,7 +58,7 @@ export function ChapterNumber({ id, className }: { id: ChapterId; className?: st
         // Full-strength --color-muted (6.66:1 on base). An opacity modifier here
         // measured 2.54:1 — dimming an already-muted token is how a decorative
         // number becomes an axe failure.
-        'text-muted font-mono text-xs tracking-[--tracking-mono] tabular-nums',
+        'text-muted font-mono text-xs tracking-(--tracking-mono) tabular-nums',
         className,
       )}
     >

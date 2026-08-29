@@ -281,15 +281,44 @@ export function ScrollChoreography() {
          * extension point the chapter-loop comment promised Journey.
          */
         const journeyCards = gsap.utils.toArray<HTMLElement>('[data-journey-card]')
-        if (journeyCards.length > 0) {
+        for (const card of journeyCards) {
+          /*
+           * SCRUBBED PER CARD, which is the reference's actual mechanism.
+           *
+           * The measured `.about-card` enters at opacity 0, scale 0.6 and
+           * ~34px down, then settles over roughly 1.2s of damped motion that
+           * is COUPLED TO SCROLL — scrolling back up plays it backwards. The
+           * previous once-fired group tween could not do that: it played one
+           * fixed 600ms entrance and then stayed put forever.
+           *
+           * `scrub: 1.2` is the damping. GSAP eases the playhead toward the
+           * scroll position over 1.2s rather than binding frame-for-frame,
+           * which is what produces the spring-like settle instead of a value
+           * that tracks the wheel exactly.
+           *
+           * Per card, not one tween over the group: each card owns its own
+           * trigger window, so the second card is not already finished by the
+           * time it enters the viewport (which is what a shared trigger does
+           * to a tall stacked list). The stagger falls out of the geometry.
+           *
+           * SAFE FOR RES-12: scale only ever approaches 1 from below and the
+           * travel is vertical, so nothing can widen the document.
+           */
           gsap.fromTo(
-            journeyCards,
-            { ...REVEAL_FROM, scale: 0.94 },
+            card,
+            { opacity: 0, y: 34, scale: 0.6 },
             {
-              ...REVEAL_TO,
+              opacity: 1,
+              y: 0,
               scale: 1,
-              stagger: staggerFor(journeyCards.length),
-              scrollTrigger: { trigger: journeyCards[0], start: 'top 85%', once: true },
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 92%',
+                end: 'top 55%',
+                scrub: 1.2,
+                invalidateOnRefresh: true,
+              },
             },
           )
         }
@@ -304,18 +333,77 @@ export function ScrollChoreography() {
          * animating it here would put it back in play.
          */
         const reveal = (section: HTMLElement) => {
-          const targets = gsap.utils
+          const all = gsap.utils
             .toArray<HTMLElement>(section.querySelectorAll('h2, h3, p, li, a'))
             // Capability and journey cards have their own beats above;
             // animating their contents twice would leave whichever tween
             // finished last holding the opacity.
             .filter((el) => !el.closest('[data-capability]') && !el.closest('[data-journey-card]'))
 
-          if (targets.length === 0) return
+          /*
+           * THE HEADING SLIDES BEHIND A MASK; everything else fades and rises.
+           *
+           * The module header records why the fade was chosen originally — the
+           * reference's reveal is a masked slide, and reproducing it needed a
+           * clipping wrapper around every revealing line. That objection holds
+           * for body copy, which is why body copy still fades. It does NOT
+           * hold for section headings: they now carry exactly one wrapper
+           * (`[data-reveal-mask]`, added in SectionHeading), so the real
+           * mechanism is available for the largest, most conspicuous text on
+           * the page at the cost of one span.
+           *
+           * Opacity is pinned at 1 throughout — the reference never fades
+           * these — so the h2 is legible from first paint even mid-tween,
+           * which keeps the "nothing is revealed only by scrolling" rule.
+           */
+          const masks = all
+            .filter((el) => el.tagName === 'H2')
+            .map((h2) => h2.querySelector<HTMLElement>('[data-reveal-mask]'))
+            .filter((el): el is HTMLElement => el !== null)
 
-          gsap.fromTo(targets, REVEAL_FROM, {
+          const fading = all.filter(
+            (el) => !(el.tagName === 'H2' && el.querySelector('[data-reveal-mask]')),
+          )
+
+          for (const mask of masks) {
+            const heading = mask.parentElement
+
+            /*
+             * The clip is armed HERE, with the from-state — not in `onStart`.
+             *
+             * `onStart` fires when the tween begins, which is when the heading
+             * scrolls into range. Between build and that moment the span is
+             * already displaced 110% downward, so an un-clipped heading
+             * rendered its own text ~86px below where it belongs, in full
+             * view, overlapping whatever sat under it. Measured on the first
+             * attempt; arming the clip alongside the offset is what makes the
+             * two states consistent.
+             */
+            if (heading) gsap.set(heading, { overflow: 'clip' })
+
+            gsap.fromTo(
+              mask,
+              { yPercent: 110 },
+              {
+                yPercent: 0,
+                ease: 'power3.out',
+                duration: 0.6,
+                scrollTrigger: { trigger: heading ?? mask, start: 'top 85%', once: true },
+                /*
+                 * Cleared the moment the slide lands: a permanent
+                 * `overflow: clip` on a heading crops descenders and any focus
+                 * ring a heading link draws.
+                 */
+                onComplete: () => heading && gsap.set(heading, { clearProps: 'overflow' }),
+              },
+            )
+          }
+
+          if (fading.length === 0) return
+
+          gsap.fromTo(fading, REVEAL_FROM, {
             ...REVEAL_TO,
-            stagger: staggerFor(targets.length),
+            stagger: staggerFor(fading.length),
             scrollTrigger: { trigger: section, start: 'top 85%', once: true },
           })
         }
@@ -348,15 +436,46 @@ export function ScrollChoreography() {
     // but generously: a cold Supabase round-trip has been measured at ~3.3s,
     // and a build that fires mid-load arms elements React is about to replace
     // (see the variant-shape note in ExperienceSection).
+    /*
+     * BUILD WHEN THE MAIN THREAD IS FREE, never in the paint's way.
+     *
+     * Building is not cheap: every ScrollTrigger resolves its start/end against
+     * live geometry and every `yPercent` tween measures its target, so the pass
+     * is a burst of forced synchronous layout. Run inline, it landed on the
+     * same frame as the hero portrait's post-hydration paint and pushed LCP
+     * from a 2176-2332ms worst case to 2512-2800ms — six of six throttled runs
+     * over the 2500ms floor, measured against the same build with this
+     * scheduling removed. Nothing about the choreography needs to win that
+     * race: every element it touches is below the fold.
+     *
+     * `requestIdleCallback` yields to painting and input; the timeout is the
+     * backstop for a thread that never goes idle, and the setTimeout fallback
+     * covers Safari, which still lacks the API.
+     */
+    const scheduleBuild = () => {
+      if (cancelled) return
+      const run = () => {
+        build()
+        // Positions are computed during build; one refresh after layout settles
+        // catches any late reflow (web fonts, images) without re-creating tweens.
+        window.setTimeout(() => ScrollTrigger.refresh(), 600)
+      }
+      // `typeof window.requestIdleCallback`, not `'requestIdleCallback' in
+      // window`: the `in` form narrows `window` itself and leaves `never` in
+      // the else branch. Called as a member so `this` stays the window.
+      if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(run, { timeout: 1500 })
+      } else {
+        window.setTimeout(run, 200)
+      }
+    }
+
     const started = Date.now()
     const waitForContent = window.setInterval(() => {
       const busy = document.querySelectorAll('[aria-busy="true"]').length > 0
       if (busy && Date.now() - started < 8000) return
       window.clearInterval(waitForContent)
-      build()
-      // Positions are computed during build; one refresh after layout settles
-      // catches any late reflow (web fonts, images) without re-creating tweens.
-      window.setTimeout(() => ScrollTrigger.refresh(), 600)
+      scheduleBuild()
     }, 120)
 
     const refresh = () => ScrollTrigger.refresh()

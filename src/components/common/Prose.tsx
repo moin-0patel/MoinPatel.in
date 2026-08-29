@@ -34,7 +34,7 @@ export function Prose({
         // FR-CASE-10 / 32.2 — the reading scale. Written as explicit child
         // selectors rather than a typography plugin so the values trace back
         // to the tokens in Section 32.
-        '[&_p]:my-4 [&_p]:leading-[--leading-body]',
+        '[&_p]:my-4 [&_p]:leading-(--leading-body)',
         '[&_h3]:text-primary [&_h3]:font-display [&_h3]:mt-8 [&_h3]:mb-3 [&_h3]:text-xl',
         '[&_h4]:text-primary [&_h4]:font-display [&_h4]:mt-6 [&_h4]:mb-2 [&_h4]:text-lg',
         '[&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5',
@@ -43,7 +43,7 @@ export function Prose({
         '[&_strong]:text-primary [&_strong]:font-semibold',
         '[&_a]:text-accent [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent-strong',
         '[&_code]:bg-surface-raised [&_code]:text-primary [&_code]:rounded [&_code]:px-1.5 [&_code]:py-0.5',
-        '[&_pre]:bg-surface-raised [&_pre]:border-subtle [&_pre]:my-5 [&_pre]:overflow-x-auto [&_pre]:rounded-[--radius-md] [&_pre]:border [&_pre]:p-4',
+        '[&_pre]:bg-surface-raised [&_pre]:border-subtle [&_pre]:my-5 [&_pre]:overflow-x-auto [&_pre]:rounded-(--radius-md) [&_pre]:border [&_pre]:p-4',
         '[&_pre_code]:bg-transparent [&_pre_code]:p-0',
         '[&_blockquote]:border-accent [&_blockquote]:text-secondary [&_blockquote]:my-5 [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:italic',
         '[&_hr]:border-subtle [&_hr]:my-8',

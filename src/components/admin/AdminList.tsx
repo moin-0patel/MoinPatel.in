@@ -68,7 +68,7 @@ export function AdminList<T>({
         {isPending ? (
           <div className="space-y-2" aria-hidden="true">
             {Array.from({ length: 3 }, (_, i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-[--radius-lg]" />
+              <Skeleton key={i} className="h-24 w-full rounded-(--radius-lg)" />
             ))}
           </div>
         ) : isError ? (
@@ -106,7 +106,7 @@ export function AdminCard({
   children?: ReactNode
 }) {
   return (
-    <article className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+    <article className="border-subtle bg-surface rounded-(--radius-lg) border p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-primary font-medium">{title}</h2>

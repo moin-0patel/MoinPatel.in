@@ -39,8 +39,8 @@ export function PipelineDiagram({ steps }: { steps: PipelineStep[] }) {
         <li key={step.id} className="relative">
           <article
             className={cn(
-              'border-subtle bg-surface flex h-full flex-col rounded-[--radius-lg] border p-4',
-              'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+              'border-subtle bg-surface flex h-full flex-col rounded-(--radius-lg) border p-4',
+              'transition-colors duration-(--duration-hover) ease-(--ease-out)',
               'hover:border-strong',
             )}
           >
@@ -50,7 +50,7 @@ export function PipelineDiagram({ steps }: { steps: PipelineStep[] }) {
               <span
                 className={cn(
                   'bg-accent-soft text-accent grid size-7 shrink-0 place-items-center',
-                  'rounded-[--radius-sm] font-mono text-xs tracking-[--tracking-mono]',
+                  'rounded-(--radius-sm) font-mono text-xs tracking-(--tracking-mono)',
                 )}
               >
                 {String(step.stepNumber).padStart(2, '0')}
@@ -81,7 +81,7 @@ export function PipelineDiagram({ steps }: { steps: PipelineStep[] }) {
             {/* The named mechanism. Persona 3's whole test is whether the
                 model/service is stated rather than implied. */}
             {step.techNote && (
-              <p className="text-muted mt-auto pt-3 font-mono text-xs tracking-[--tracking-mono]">
+              <p className="text-muted mt-auto pt-3 font-mono text-xs tracking-(--tracking-mono)">
                 {step.techNote}
               </p>
             )}

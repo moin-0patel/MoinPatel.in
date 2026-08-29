@@ -72,7 +72,7 @@ export default function DashboardPage() {
 
           {/* R-11 — an empty portfolio is worse than no portfolio. */}
           {counts && counts.publishedProjects === 0 && (
-            <div className="border-warning/30 bg-warning-soft mt-6 flex items-start gap-3 rounded-[--radius-md] border p-4">
+            <div className="border-warning/30 bg-warning-soft mt-6 flex items-start gap-3 rounded-(--radius-md) border p-4">
               <AlertTriangle className="text-warning mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-primary text-sm font-medium">
@@ -129,8 +129,8 @@ function StatCard({
     <Link
       to={to}
       className={cn(
-        'block rounded-[--radius-lg] border p-4',
-        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+        'block rounded-(--radius-lg) border p-4',
+        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
         tone === 'accent' && 'border-accent/30 bg-accent-soft',
         tone === 'warning' && 'border-warning/30 bg-warning-soft',
         tone === 'default' && 'border-subtle bg-surface hover:border-strong',
@@ -138,7 +138,7 @@ function StatCard({
     >
       <div className="text-muted flex items-center gap-2">
         {icon}
-        <span className="font-mono text-xs tracking-[--tracking-mono] uppercase">{label}</span>
+        <span className="font-mono text-xs tracking-(--tracking-mono) uppercase">{label}</span>
       </div>
       {isPending ? (
         <Skeleton className="mt-3 h-9 w-12" />
@@ -161,8 +161,8 @@ function MiniStat({
   isPending: boolean
 }) {
   return (
-    <div className="border-subtle bg-surface rounded-[--radius-md] border p-3">
-      <p className="text-muted font-mono text-xs tracking-[--tracking-mono] uppercase">{label}</p>
+    <div className="border-subtle bg-surface rounded-(--radius-md) border p-3">
+      <p className="text-muted font-mono text-xs tracking-(--tracking-mono) uppercase">{label}</p>
       {isPending ? (
         <Skeleton className="mt-2 h-6 w-8" />
       ) : (

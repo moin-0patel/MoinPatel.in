@@ -102,7 +102,7 @@ export default function AdminResetPasswordPage() {
     <div className="bg-base grid min-h-dvh place-items-center px-4">
       <SEO title={pageTitle('Reset password · Admin')} noindex />
 
-      <div className="border-subtle bg-surface w-full max-w-sm rounded-[--radius-lg] border p-6">
+      <div className="border-subtle bg-surface w-full max-w-sm rounded-(--radius-lg) border p-6">
         <p className="text-muted font-mono text-xs tracking-[0.18em]">MP · ADMIN</p>
 
         {phase === 'checking' && (
@@ -157,7 +157,7 @@ export default function AdminResetPasswordPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   aria-describedby="password-hint"
-                  className="border-strong bg-base text-primary focus:border-accent w-full rounded-[--radius-sm] border px-3 py-2 text-sm focus:outline-none"
+                  className="border-strong bg-base text-primary focus:border-accent w-full rounded-(--radius-sm) border px-3 py-2 text-sm focus:outline-none"
                 />
                 <p id="password-hint" className="text-muted mt-1 text-xs">
                   At least {MIN_PASSWORD_LENGTH} characters.
@@ -178,7 +178,7 @@ export default function AdminResetPasswordPage() {
                   required
                   value={confirm}
                   onChange={(event) => setConfirm(event.target.value)}
-                  className="border-strong bg-base text-primary focus:border-accent w-full rounded-[--radius-sm] border px-3 py-2 text-sm focus:outline-none"
+                  className="border-strong bg-base text-primary focus:border-accent w-full rounded-(--radius-sm) border px-3 py-2 text-sm focus:outline-none"
                 />
               </div>
 

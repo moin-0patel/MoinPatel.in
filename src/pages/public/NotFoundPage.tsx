@@ -20,7 +20,7 @@ export default function NotFoundPage() {
     <>
       <SEO title="Not found · Moin Patel" noindex />
       <div className="container-page flex min-h-[60dvh] flex-col items-center justify-center py-20 text-center">
-        <p className="text-muted font-mono text-sm tracking-[--tracking-mono]">404</p>
+        <p className="text-muted font-mono text-sm tracking-(--tracking-mono)">404</p>
         <h1 className="text-primary mt-4 text-4xl">This page isn&rsquo;t available</h1>
         <p className="text-secondary measure mt-4">
           The link may be out of date, or the page may have been moved.

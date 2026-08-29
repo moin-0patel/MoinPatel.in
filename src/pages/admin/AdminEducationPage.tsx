@@ -214,7 +214,7 @@ function EducationEditor({
   }
 
   return (
-    <div className="border-accent/30 bg-surface mt-6 space-y-4 rounded-[--radius-lg] border p-5">
+    <div className="border-accent/30 bg-surface mt-6 space-y-4 rounded-(--radius-lg) border p-5">
       <h2 className="text-primary font-medium">
         {id ? 'Edit qualification' : 'New qualification'}
       </h2>

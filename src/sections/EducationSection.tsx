@@ -30,7 +30,7 @@ export function EducationSection() {
           meta="CREDENTIALS"
           title="Education"
         />
-        <Skeleton className="h-28 w-full max-w-md rounded-[--radius-lg]" />
+        <Skeleton className="h-28 w-full max-w-md rounded-(--radius-lg)" />
       </Section>
     )
   }

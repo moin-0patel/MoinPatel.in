@@ -142,3 +142,70 @@ production on a paid plan, or add a scheduled keep-alive request.
 
 Revert the offending commit and redeploy. Database rollbacks are a **new forward
 migration**, never an ad-hoc dashboard fix (MIG-02, MIG-06).
+
+---
+
+## Hosting on Render (alternative to Vercel)
+
+`render.yaml` is a Render Blueprint that reproduces `vercel.json` — same build,
+same publish directory, same six security headers, same cache rules, same SPA
+fallback. The two files are kept in step deliberately: **change a header in one,
+change it in the other**, or the site behaves differently depending on which
+host answered.
+
+| Setting      | Render (`render.yaml`) | Vercel (`vercel.json`) |
+| ------------ | ---------------------- | ---------------------- |
+| Build        | `buildCommand`         | `buildCommand`         |
+| Output       | `staticPublishPath`    | `outputDirectory`      |
+| SPA fallback | `routes: rewrite`      | `rewrites`             |
+| Headers      | `headers[]`            | `headers[]`            |
+| Pretty URLs  | automatic              | `cleanUrls: true`      |
+
+### Steps
+
+1. Push the branch. **Render builds from the Git remote, not from your working
+   tree** — anything uncommitted is simply not deployed.
+2. Render dashboard → **New** → **Blueprint** → select this repository.
+3. Render reads `render.yaml` and prompts for the three `sync: false`
+   variables. Supply `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` and
+   `VITE_SITE_URL`.
+4. `VITE_SITE_URL` is the chicken-and-egg step. The URL is
+   `https://<service-name>.onrender.com`, which is known the moment the service
+   is named — so set it at creation. If you deploy first and set it after, you
+   must **trigger a rebuild**: the value is compiled into the bundle and baked
+   into the prerendered HTML, so it cannot be corrected by an env change alone.
+5. Add the Render origin to Supabase → Authentication → URL Configuration
+   (SEC-10), or admin sign-in redirects will fail.
+6. Custom domain: add it in Render, then update `VITE_SITE_URL` to the custom
+   origin and rebuild. Do not leave `VITE_SITE_URL` pointing at `.onrender.com`
+   once a custom domain is live — canonicals would advertise the wrong origin
+   and split the site's SEO identity across two hosts.
+
+### Verify after the first deploy
+
+The prerender is the thing most likely to break on a host swap, because it
+depends on the platform serving a real file in preference to the SPA fallback.
+Check it explicitly rather than assuming:
+
+```sh
+# Must print the PROJECT's title, not the site-wide default.
+curl -s https://<your-site>/projects/exam-build-platform | grep -o '<title>[^<]*'
+
+# Must print the production origin, never localhost.
+curl -s https://<your-site>/ | grep -o '<link rel="canonical"[^>]*>'
+curl -s https://<your-site>/sitemap.xml | head -5
+```
+
+If the project URL returns the site-wide title, Render is applying the `/*`
+rewrite before matching the file, and the prerendered pages are being masked.
+The fix is to narrow the fallback to the routes that genuinely have no file
+rather than to remove it — `/admin/*` and the 404 path still need it.
+
+Then run the R-01 launch gate from "First production release": paste a project
+URL into LinkedIn and WhatsApp and confirm the preview shows that project.
+
+### Free tier
+
+Render's free static sites do not spin down the way free web services do, so the
+DEP-13 concern above is about **Supabase** pausing, not Render. It applies
+identically on either host.

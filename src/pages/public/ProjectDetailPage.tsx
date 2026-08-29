@@ -134,7 +134,7 @@ function CaseStudy({
         <div className="measure">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <StatusBadge status={project.status} />
-            <span className="text-muted font-mono text-xs tracking-[--tracking-mono]">
+            <span className="text-muted font-mono text-xs tracking-(--tracking-mono)">
               {formatDateRange(project.startedOn, project.completedOn, false)}
             </span>
           </div>
@@ -213,7 +213,7 @@ function CaseStudy({
             fetchPriority="high"
             decoding="async"
             sizes={imageSizes('full')}
-            className="border-subtle mt-10 aspect-video w-full rounded-[--radius-lg] border object-cover"
+            className="border-subtle mt-10 aspect-video w-full rounded-(--radius-lg) border object-cover"
           />
         )}
       </header>
@@ -229,7 +229,7 @@ function CaseStudy({
             <div className="sticky top-24">
               <p
                 aria-hidden="true"
-                className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase"
+                className="text-muted mb-3 font-mono text-xs tracking-(--tracking-mono) uppercase"
               >
                 On this page
               </p>
@@ -241,7 +241,7 @@ function CaseStudy({
                       aria-current={activeId === block.id ? 'true' : undefined}
                       className={cn(
                         'block border-l-2 py-1 pl-3 text-sm',
-                        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                         activeId === block.id
                           ? 'border-accent text-primary'
                           : 'border-subtle text-muted hover:text-secondary hover:border-strong',
@@ -301,7 +301,7 @@ function CaseStudy({
                   width={architectureImage.width ?? undefined}
                   height={architectureImage.height ?? undefined}
                   sizes={imageSizes('full')}
-                  className="border-subtle w-full rounded-[--radius-lg] border"
+                  className="border-subtle w-full rounded-(--radius-lg) border"
                 />
                 {architectureImage.caption && (
                   <figcaption className="text-muted mt-2 text-sm">
@@ -341,7 +341,7 @@ function CaseStudy({
           <section className="border-subtle mt-16 border-t pt-10">
             {/* FR-CASE-09 — deep-links to /contact with the service type mapped
                 from the project's category, so the form arrives prefilled. */}
-            <div className="from-accent-soft to-base border-subtle rounded-[--radius-lg] border bg-gradient-to-br p-6 text-center">
+            <div className="from-accent-soft to-base border-subtle rounded-(--radius-lg) border bg-gradient-to-br p-6 text-center">
               <h2 className="text-primary text-xl">Have a process like this one?</h2>
               <p className="text-secondary measure mx-auto mt-2 text-sm">
                 If your team is doing something similar by hand, it can probably be replaced.
@@ -360,15 +360,15 @@ function CaseStudy({
                 to={`/projects/${nextProject.slug}`}
                 className={cn(
                   'group border-subtle bg-surface mt-6 flex items-center justify-between gap-4',
-                  'rounded-[--radius-lg] border p-5',
-                  'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                  'rounded-(--radius-lg) border p-5',
+                  'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                   'hover:border-strong',
                 )}
               >
                 <span className="min-w-0">
                   <span
                     aria-hidden="true"
-                    className="text-muted block font-mono text-xs tracking-[--tracking-mono] uppercase"
+                    className="text-muted block font-mono text-xs tracking-(--tracking-mono) uppercase"
                   >
                     Next project
                   </span>
@@ -411,7 +411,7 @@ function ClaimBand({ slug }: { slug: string }) {
       <ul className="grid gap-3 sm:grid-cols-3">
         {claims.map((claim) => (
           <Card as="li" key={claim.label} className="min-w-0">
-            <p className="text-accent font-mono text-xs tracking-[--tracking-mono] uppercase">
+            <p className="text-accent font-mono text-xs tracking-(--tracking-mono) uppercase">
               {claim.label}
             </p>
             <p className="text-secondary mt-2 text-sm">{claim.detail}</p>
@@ -474,7 +474,7 @@ function TechnologyGroups({ project }: { project: Project }) {
         <div key={category}>
           <h3
             id={`tech-${category}`}
-            className="text-muted mb-2 font-mono text-xs tracking-[--tracking-mono] uppercase"
+            className="text-muted mb-2 font-mono text-xs tracking-(--tracking-mono) uppercase"
           >
             {TECH_CATEGORY_LABEL[category]}
           </h3>
@@ -505,7 +505,7 @@ function CaseStudySkeleton() {
         <Skeleton className="h-12 w-4/5" />
         <SkeletonText lines={2} />
       </div>
-      <Skeleton className="mt-10 aspect-video w-full rounded-[--radius-lg]" />
+      <Skeleton className="mt-10 aspect-video w-full rounded-(--radius-lg)" />
       <div className="measure mt-12 space-y-10">
         {Array.from({ length: 3 }, (_, i) => (
           <div key={i} className="space-y-3">

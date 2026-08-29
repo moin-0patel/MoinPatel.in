@@ -91,7 +91,7 @@ export function ImageUploader({
   const missingAlt = requireAlt && altText.trim() === ''
 
   return (
-    <div className="border-subtle bg-surface rounded-[--radius-lg] border p-4">
+    <div className="border-subtle bg-surface rounded-(--radius-lg) border p-4">
       <label htmlFor={inputId} className="text-secondary mb-1.5 block text-sm font-medium">
         {label}
       </label>
@@ -102,7 +102,7 @@ export function ImageUploader({
         accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
         onChange={(event) => choose(event.target.files?.[0] ?? null)}
         aria-describedby={`${inputId}-hint`}
-        className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-accent-ink"
+        className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-(--radius-sm) file:border-0 file:px-3 file:py-2 file:text-accent-ink"
       />
       <p id={`${inputId}-hint`} className="text-muted mt-1.5 text-xs">
         Resized to 1920px and converted to WebP in your browser before upload. Location data in the
@@ -115,7 +115,7 @@ export function ImageUploader({
             <img
               src={preview}
               alt=""
-              className="border-subtle size-24 shrink-0 rounded-[--radius-md] border object-cover"
+              className="border-subtle size-24 shrink-0 rounded-(--radius-md) border object-cover"
             />
           )}
 
@@ -137,7 +137,7 @@ export function ImageUploader({
                   aria-invalid={missingAlt || undefined}
                   placeholder="Describe what the image shows"
                   className={cn(
-                    'border-strong bg-base text-primary w-full rounded-[--radius-sm] border px-3 py-2 text-sm',
+                    'border-strong bg-base text-primary w-full rounded-(--radius-sm) border px-3 py-2 text-sm',
                     'focus:border-accent focus:outline-none',
                   )}
                 />

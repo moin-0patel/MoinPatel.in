@@ -51,12 +51,18 @@ export default function MobileNavPanel({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="bg-base/80 fixed inset-0 z-50 backdrop-blur-sm md:hidden" />
+        {/* `mobile-scrim` / `mobile-sheet` carry the open/close keyframes in
+            globals.css, driven by the `data-state` Radix already stamps here.
+            Radix holds both nodes mounted until the exit animation ends, so
+            the close is animated rather than cut. Presentation only — the
+            focus trap, Esc, scroll lock and focus restoration below are
+            untouched. */}
+        <Dialog.Overlay className="bg-base/80 mobile-scrim fixed inset-0 z-50 backdrop-blur-sm md:hidden" />
 
         <Dialog.Content
           id={id}
           // RES-01 — a full-screen sheet, not a squeezed horizontal bar.
-          className="bg-base fixed inset-0 z-50 flex flex-col md:hidden"
+          className="bg-base mobile-sheet fixed inset-0 z-50 flex flex-col md:hidden"
           // No description element exists; this silences Radix's dev warning
           // rather than pointing aria-describedby at nothing.
           aria-describedby={undefined}
@@ -89,7 +95,12 @@ export default function MobileNavPanel({
             triggerRef.current?.focus()
           }}
         >
-          <div className="container-page flex h-[--header-height] shrink-0 items-center justify-between">
+          {/* 64px, matching the page header this sheet opens over — the two
+              rows must stay the same height or the close button lands at a
+              different y than the hamburger that opened it. Corrected in the
+              same pass that took the page header out of flow; see the long
+              note in PublicLayout's Header. */}
+          <div className="container-page flex h-(--header-height) shrink-0 items-center justify-between">
             {/* A11Y-11 — the dialog is labelled by its heading. */}
             <Dialog.Title className="text-muted font-mono text-xs tracking-[0.18em] uppercase">
               Menu
@@ -97,7 +108,7 @@ export default function MobileNavPanel({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="text-secondary hover:text-primary -mr-2 grid size-11 place-items-center rounded-[--radius-sm]"
+                className="text-secondary hover:text-primary -mr-2 grid size-11 place-items-center rounded-(--radius-sm)"
                 aria-label="Close navigation menu"
               >
                 <X className="size-5" aria-hidden="true" />
@@ -125,8 +136,8 @@ export default function MobileNavPanel({
                     onClick={close}
                     className={({ isActive }) =>
                       cn(
-                        'flex min-h-12 items-center rounded-[--radius-sm] px-3 text-lg',
-                        'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                        'flex min-h-12 items-center rounded-(--radius-sm) px-3 text-lg',
+                        'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                         isActive
                           ? 'bg-accent-soft text-accent'
                           : 'text-secondary hover:text-primary',

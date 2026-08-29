@@ -109,6 +109,21 @@ export function FaqSection() {
        * truthful answers, as the note above records. The rhythm — panel, gap,
        * two columns — is the reference's.
        */}
+      {/* `mt-[--section-gap]` is dead (Tailwind v4 drops bare bracket custom
+          properties) and computes 0. IT SHOULD STAY DEAD — measured, not
+          deferred.
+
+          The separation above this grid is already supplied by the heading
+          block's own `mb-8 md:mb-12`, and it measures 48px from md up and 32px
+          on a phone — identical to capabilities, process, impact and skills,
+          which all take their spacing from the same SectionHeading margin.
+          This utility is redundant with that margin, not missing beside it.
+
+          Correcting it would ADD --section-gap on top of the margin, taking
+          this one section to 86.64-98.08px on desktop and 64px on mobile while
+          every sibling stays at 48/32 — it would create the mismatch, not fix
+          one. (`--section-gap` has no live consumer anywhere in the codebase;
+          its only other use is the unreferenced ProjectPlate.) */}
       <div className="mt-[--section-gap] grid items-start gap-2 lg:grid-cols-2">
         {items.map((faq) => (
           <div key={faq.question} className="bg-surface rounded-[10px]">
@@ -116,8 +131,8 @@ export function FaqSection() {
               <summary
                 className={[
                   'text-primary flex cursor-pointer items-center justify-between gap-6',
-                  'px-6 py-[18px] text-[length:var(--text-lg)] leading-[--leading-snug] font-medium',
-                  'hover:text-accent transition-colors duration-[--duration-hover] ease-[--ease-reference]',
+                  'px-6 py-[18px] text-[length:var(--text-lg)] leading-(--leading-snug) font-medium',
+                  'hover:text-accent transition-colors duration-(--duration-hover) ease-(--ease-reference)',
                   'marker:content-[""] [&::-webkit-details-marker]:hidden',
                 ].join(' ')}
               >
@@ -134,10 +149,10 @@ export function FaqSection() {
                  */}
                 <span
                   aria-hidden="true"
-                  className="group-open:bg-base/80 relative grid size-8 shrink-0 place-items-center rounded-[6px] transition-colors duration-[--duration-hover]"
+                  className="group-open:bg-base/80 relative grid size-8 shrink-0 place-items-center rounded-[6px] transition-colors duration-(--duration-hover)"
                 >
                   <span className="bg-strong absolute h-px w-4" />
-                  <span className="bg-strong absolute h-px w-4 rotate-90 transition-transform duration-[--duration-hover] ease-[--ease-reference] group-open:rotate-0 motion-reduce:transition-none" />
+                  <span className="bg-strong absolute h-px w-4 rotate-90 transition-transform duration-(--duration-hover) ease-(--ease-reference) group-open:rotate-0 motion-reduce:transition-none" />
                 </span>
               </summary>
 

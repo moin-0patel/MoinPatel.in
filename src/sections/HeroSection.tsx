@@ -170,6 +170,17 @@ export function HeroSection() {
             'h-[80svh] lg:h-[91svh]',
             // The last few pixels — see the utility, which carries the geometry.
             'portrait-matte',
+            /*
+             * NO AMBIENT ZOOM HERE, and that is a measured decision rather
+             * than an omission — see the retired `portrait-zoom` note in
+             * globals.css. The reference's portrait does not animate: its
+             * wrapper carries a STATIC scale(1.0372) with
+             * `animation-name: none`, which an earlier audit misread as a slow
+             * zoom by sampling two nested static scales. Implementing it as an
+             * animation also pushed LCP from ~750ms to ~2.6s, past the §12.4
+             * floor, because a scaling hero image registers a second, larger
+             * largest-contentful-paint entry.
+             */
           )}
         />
       </div>
@@ -193,7 +204,7 @@ export function HeroSection() {
                 <span className="text-accent font-display text-[length:var(--text-3xl)] leading-none font-bold">
                   {stat.value}
                 </span>
-                <span className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
+                <span className="text-secondary font-mono text-xs tracking-(--tracking-mono) uppercase">
                   {stat.label}
                 </span>
               </div>
@@ -264,7 +275,7 @@ export function HeroSection() {
                * block clears the figure entirely — the plate removes that split
                * instead of papering over it.
                */}
-              <p className="text-secondary mt-1 font-mono text-xs tracking-[--tracking-mono] uppercase">
+              <p className="text-secondary mt-1 font-mono text-xs tracking-(--tracking-mono) uppercase">
                 {roleTitle}
               </p>
             </div>
@@ -328,12 +339,12 @@ export function HeroSection() {
              * alike, so it never draws a full-width band across the cream.
              */}
             <div className="flex w-fit flex-col gap-2 px-3 py-2 [background-color:var(--glass-bg)]">
-              <p className="text-secondary font-mono text-xs tracking-[--tracking-mono] uppercase">
+              <p className="text-secondary font-mono text-xs tracking-(--tracking-mono) uppercase">
                 {location}
               </p>
 
               {showAvailability && (
-                <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-[--tracking-mono] uppercase">
+                <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-(--tracking-mono) uppercase">
                   <span className="bg-success size-1.5 shrink-0 rounded-full" aria-hidden="true" />
                   {availabilityLabel}
                 </p>

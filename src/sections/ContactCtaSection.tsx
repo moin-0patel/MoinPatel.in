@@ -57,7 +57,10 @@ export function ContactCtaSection() {
           id="contact-cta-heading"
           className="text-primary font-display max-w-[18ch] text-[length:var(--text-4xl)] leading-[1.02] font-medium text-balance md:text-[length:var(--text-5xl)] lg:text-[length:var(--text-7xl)]"
         >
-          Have a manual process worth automating?
+          {/* The masked-slide target, as in SectionHeading. */}
+          <span data-reveal-mask="" className="block">
+            Have a manual process worth automating?
+          </span>
         </h2>
 
         {/* 16.99px in a narrow start-aligned column, as measured. */}

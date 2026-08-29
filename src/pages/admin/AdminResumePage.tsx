@@ -98,7 +98,7 @@ export default function AdminResumePage() {
       {!isPending && !published && (
         <p
           role="status"
-          className="border-warning/30 bg-warning-soft text-warning mt-6 rounded-[--radius-md] border px-4 py-3 text-sm"
+          className="border-warning/30 bg-warning-soft text-warning mt-6 rounded-(--radius-md) border px-4 py-3 text-sm"
         >
           No version is published, so every resume link is hidden across the site and /resume shows
           a neutral message.
@@ -110,7 +110,7 @@ export default function AdminResumePage() {
           Upload a new version
         </h2>
 
-        <div className="border-subtle bg-surface mt-4 rounded-[--radius-lg] border p-5">
+        <div className="border-subtle bg-surface mt-4 rounded-(--radius-lg) border p-5">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label
@@ -126,7 +126,7 @@ export default function AdminResumePage() {
                 accept="application/pdf"
                 onChange={(event) => handleFile(event.target.files?.[0] ?? null)}
                 aria-describedby="resume-file-hint"
-                className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-[--radius-sm] file:border-0 file:px-3 file:py-2 file:text-accent-ink"
+                className="text-secondary file:bg-accent-strong w-full text-sm file:mr-3 file:rounded-(--radius-sm) file:border-0 file:px-3 file:py-2 file:text-accent-ink"
               />
               <p id="resume-file-hint" className="text-muted mt-1.5 text-xs">
                 PDF only, up to {formatBytes(MAX_RESUME_BYTES)}.
@@ -186,8 +186,8 @@ export default function AdminResumePage() {
                 key={version.id}
                 className={
                   version.is_published
-                    ? 'border-accent/40 bg-accent-soft rounded-[--radius-lg] border p-4'
-                    : 'border-subtle bg-surface rounded-[--radius-lg] border p-4'
+                    ? 'border-accent/40 bg-accent-soft rounded-(--radius-lg) border p-4'
+                    : 'border-subtle bg-surface rounded-(--radius-lg) border p-4'
                 }
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">

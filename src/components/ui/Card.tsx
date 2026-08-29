@@ -16,8 +16,8 @@ import { cn } from '@/lib/cn'
  * Every one of them read
  *
  *   rim-light border-subtle bg-surface hover:border-accent/40
- *   transition-colors duration-[--duration-hover] ease-[--ease-out]
- *   rounded-[--radius-lg] border p-5
+ *   transition-colors duration-(--duration-hover) ease-(--ease-out)
+ *   rounded-(--radius-lg) border p-5
  *
  * with small drift between copies — ProjectCard also carried
  * `hover:shadow-[--shadow-raised]` and a second, duplicate `transition-colors`;
@@ -93,7 +93,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
     {
       ref,
       className: cn(
-        'border-subtle bg-surface rounded-[--radius-lg] border',
+        'border-subtle bg-surface rounded-(--radius-lg) border',
         edge && 'panel-edge',
         interactive && [
           'hover:border-strong',
@@ -101,7 +101,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
           // `transition-colors` keeps a future `transform` from being animated
           // by accident, which is how a flat card acquires a lift nobody asked
           // for.
-          'transition-[border-color,background-color,color] duration-[--duration-hover] ease-[--ease-out]',
+          'transition-[border-color,background-color,color] duration-(--duration-hover) ease-(--ease-out)',
         ],
         PADDING[padding],
         className,

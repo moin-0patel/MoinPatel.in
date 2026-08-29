@@ -39,7 +39,7 @@ export function EmptyState({
     <div
       className={cn(
         'border-subtle bg-surface/40 flex flex-col items-center justify-center',
-        'rounded-[--radius-lg] border border-dashed px-6 py-14 text-center',
+        'rounded-(--radius-lg) border border-dashed px-6 py-14 text-center',
         className,
       )}
     >
@@ -85,7 +85,7 @@ export function ErrorState({
       role="alert"
       className={cn(
         'border-danger/25 bg-danger-soft/40 flex flex-col items-center justify-center',
-        'rounded-[--radius-lg] border px-6 py-12 text-center',
+        'rounded-(--radius-lg) border px-6 py-12 text-center',
         className,
       )}
     >

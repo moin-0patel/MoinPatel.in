@@ -131,8 +131,8 @@ export default function ProjectsPage() {
                   aria-pressed={isActive}
                   onClick={() => toggleCategory(filter.value)}
                   className={cn(
-                    'h-11 rounded-[--radius-sm] border px-3 text-sm md:h-9',
-                    'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+                    'h-11 rounded-(--radius-sm) border px-3 text-sm md:h-9',
+                    'transition-colors duration-(--duration-hover) ease-(--ease-out)',
                     isActive
                       ? 'border-accent bg-accent-soft text-accent'
                       : 'border-subtle text-secondary hover:border-strong hover:text-primary',
@@ -234,7 +234,7 @@ function ProjectGrid({
         'grid gap-4 md:grid-cols-2 xl:grid-cols-3',
         // PRD 39 — on a filter change the existing results dim rather than
         // being replaced by skeletons, which avoids a jarring re-layout.
-        'transition-opacity duration-[--duration-hover]',
+        'transition-opacity duration-(--duration-hover)',
         isStale && 'opacity-60',
       )}
     >

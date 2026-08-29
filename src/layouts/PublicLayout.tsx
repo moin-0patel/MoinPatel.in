@@ -1,6 +1,6 @@
 import { Download, Mail, Menu } from 'lucide-react'
 import { Suspense, lazy, useEffect, useRef, useState, type ComponentType } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { BRAND_ICONS } from '@/components/ui/brandIcons'
 import { Button } from '@/components/ui/Button'
@@ -51,6 +51,24 @@ const NAV_RIGHT = [
 const NAV_ITEMS = [...NAV_LEFT, ...NAV_RIGHT]
 
 export function PublicLayout() {
+  /*
+   * The header is fixed chrome (see Header), so it reserves no space and every
+   * route's content begins at y=0.
+   *
+   * On Home that is the point: the hero is built to run full-bleed under the
+   * navigation, exactly as the reference does — its wordmark sits at 7% of the
+   * hero and the links sit over it.
+   *
+   * Every OTHER route opens with an <h1> instead, and those pages carry their
+   * own `py-12 md:py-20`. At md and up that puts the heading at 80px, already
+   * 16px clear of the 64px header. Below md it puts it at 48px — 16px UNDER
+   * the header, measured on /about, /projects, /contact, /resume, /skills and
+   * /experience at both 390 and 375. This padding closes exactly that gap and
+   * lands the heading at the same 80px the desktop already used, rather than
+   * reserving the header height on every route and pushing all six pages down.
+   */
+  const isHome = useLocation().pathname === '/'
+
   return (
     <div className="flex min-h-dvh flex-col">
       {/*
@@ -74,7 +92,7 @@ export function PublicLayout() {
           // accent-strong for the same white-on-accent contrast reason as the
           // Button. axe never catches this one: it only exists while focused.
           'focus:bg-accent-strong focus:static focus:m-2 focus:inline-block focus:size-auto',
-          'focus:rounded-[--radius-md] focus:px-4 focus:py-2 focus:text-white focus:[clip-path:none]',
+          'focus:rounded-(--radius-md) focus:px-4 focus:py-2 focus:text-white focus:[clip-path:none]',
         )}
       >
         Skip to content
@@ -83,7 +101,7 @@ export function PublicLayout() {
       <Header />
 
       {/* A11Y-01 — one <main> landmark, targeted by the skip link. */}
-      <main id="main" className="flex-1">
+      <main id="main" className={cn('flex-1', !isHome && 'pt-8 md:pt-0')}>
         <Outlet />
       </main>
 
@@ -101,15 +119,58 @@ function Header() {
    * no bar at all: the links sit directly on the ground in two groups with the
    * brand between them, and there is no surface behind them.
    *
-   * It stays `sticky top-0` rather than being absolutely placed at 47% of the
-   * hero the way the reference's is. That placement only works on a page whose
-   * first screen is the hero; this navigation is shared by /about, /projects,
-   * /contact and the rest, and a mid-viewport nav on a case-study page would be
-   * unusable. Same visual language, one deliberate structural divergence.
+   * It is `fixed top-0` — out of flow, like the reference's, which the Phase 0
+   * audit records as "fixed chrome, outside the scroll range". It is NOT placed
+   * at 47% of the hero the way the reference's is: that placement only works on
+   * a page whose first screen is the hero, and this navigation is shared by
+   * /about, /projects, /contact and the rest, where a mid-viewport nav would be
+   * unusable. Same visual language, out of flow as the reference has it, with
+   * the vertical placement as the one deliberate divergence.
    */
   return (
-    <header className="sticky top-0 z-50">
-      <div className="container-page flex h-[--header-height] items-center justify-between gap-6">
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/*
+       * FIXED CHROME, NOT A BAR IN FLOW — and that is what makes the 64px
+       * token usable at all. Header, MobileNavPanel and the boot shell in
+       * index.html are one unit; change them together.
+       *
+       * `h-[--header-height]` was dead for a long time (Tailwind v4 drops a
+       * bare custom property in the bracket form), so the row was content-sized
+       * — measured 27.19px at desktop widths, 26.30-26.80 between, and 44px
+       * below md, against the token's 64px.
+       *
+       * Correcting it while the header was `sticky top-0` was built and
+       * measured, and it FAILED. Sticky keeps the element in flow, so the row
+       * growing to 64px pushed the whole `min-h-[100svh]` hero down 36.81px on
+       * desktop / 20px on mobile. The hero's CTA row has only 28.81px of fold
+       * clearance, so "Let's Talk" / "View My Work" went 8px BELOW the fold at
+       * 1440, 1280 and 1024, and the location chip was clipped 16px at
+       * 768/390/375. No gate catches that — all 140 UI checks passed on the
+       * broken composition; it was caught by screenshot.
+       *
+       * `fixed` is the fix, and it is also what the reference does. The Phase 0
+       * audit records its navigation as "fixed chrome, outside the scroll
+       * range", sitting OVER the composition, with the hero at `paddingTop: 0`.
+       * Out of flow, the 64px costs zero vertical space: the hero starts at
+       * y=0 like the reference's, every section moves UP by the old row height,
+       * and the CTA row gains clearance instead of losing it.
+       *
+       * Two consequences that are not visible from this line:
+       *
+       *   the boot shell no longer needs `--boot-top` at all. It existed only
+       *   to reproduce the in-flow header's height so the pre-hydration hero
+       *   and the React hero landed in the same place; with nothing in flow
+       *   above the hero, both start at 0 and the variable is gone;
+       *
+       *   this header has no background by design, so on every route content
+       *   now scrolls UNDER it. That is only safe because the first element on
+       *   each route clears 64px — measured on all six viewports across home,
+       *   /about, /projects, /contact, /resume and a case study. Anything new
+       *   at the top of a route must keep that clearance, and
+       *   `scroll-padding-top: calc(var(--header-height) + 24px)` in globals.css
+       *   is what keeps anchor targets clear of it.
+       */}
+      <div className="container-page flex h-(--header-height) items-center justify-between gap-6">
         {/* A11Y-01 — landmarks carry accessible names. */}
         <nav aria-label="Primary" className="hidden flex-1 md:block">
           <ul className="flex items-center gap-7">
@@ -163,7 +224,17 @@ function NavItem({ to, label }: { to: string; label: string }) {
       className={({ isActive }) =>
         cn(
           'font-display text-sm tracking-[0.06em] uppercase md:text-[0.95rem]',
-          'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+          'transition-colors duration-(--duration-hover) ease-(--ease-out)',
+          /*
+           * The reference darkens the item's BACKGROUND under the pointer
+           * (measured #ebeada -> #c9c8ba at 0.3s), not just its text.
+           *
+           * The negative margins cancel the padding so the type sits exactly
+           * where it did before this was added — the header's measured layout
+           * and the §12.3 heading positions do not move, only a rounded plate
+           * appears behind the word on hover.
+           */
+          'rounded-full px-3 py-1.5 -mx-3 -my-1.5 hover:bg-surface',
           isActive ? 'text-primary font-semibold' : 'text-secondary hover:text-primary font-medium',
         )
       }
@@ -266,8 +337,8 @@ function MobileNavSheet() {
         // height unchanged while the hit area stays full size.
         className={cn(
           'text-secondary hover:text-primary -mr-2 grid size-11 place-items-center',
-          'rounded-[--radius-sm] md:hidden',
-          'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+          'rounded-(--radius-sm) md:hidden',
+          'transition-colors duration-(--duration-hover) ease-(--ease-out)',
         )}
         aria-label="Open navigation menu"
         aria-haspopup="dialog"
@@ -353,13 +424,16 @@ function Footer() {
           </div>
 
           <nav aria-label="Footer">
-            <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
+            <h2 className="text-muted mb-3 font-mono text-xs tracking-(--tracking-mono) uppercase">
               Pages
             </h2>
             <ul className="flex flex-col gap-2">
               {NAV_ITEMS.map((item) => (
                 <li key={item.to}>
-                  <NavLink to={item.to} className="text-secondary hover:text-primary text-sm">
+                  <NavLink
+                    to={item.to}
+                    className="text-secondary hover:text-primary text-sm transition-colors duration-(--duration-hover) ease-(--ease-out)"
+                  >
                     {item.label}
                   </NavLink>
                 </li>
@@ -372,7 +446,7 @@ function Footer() {
             placeholders pending Q-02/Q-03. */}
           {(footerSocials.length > 0 || profile?.emailPublic) && (
             <div>
-              <h2 className="text-muted mb-3 font-mono text-xs tracking-[--tracking-mono] uppercase">
+              <h2 className="text-muted mb-3 font-mono text-xs tracking-(--tracking-mono) uppercase">
                 Elsewhere
               </h2>
               <ul className="flex flex-col gap-2">
@@ -384,7 +458,7 @@ function Footer() {
                       <a
                         href={link.url}
                         {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                        className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
+                        className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm transition-colors duration-(--duration-hover) ease-(--ease-out)"
                       >
                         <Icon className="size-4" />
                         {link.label}

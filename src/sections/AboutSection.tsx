@@ -49,7 +49,7 @@ export function AboutSection() {
        * that into an ordinary text block.
        */}
       <div className="max-w-[24rem]">
-        <p className="text-secondary text-lg leading-[--leading-body]">{profile.shortBio}</p>
+        <p className="text-secondary text-lg leading-(--leading-body)">{profile.shortBio}</p>
 
         {profile.location && <p className="text-muted mt-4 text-sm">{profile.location}</p>}
 
@@ -72,7 +72,7 @@ export function AboutSection() {
         {profile.longBioMd && (
           <Link
             to="/about"
-            className="text-accent hover:text-primary mt-6 inline-flex items-center gap-1 font-medium transition-colors duration-[--duration-hover] ease-[--ease-reference]"
+            className="text-accent hover:text-primary mt-6 inline-flex items-center gap-1 font-medium transition-colors duration-(--duration-hover) ease-(--ease-reference)"
           >
             Read more
             <ArrowRight className="size-4" aria-hidden="true" />

@@ -1,0 +1,100 @@
+# Render Blueprint — static hosting for the built site.
+#
+# PRD Section 42 / DEP-03, DEP-04, SEC-08. This is the Render equivalent of
+# vercel.json; the two are kept deliberately in step, header for header, so the
+# site behaves identically whichever host serves it. If you change a header
+# here, change it there.
+#
+# HOW TO USE
+#   Render dashboard -> New -> Blueprint -> pick this repo. Render reads this
+#   file, creates the static site, and builds it. The three VITE_ variables are
+#   marked `sync: false`, which means Render PROMPTS for them rather than
+#   taking a value from this file — they are environment-specific and one of
+#   them is a key, so none of them belongs in the repository.
+
+services:
+  - type: web
+    name: moinpatel-in # <- this sets the URL: https://moinpatel-in.onrender.com
+    runtime: static
+    plan: free
+
+    # `npm run build` = tsc -b -> vite build -> prerender + sitemap.
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+
+    # Previews would each build with the production VITE_SITE_URL and could be
+    # indexed; off until that is worth solving.
+    pullRequestPreviewsEnabled: false
+
+    envVars:
+      # package.json requires >=20.19.0. Pinned so a Render default bump cannot
+      # silently change the build.
+      - key: NODE_VERSION
+        value: '22'
+
+      # Supabase project URL. Public by nature.
+      - key: VITE_SUPABASE_URL
+        sync: false
+
+      # Publishable (anon) key. Public by design — safe ONLY because RLS is
+      # correct, which db:verify:remote proves against the live project.
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+
+      # Canonical origin, NO trailing slash. Everything SEO depends on this:
+      # canonical tags, og:url, all 10 sitemap URLs and the robots.txt Sitemap
+      # line. Set it to this service's real URL before the first real launch —
+      # a build with the default localhost value ships broken canonicals.
+      - key: VITE_SITE_URL
+        sync: false
+
+    headers:
+      # --- SEC-08, identical to vercel.json --------------------------------
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in; font-src 'self'; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'self' https://*.supabase.co; upgrade-insecure-requests"
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), interest-cohort=()
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=63072000; includeSubDomains; preload
+
+      # --- caching ----------------------------------------------------------
+      # Vite fingerprints these filenames, so they are safe to freeze.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      # The prerendered HTML must NOT be frozen: it carries per-route SEO tags
+      # that change whenever content is republished and rebuilt.
+      - path: /*.html
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /sitemap.xml
+        name: Cache-Control
+        value: public, max-age=3600
+
+    routes:
+      # DEP-04 — client-side routing fallback.
+      #
+      # This must NOT defeat the prerender. Render serves a matching file first
+      # and only falls through to these rules when nothing matches, so
+      # /projects/exam-build-platform is served from its own prerendered
+      # index.html with that project's tags, and this rule catches only routes
+      # that have no file (e.g. /admin, or a genuine 404 the SPA renders).
+      #
+      # VERIFY THIS AFTER THE FIRST DEPLOY — see docs/deployment.md. If a
+      # project URL comes back with the site-wide default <title>, the fallback
+      # is being applied too early and the prerender is being masked.
+      - type: rewrite
+        source: /*
+        destination: /index.html

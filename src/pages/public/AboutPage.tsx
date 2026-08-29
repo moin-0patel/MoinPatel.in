@@ -57,7 +57,7 @@ export default function AboutPage() {
           </div>
 
           {isPending ? (
-            <Skeleton className="aspect-square w-full rounded-[--radius-xl] lg:w-[280px]" />
+            <Skeleton className="aspect-square w-full rounded-(--radius-xl) lg:w-[280px]" />
           ) : (
             avatarUrl && (
               <img
@@ -65,7 +65,7 @@ export default function AboutPage() {
                 alt={profile?.avatarAlt ?? profile?.fullName ?? 'Moin Patel'}
                 loading="lazy"
                 decoding="async"
-                className="ring-accent/20 aspect-square w-full rounded-[--radius-xl] object-cover ring-2 ring-offset-4 ring-offset-[--color-base] lg:w-[280px]"
+                className="ring-accent/20 aspect-square w-full rounded-(--radius-xl) object-cover ring-2 ring-offset-4 ring-offset-(--color-base) lg:w-[280px]"
               />
             )
           )}

@@ -118,7 +118,7 @@ export function WorkCard({ project, index }: { project: ProjectSummary; index: n
       <span
         aria-hidden="true"
         data-work-scrim=""
-        className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-[--duration-overlay] ease-[--ease-reference]"
+        className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-(--duration-overlay) ease-(--ease-reference)"
       />
 
       {/* --- the content layer ----------------------------------------- */}
@@ -165,8 +165,16 @@ export function WorkCard({ project, index }: { project: ProjectSummary; index: n
         className={cn(
           'absolute right-[18px] bottom-[26px] grid size-9 place-items-center rounded-full',
           'bg-accent-fill text-accent-ink',
-          'transition-transform duration-[--duration-hover] ease-[--ease-reference]',
-          'group-hover:-translate-y-0.5 motion-reduce:transform-none',
+          'transition-transform duration-(--duration-hover) ease-(--ease-reference)',
+          // Diagonally, along the glyph's own axis — the reference slides its
+          // arrow out along the direction it points rather than only lifting
+          // it. Half a step on each axis keeps the disc inside the card.
+          //
+          // `motion-reduce:translate-none`, NOT `transform-none`: v4 compiles
+          // these to the standalone `translate` property, so the old
+          // `transform-none` guard never disabled anything and the disc still
+          // moved under `prefers-reduced-motion`. Measured, not assumed.
+          'group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:translate-none',
         )}
       >
         <ArrowUpRight className="size-[18px]" />

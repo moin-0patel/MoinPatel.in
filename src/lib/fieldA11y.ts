@@ -9,10 +9,10 @@ import { cn } from './cn'
 
 /** PRD 32.4 — the one control surface, used by every input, textarea and select. */
 export const controlClass = cn(
-  'bg-surface border-subtle text-primary w-full rounded-[--radius-sm] border',
+  'bg-surface border-subtle text-primary w-full rounded-(--radius-sm) border',
   // RES-07 — 44px minimum touch target on every control.
   'min-h-11 px-3 py-2 text-sm',
-  'transition-colors duration-[--duration-hover] ease-[--ease-out]',
+  'transition-colors duration-(--duration-hover) ease-(--ease-out)',
   'focus:border-accent',
   'aria-[invalid=true]:border-danger',
   'disabled:cursor-not-allowed disabled:opacity-45',

@@ -556,3 +556,108 @@ details::details-content {
 details[open]::details-content {
   block-size: auto;
 }
+
+/* --- Mobile navigation sheet ------------------------------------------------
+ *
+ * Radix stamps `data-state="open|closed"` on the overlay and content and holds
+ * the node mounted until the exit animation ends, so the close is animated
+ * rather than cut. Durations come from the modal tokens, which tokens.css
+ * already collapses to 0ms under `prefers-reduced-motion` — that is the whole
+ * A11Y-10 story here, so no extra media query is needed.
+ *
+ * The sheet is full-screen (RES-01), so it rises a short distance rather than
+ * sliding a full panel width: a 10px lift plus a fade reads as the surface
+ * arriving without a long travel the eye has to track on a phone.
+ */
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.mobile-sheet[data-state='open'] {
+  animation: sheet-in var(--duration-modal-in) var(--ease-reference) both;
+}
+.mobile-sheet[data-state='closed'] {
+  animation: sheet-out var(--duration-modal-out) var(--ease-reference) both;
+}
+.mobile-scrim[data-state='open'] {
+  animation: scrim-in var(--duration-modal-in) var(--ease-reference) both;
+}
+.mobile-scrim[data-state='closed'] {
+  animation: scrim-out var(--duration-modal-out) var(--ease-reference) both;
+}
+
+/* --- Hero portrait: why there is NO ambient zoom ----------------------------
+ *
+ * A `portrait-zoom` utility briefly lived here (scale 1 -> 1.037 over 8s) on
+ * the belief that the reference's hero figure settles into its scale. It was
+ * removed for two independent reasons, both measured, and it should not be
+ * reintroduced without answering both:
+ *
+ *   IT IS NOT WHAT THE REFERENCE DOES. `.profile-img-wrap` carries a STATIC
+ *   `scale(1.0372)` with `animation-name: none` and `animation-duration: 0s`,
+ *   constant across a 6-second sample from first paint. The earlier reading of
+ *   "a slow zoom" came from sampling two NESTED elements with different fixed
+ *   scales (wrap at 1.0372, img at 1.001) and mistaking the pair for motion.
+ *
+ *   IT BREAKS THE PERFORMANCE FLOOR. The portrait is the LCP element. Any
+ *   scale-up makes the hydrated image paint larger than the pre-hydration boot
+ *   copy, which registers a SECOND largest-contentful-paint entry: LCP moved
+ *   from ~750ms to a consistent 2.58-2.96s, over §12.4's 2500ms limit, in five
+ *   of five throttled runs. A delay does not solve it — the delay is measured
+ *   from element mount (hydration), not from navigation start.
+ *
+ * Our portrait's size is already solved by the measured 80svh/91svh head-height
+ * rule in HeroSection, so there is nothing the reference's wrapper scale would
+ * add even as a static value — and a static scale here would also desync the
+ * boot shell's copy, which is what keeps the hydration swap invisible.
+ */
+
+/* --- Press dip --------------------------------------------------------------
+ *
+ * The pressed state for pill/CTA buttons. Declared here rather than as
+ * `active:scale-[0.985] motion-reduce:scale-100` because those two variants
+ * carry equal specificity and Tailwind sorts `motion-reduce` BEFORE `active`,
+ * so the guard lost the cascade and the dip still ran for users who asked for
+ * reduced motion. Inside a `no-preference` query there is no rule to lose.
+ *
+ * `scale`, not `transform`: Tailwind v4 and this rule both drive the
+ * standalone property, so Button's transition list names `scale` to match.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .press-dip:active {
+    scale: 0.985;
+  }
+}
