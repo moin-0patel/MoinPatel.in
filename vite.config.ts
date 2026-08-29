@@ -13,9 +13,20 @@ export default defineConfig({
     },
   },
 
+  /*
+   * `vite preview` doubles as the production server when the site is deployed
+   * as a Render WEB SERVICE (start command `npm run preview`). Render routes
+   * traffic to the port in $PORT and to a hostname vite doesn't know, so:
+   * bind all interfaces, accept the Render hostname, and honour $PORT.
+   * Locally nothing changes — $PORT is unset and the default 4173 stands,
+   * and the verify scripts pass their own explicit ports programmatically.
+   *
+   * The static-site path (render.yaml / vercel.json) does not use this block.
+   */
   preview: {
     host: '0.0.0.0',
     allowedHosts: true,
+    port: Number(process.env.PORT ?? 4173),
   },
 
   build: {

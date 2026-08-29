@@ -16,10 +16,16 @@ services:
   - type: web
     name: moinpatel-in # <- this sets the URL: https://moinpatel-in.onrender.com
     runtime: static
-    plan: free
+    # No `plan` here on purpose: static sites are free by definition and the
+    # blueprint validator can reject the field on runtime: static.
 
-    # `npm run build` = tsc -b -> vite build -> prerender + sitemap.
-    buildCommand: npm run build
+    # The install is EXPLICIT. Render does not reliably install dependencies
+    # before the build command (the 2026-08-29 deploy ran `npm run build` on an
+    # empty node_modules one second after boot, so Node 26's own bundled tsc
+    # answered `tsc -b` instead of the locked TypeScript 5.9 — see the
+    # baseUrl/TS5102 note in tsconfig.app.json). `npm ci` pins to the lockfile.
+    # Then `npm run build` = tsc -b -> vite build -> prerender + sitemap.
+    buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
 
     # Previews would each build with the production VITE_SITE_URL and could be

@@ -26,8 +26,11 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
 
-    /* Paths */
-    "baseUrl": ".",
+    /* Paths.
+     * No `baseUrl` on purpose: `paths` entries are resolved relative to this
+     * file when baseUrl is absent (TS 4.1+), and TypeScript 7 REMOVES baseUrl
+     * outright (TS5102) — Render's Node 26 toolchain proved that on
+     * 2026-08-29. This form typechecks identically on 5.9 and 7. */
     "paths": {
       "@/*": ["./src/*"]
     }

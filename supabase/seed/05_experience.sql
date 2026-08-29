@@ -23,9 +23,12 @@
 -- ranges and different work, and collapsing them would hide the promotion and
 -- misstate when each was held. Two rows is the honest shape.
 --
--- ORDER — `newest first` (FR-EXP-01/03, see cv.service.ts). Both readers sort
--- by `sort_order` ascending, so the current AI role takes 10 and the earlier
--- Reservationist role takes 20.
+-- ORDER — CHRONOLOGICAL, by owner decision (2026-08-29): "it should go
+-- according to date or month". The journey timeline reads oldest -> newest,
+-- so the Reservationist role takes sort_order 10 and the current AI role
+-- takes 20. This supersedes the `newest first` reading of FR-EXP-01/03 that
+-- this file previously followed; both readers sort by `sort_order` ascending,
+-- so the swap applies everywhere experience renders (home journey, /resume).
 --
 -- Achievements are absent, not empty: Q-15 / Section 15 permit achievement
 -- rows only where the resume states specific, verifiable ones. Inventing
@@ -52,7 +55,7 @@ insert into public.experience (
   true,
   null,
   'published',
-  10
+  20
 )
 on conflict (id) do nothing;
 
@@ -74,7 +77,7 @@ insert into public.experience (
   false,
   null,
   'published',
-  20
+  10
 )
 on conflict (id) do nothing;
 
