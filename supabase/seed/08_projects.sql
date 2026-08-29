@@ -129,51 +129,58 @@ on conflict (project_id, technology_id) do nothing;
 
 
 -- -------------------------------------------------------------------------
--- 3. Exam Build Platform
+-- 3. Performix (previously "Exam Build Platform")
 --
--- Status is in_progress, and the copy below says so plainly. Principle 3 and
--- rule 9 of 43.4: in-progress means in-progress in EVERY surface. There is no
--- completed-state language in this record.
+-- This record carried in_progress and in-progress-only copy from creation.
+-- Both facts have since been resolved BY THE OWNER, not inferred:
 --
--- how_it_works_md and the pipeline steps are deliberately absent. Q-16 asks
--- what is genuinely built today versus planned; until that is answered, this
--- seed states the intended scope and does not claim any part of it is
--- finished. Writing "user management is built" without confirmation would be
--- exactly the fabrication the PRD prohibits.
+--   2026-08-18  Q-06/Q-07/Q-16 resolved — publication approved, the client
+--               may be named, and the live case study was rewritten to the
+--               completed scope (see the record in production).
+--   2026-08-29  Owner: the platform is COMPLETED, is named "Performix", and
+--               is live at https://bookends-exam.onrender.com.
+--
+-- The slug stays `exam-build-platform`: it is baked into prerendered routes,
+-- the sitemap and any shared links, and a rename would 404 all of them.
+--
+-- The copy below is the seed's short-form scope statement with the
+-- in-progress qualifiers removed — nothing was added to it. The full
+-- owner-approved case study lives in the production record and is managed
+-- through /admin, not this file.
 -- -------------------------------------------------------------------------
 insert into public.projects (
   id, slug, title, summary,
   description_md, problem_md, solution_md,
-  status, category, publication_state, visibility_mode,
+  status, category, publication_state, visibility_mode, live_url,
   is_featured, sort_order, client_disclosed, confidentiality_note
 ) values (
   '00000000-0000-4000-a300-000000000003',
   'exam-build-platform',
-  'Exam Build Platform',
-  'In progress — a platform for building and running exams, covering candidates, exams and evaluation.',
+  'Performix',
+  'A platform for building and running exams, covering candidates, exams and evaluation.',
 
-  'A platform for creating and running exams end to end. **This project is in progress.** The scope below describes what the platform is being built to do, not what is finished.',
+  'A platform for creating and running exams end to end.',
 
   'Running exams across users, candidates and evaluation involves several separate manual processes that do not share data with each other.',
 
-  E'The platform is being built around five areas:\n\n- User management\n- Exam management\n- Candidate management\n- Automated evaluation\n- A scalable architecture underneath all of it\n\nWhich of these are complete today is being confirmed before this case study is published.',
+  E'The platform is built around five areas:\n\n- User management\n- Exam management\n- Candidate management\n- Automated evaluation\n- A scalable architecture underneath all of it',
 
-  'in_progress',
+  'completed',        -- Owner-confirmed 2026-08-29.
   'web_application',
-  'draft',            -- Q-07, Q-16
-  'case_study_only',
+  'draft',            -- The seed NEVER publishes (AC-CONTENT gate); publishing
+                      -- is an owner action taken in /admin, as it was in prod.
+  'full',             -- The live URL is meant to be advertised.
+  'https://bookends-exam.onrender.com',
   true,               -- featured. This was `false` originally, on the reasoning
                       -- that an in-progress project should not be one of the
                       -- homepage proof points. Reversed by owner decision once
-                      -- the project was published: the portfolio is three
-                      -- projects and all three belong in the featured set.
-                      -- Principle 3 is not weakened by this — the In Progress
-                      -- status is carried on the record and rendered on every
-                      -- surface, so featuring it presents work in progress AS
-                      -- work in progress rather than hiding it.
+                      -- the project was published — and moot since 2026-08-29,
+                      -- when the owner confirmed the project completed.
   30,
-  false,              -- Q-07
-  'Q-07: confirm who this is for and whether it may be published. Q-16: confirm what is genuinely built versus planned before any how-it-works content is written. Must render as In Progress everywhere (Principle 3).'
+  false,              -- The seed stays conservative (FR-PROJ-16 gate). In
+                      -- production the owner disclosed the client on
+                      -- 2026-08-18; that is an owner action, not a seed default.
+  'Q-06/Q-07/Q-16 resolved 2026-08-18; completion and the Performix name confirmed by the owner 2026-08-29.'
 )
 on conflict (id) do nothing;
 

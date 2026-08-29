@@ -696,10 +696,32 @@ check(
     (await scalar(db, `select count(*)::int from public.skills`)) === 14,
 )
 
+// This check asserted `in_progress` from creation until 2026-08-29, when the
+// owner confirmed the platform completed, named it Performix, and supplied the
+// live URL. Principle 3 cuts both ways: claiming completed early is a
+// fabrication, and claiming in-progress after completion is simply false. The
+// check now pins the NEW facts with the same strictness.
 check(
-  'Exam Build Platform is in_progress, not completed (Principle 3)',
+  'Performix (exam-build-platform) is completed, renamed, and live (owner 2026-08-29)',
   (await scalar(db, `select status from public.projects where slug='exam-build-platform'`)) ===
-    'in_progress',
+    'completed' &&
+    (await scalar(db, `select title from public.projects where slug='exam-build-platform'`)) ===
+      'Performix' &&
+    (await scalar(db, `select live_url from public.projects where slug='exam-build-platform'`)) ===
+      'https://bookends-exam.onrender.com',
+)
+
+// The completed record must carry no leftover in-progress language in the
+// seed copy — the reverse of the old check, guarding the same principle.
+check(
+  'Performix seed copy contains no in-progress language',
+  (await scalar(
+    db,
+    `select count(*)::int from public.projects
+     where slug='exam-build-platform'
+       and (summary ilike '%in progress%' or description_md ilike '%in progress%'
+            or solution_md ilike '%being built%')`,
+  )) === 0,
 )
 
 check(
