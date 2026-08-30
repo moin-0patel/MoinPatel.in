@@ -280,6 +280,59 @@ export function ScrollChoreography() {
          * same explicit opt-in `data-capability` uses. This is also the
          * extension point the chapter-loop comment promised Journey.
          */
+        /*
+         * CHAPTER 01 HANDOFF — spec §4 ch01, unimplemented until 2026-08-30.
+         *
+         * The reference's hero does not sit frozen while the page slides over
+         * it: scrolling away moves the composition at its own rates. The spec
+         * had already written the DOM half of this — "name and role title fade
+         * to opacity 0.15 and drift Y −30px — the one place text recedes" —
+         * but only the camera side was ever built.
+         *
+         * SCRUBBED, not fired: the whole point is that the motion is coupled
+         * to the wheel, damped just enough (0.6s) to read as smooth rather
+         * than strapped on. `ease: 'none'` because the scrub IS the easing.
+         *
+         * Safe by construction on the two metrics the hero is famous for
+         * breaking here:
+         *   LCP — at progress 0 every tween holds identity, so the first
+         *   paint is byte-identical to the boot shell, and Chrome stops LCP
+         *   observation at the first scroll anyway;
+         *   CLS — transforms never move layout, and the hero's own
+         *   overflow-hidden clips the parallax travel.
+         *
+         * The wordmark travels furthest (it is the deepest layer), the figure
+         * about half that, and the identity plate takes the spec's exact
+         * recede. Reduced motion never mounts this module at all.
+         */
+        const hero = document.querySelector<HTMLElement>('[data-chapter="hero"]')
+        if (hero) {
+          const heroExit = gsap.timeline({
+            scrollTrigger: {
+              trigger: hero,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          })
+          const wordmark = hero.querySelector('[data-hero-wordmark]')
+          const figure = hero.querySelector('[data-hero-figure]')
+          const plate = hero.querySelector('[data-hero-recede]')
+          /*
+           * Travel is viewport-relative, NOT yPercent: the wordmark and the
+           * figure wrapper have wildly different heights, so equal-feeling
+           * percentages inverted the depth (the foreground figure out-lagged
+           * the background wordmark). Depth order is: wordmark (deepest,
+           * ~14vh of lag), figure (~7vh), text plate (recedes upward).
+           * Function values so invalidateOnRefresh re-derives them on resize.
+           */
+          if (wordmark)
+            heroExit.to(wordmark, { y: () => window.innerHeight * 0.14, ease: 'none' }, 0)
+          if (figure) heroExit.to(figure, { y: () => window.innerHeight * 0.07, ease: 'none' }, 0)
+          if (plate) heroExit.to(plate, { opacity: 0.15, y: -30, ease: 'none' }, 0)
+        }
+
         const journeyCards = gsap.utils.toArray<HTMLElement>('[data-journey-card]')
         for (const card of journeyCards) {
           /*

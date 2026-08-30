@@ -102,6 +102,10 @@ export function HeroSection() {
        */}
       <span
         aria-hidden="true"
+        // The chapter-01 handoff's parallax target (ScrollChoreography). At
+        // scroll 0 the tween holds identity, so the boot-shell copy in
+        // index.html still lands pixel-exact at hydration.
+        data-hero-wordmark=""
         className={cn(
           // text-[color:var(...)], NOT text-[--color-accent-word]. Tailwind v4 does
           // not resolve a bare custom property in the bracket form — it compiles to
@@ -130,7 +134,14 @@ export function HeroSection() {
        * creates a stacking context — so the figure stands in front of "MOIN
        * PATEL" and behind the headline without a single z-index.
        */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
+      <div
+        // Chapter-01 parallax target — the WRAPPER, not the img: the figure's
+        // own transform pipeline (portrait-matte, height rules) stays
+        // untouched, and useHeroFraming reads on resize only, so a
+        // scroll-time transform here never feeds back into the Core framing.
+        data-hero-figure=""
+        className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center"
+      >
         <img
           src="/moin-portrait.webp"
           alt={`${fullName}, ${roleTitle}`}
@@ -247,7 +258,13 @@ export function HeroSection() {
              * a text plate, not a card. `w-fit` keeps it shrink-wrapped at
              * `items-start` and at `lg:items-center` alike.
              */}
-            <div className="w-fit px-3 py-2 [background-color:var(--glass-bg)]">
+            <div
+              // Chapter-01 recede target: spec §4 ch01 has the name and role
+              // fading to 0.15 and drifting -30px as the reader scrolls into
+              // the statement — "the one place text recedes".
+              data-hero-recede=""
+              className="w-fit px-3 py-2 [background-color:var(--glass-bg)]"
+            >
               {/*
                * A11Y-02 / PRD 12.12 — the page's single h1, and it stays the
                * name. The reference's own brand name is its wordmark; this is
