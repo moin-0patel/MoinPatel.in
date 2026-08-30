@@ -943,10 +943,14 @@ try {
     }),
   )
 
-  // Q-20 — availability_label is null, so the pill must not render.
+  // Q-20 — ANSWERED by the owner on 2026-08-29: the label is "Open to
+  // opportunities" and available_for_work is true, so the pill MUST render.
+  // This check asserted absence while the label was null; the fact changed,
+  // so the check pins the new fact with the same strictness — the exact
+  // wording, not just any pill.
   check(
-    'availability pill absent (availability_label is null)',
-    (await page.getByText(/available for work/i).count()) === 0,
+    'availability pill shows "Open to opportunities" (Q-20 resolved 2026-08-29)',
+    (await page.getByText(/open to opportunities/i).count()) >= 1,
   )
 
   /* --- 3. Responsive — RES-12 / 41.6 -------------------------------------- */

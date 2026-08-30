@@ -540,9 +540,17 @@ check(
   (await scalar(db, `select count(*)::int from public.site_settings where not is_public`)) === 0,
 )
 
+// Until 2026-08-29 this asserted anon sees exactly ONE link, because LinkedIn
+// and GitHub were unpublished placeholders (Q-02/Q-03 unanswered). The owner
+// supplied both URLs and published them, so the check now pins all three —
+// still proving the same thing: RLS returns exactly the published rows.
 check(
-  'anon sees no unpublished social links (Q-02/Q-03 placeholders stay hidden)',
-  (await scalar(db, `select count(*)::int from public.social_links`)) === 1,
+  'anon sees exactly the 3 published social links (Q-02/Q-03 resolved 2026-08-29)',
+  (await scalar(db, `select count(*)::int from public.social_links`)) === 3 &&
+    (await scalar(
+      db,
+      `select count(*)::int from public.social_links where url like 'https://REQUIRES%' or url like '%REQUIRES-USER-INPUT%'`,
+    )) === 0,
 )
 
 check(

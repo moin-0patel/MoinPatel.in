@@ -24,20 +24,20 @@ insert into public.social_links (
     '00000000-0000-4000-a200-000000000001',
     'linkedin',
     'LinkedIn',
-    'https://www.linkedin.com/in/REQUIRES-USER-INPUT',   -- Q-02
+    'https://www.linkedin.com/in/moin-patell',   -- Q-02 resolved 2026-08-29
     'linkedin',
     true, true, 10,
-    false
+    true
   ),
 
   (
     '00000000-0000-4000-a200-000000000002',
     'github',
     'GitHub',
-    'https://github.com/REQUIRES-USER-INPUT',           -- Q-03
+    'https://github.com/moin-0patel',           -- Q-03 resolved 2026-08-29
     'github',
     true, true, 20,
-    false
+    true
   ),
 
   -- The one link we can stand behind today.

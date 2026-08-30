@@ -171,6 +171,34 @@ async function fetchPublishedProjects() {
 }
 
 /**
+ * SEO-04 — the site-wide social preview. `site_settings.default_og_image_path`
+ * is a public setting holding a path in the `profile` bucket; when set, every
+ * STATIC route's prerendered HTML carries it as og:image. Project routes keep
+ * their own og/cover precedence and fall back to this. Null (or no database)
+ * degrades to no og:image, exactly as before this existed.
+ */
+async function fetchDefaultOgImage() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return null
+  try {
+    const params = new URLSearchParams({
+      select: 'value',
+      key: 'eq.default_og_image_path',
+    })
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?${params.toString()}`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    })
+    if (!response.ok) return null
+    const rows = await response.json()
+    // Settings values are JSON; a string value arrives as '"path"'.
+    const raw = rows?.[0]?.value ?? null
+    const path = typeof raw === 'string' ? raw : null
+    return publicStorageUrl('profile', path)
+  } catch {
+    return null
+  }
+}
+
+/**
  * Strip every SEO tag from the shell, so injection always starts from a clean
  * <head>.
  *
@@ -258,6 +286,7 @@ const shell = await readFile(join(DIST, 'index.html'), 'utf8')
 const sitemapEntries = []
 
 // --- static routes ---------------------------------------------------------
+const defaultOgImage = await fetchDefaultOgImage()
 for (const route of STATIC_ROUTES) {
   const canonical = `${SITE_URL}${route.path === '/' ? '' : route.path}`
   await writeRoute(
@@ -266,7 +295,7 @@ for (const route of STATIC_ROUTES) {
       title: route.title,
       description: route.description,
       canonical,
-      image: null,
+      image: defaultOgImage,
       type: route.path === '/' ? 'profile' : 'website',
     }),
   )
@@ -294,10 +323,13 @@ if (projects) {
 
   for (const project of withCaseStudy) {
     const canonical = `${SITE_URL}/projects/${project.slug}`
-    // SEO-04 resolution order: project OG image -> project cover -> none.
+    // SEO-04 resolution order: project OG image -> project cover -> the
+    // site-wide default. A project link should never preview blank when the
+    // site has any image at all.
     const image =
       publicStorageUrl('projects', project.og_image_path) ??
-      publicStorageUrl('projects', project.cover_image_path)
+      publicStorageUrl('projects', project.cover_image_path) ??
+      defaultOgImage
 
     await writeRoute(
       `/projects/${project.slug}`,
@@ -330,6 +362,24 @@ if (projects) {
     )
   }
 }
+
+// --- 404.html --------------------------------------------------------------
+// Both hosting shapes use this: `serve` (the Render web service) and Render
+// static sites serve `404.html` with a 404 status for any path that matches
+// no file and no rewrite. It is the SPA shell, so after hydration the router
+// renders the branded NotFoundPage for whatever the path was. `noindex`
+// instead of a canonical: a 404 has no canonical URL, and the shell's default
+// homepage tags would otherwise make every dead link advertise the homepage.
+await writeFile(
+  join(DIST, '404.html'),
+  stripSeoTags(shell).replace(
+    '</head>',
+    `  <title>Page not found · ${SITE_NAME}</title>\n` +
+      `    <meta name="robots" content="noindex" />\n  </head>`,
+  ),
+  'utf8',
+)
+console.log('  ✓ 404.html (SPA shell, noindex)')
 
 // --- sitemap + robots ------------------------------------------------------
 await writeFile(join(DIST, 'sitemap.xml'), buildSitemap(sitemapEntries), 'utf8')

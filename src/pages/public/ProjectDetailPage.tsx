@@ -73,6 +73,7 @@ function CaseStudy({
     () =>
       [
         { id: 'overview', label: 'Overview', present: Boolean(project.descriptionMd) },
+        { id: 'role', label: 'My Role', present: Boolean(project.roleDescription) },
         { id: 'problem', label: 'The Problem', present: Boolean(project.problemMd) },
         { id: 'solution', label: 'The Solution', present: Boolean(project.solutionMd) },
         { id: 'how-it-works', label: 'How It Works', present: Boolean(project.howItWorksMd) },
@@ -260,6 +261,19 @@ function CaseStudy({
           {/* --- 2. Overview --- */}
           <Block id="overview" title="Overview" show={Boolean(project.descriptionMd)}>
             <Prose markdown={project.descriptionMd} />
+          </Block>
+
+          {/*
+           * --- 2b. My Role ---
+           *
+           * `role_description` existed in the schema, the fetch and the admin
+           * editor ("Your role — what did you personally do?") but no public
+           * surface ever rendered it — filled in by every project, shown by
+           * none. Plain text by design (the admin field is a single input,
+           * not markdown), so a <p> rather than <Prose>.
+           */}
+          <Block id="role" title="My Role" show={Boolean(project.roleDescription)}>
+            <p className="text-secondary measure text-lg">{project.roleDescription}</p>
           </Block>
 
           {/* --- 3. The Problem --- */}

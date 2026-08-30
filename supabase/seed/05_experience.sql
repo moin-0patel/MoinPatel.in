@@ -1,12 +1,8 @@
 -- =========================================================================
 -- 05_experience — PRD 15, 28.2
 --
--- ⚠ UNVERIFIED, and one open question still sits on these records:
---
---   Q-08  The exact legal entity name. The brief says "Bookends Private
---         Limited"; other material for the same group uses "Bookends
---         Hospitality Pvt. Ltd." The brief's wording is used below and must be
---         corrected against the resume before launch.
+--   Q-08  ANSWERED (owner, 2026-08-29): the entity is "Bookends Hospitality
+--         Pvt. Ltd." — matching the branding on the Performix landing page.
 --
 --   Q-09  ANSWERED (owner, 2026-08-28). The titles are NOT concurrent. The
 --         Bookends tenure is two SEQUENTIAL roles: Reservationist from April
@@ -43,7 +39,7 @@ insert into public.experience (
   start_date, end_date, is_current, summary_md, publication_state, sort_order
 ) values (
   '00000000-0000-4000-e000-000000000001',
-  'Bookends Private Limited',   -- Q-08
+  'Bookends Hospitality Pvt. Ltd.',   -- Q-08 resolved 2026-08-29
   null,
   'AI Automation Executive',
   'Full-time',
@@ -67,7 +63,7 @@ insert into public.experience (
   start_date, end_date, is_current, summary_md, publication_state, sort_order
 ) values (
   '00000000-0000-4000-e000-000000000002',
-  'Bookends Private Limited',   -- Q-08
+  'Bookends Hospitality Pvt. Ltd.',   -- Q-08 resolved 2026-08-29
   null,
   'Reservationist',
   'Full-time',
@@ -104,13 +100,17 @@ on conflict (id) do nothing;
 
 -- FR-EXP-04 — tools used in the role, drawn from the seeded technology list.
 --
--- All six sit on the Reservationist record: each is a reservation or storefront
--- platform, and the responsibility bullet above names four of them explicitly.
--- The AI role carries NO technology rows on purpose — the brief states what it
--- built ("AI-powered automation", "internal web applications") but never which
--- stack it used, and assigning one would be an invented fact under Principle 4.
--- Attach them once the resume confirms them.
+-- The six platform tools sit on the Reservationist record: each is a
+-- reservation or storefront platform, and the responsibility bullet above
+-- names four of them explicitly. The AI role's three tools were confirmed by
+-- the owner on 2026-08-29 (they previously stood empty rather than invented —
+-- Principle 4).
 insert into public.experience_technologies (experience_id, technology_id, sort_order) values
+  -- AI Automation Executive (owner-confirmed 2026-08-29)
+  ('00000000-0000-4000-e000-000000000001', '00000000-0000-4000-b000-000000000005', 10),  -- Gemini 2.5 Flash
+  ('00000000-0000-4000-e000-000000000001', '00000000-0000-4000-b000-000000000004', 20),  -- Google Apps Script
+  ('00000000-0000-4000-e000-000000000001', '00000000-0000-4000-b000-000000000007', 30),  -- Google Sheets
+  -- Reservationist
   ('00000000-0000-4000-e000-000000000002', '00000000-0000-4000-b000-000000000008', 10),  -- Petpooja POS
   ('00000000-0000-4000-e000-000000000002', '00000000-0000-4000-b000-00000000000c', 20),  -- Zomato Merchant
   ('00000000-0000-4000-e000-000000000002', '00000000-0000-4000-b000-00000000000d', 30),  -- Swiggy Merchant
