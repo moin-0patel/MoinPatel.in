@@ -224,7 +224,10 @@ function NavItem({ to, label }: { to: string; label: string }) {
       className={({ isActive }) =>
         cn(
           'font-display text-sm tracking-[0.06em] uppercase md:text-[0.95rem]',
-          'transition-colors duration-(--duration-hover) ease-(--ease-out)',
+          // `nav-weight-morph`, not `transition-colors` — the reference morphs
+          // the item's weight over 0.4s (font-variation-settings in the
+          // measured inventory) as well as its colours. See globals.css.
+          'nav-weight-morph',
           /*
            * The reference darkens the item's BACKGROUND under the pointer
            * (measured #ebeada -> #c9c8ba at 0.3s), not just its text.

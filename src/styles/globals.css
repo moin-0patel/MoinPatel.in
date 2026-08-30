@@ -661,3 +661,32 @@ details[open]::details-content {
     scale: 0.985;
   }
 }
+
+/* --- Nav weight morph -------------------------------------------------------
+ *
+ * The reference's nav items morph their WEIGHT, not just their colour: the
+ * measured inventory has `p.nav-webflow-text` transitioning
+ * `font-variation-settings` over 0.4s. Ours snapped between font-medium and
+ * font-semibold on route change because only colours were in the transition
+ * list. Geist is a variable font, so transitioning `font-weight` interpolates
+ * through the axis and reproduces the morph.
+ *
+ * One rule rather than Tailwind utilities because the durations differ per
+ * property — colours keep the site's hover token while the weight matches the
+ * reference's 0.4s — and a `transition-*` utility would overwrite the whole
+ * shorthand. Reduced motion collapses it with everything else: the duration
+ * tokens go to 0ms, and the literal 0.4s is guarded by the media query.
+ */
+.nav-weight-morph {
+  transition:
+    color var(--duration-hover) var(--ease-out),
+    background-color var(--duration-hover) var(--ease-out);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-weight-morph {
+    transition:
+      color var(--duration-hover) var(--ease-out),
+      background-color var(--duration-hover) var(--ease-out),
+      font-weight 0.4s ease;
+  }
+}
