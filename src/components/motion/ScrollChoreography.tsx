@@ -281,56 +281,153 @@ export function ScrollChoreography() {
          * extension point the chapter-loop comment promised Journey.
          */
         /*
-         * CHAPTER 01 HANDOFF — spec §4 ch01, unimplemented until 2026-08-30.
+         * THE HERO MORPH — Phase 6, the continuous scroll composition.
          *
-         * The reference's hero does not sit frozen while the page slides over
-         * it: scrolling away moves the composition at its own rates. The spec
-         * had already written the DOM half of this — "name and role title fade
-         * to opacity 0.15 and drift Y −30px — the one place text recedes" —
-         * but only the camera side was ever built.
+         * The forensic pass over the reference recording (2026-08-30) showed
+         * its hero does not scroll away: it DISASSEMBLES. The wordmark shrinks
+         * into a compact top-left mark, the headline drifts up and aside, the
+         * portrait scales up, holds the stage, and then fades into an
+         * atmospheric layer while the next section slides in over it. The
+         * earlier parallax exit (2026-08-30, one viewport of lag) was the
+         * first approximation; this replaces it.
          *
-         * SCRUBBED, not fired: the whole point is that the motion is coupled
-         * to the wheel, damped just enough (0.6s) to read as smooth rather
-         * than strapped on. `ease: 'none'` because the scrub IS the easing.
+         * MECHANISM. `hero-morph-scene` (added here, styled in globals.css)
+         * grows the section to 250svh, makes the composition wrapper a sticky
+         * 100svh stage, and pulls the following section up 100svh. This
+         * timeline then scrubs across the scene's 150svh of travel. Adding
+         * the class HERE keeps the standing failure contract: reduced motion
+         * never mounts this module, prerendered HTML never carries the class,
+         * and if this chunk fails to load the hero stays a plain viewport.
          *
-         * Safe by construction on the two metrics the hero is famous for
-         * breaking here:
-         *   LCP — at progress 0 every tween holds identity, so the first
-         *   paint is byte-identical to the boot shell, and Chrome stops LCP
-         *   observation at the first scroll anyway;
-         *   CLS — transforms never move layout, and the hero's own
-         *   overflow-hidden clips the parallax travel.
+         * The class must be added BEFORE any ScrollTrigger is created — it
+         * changes the document's geometry, and every trigger below measures
+         * against that geometry. The chapter timeline re-measures on its own
+         * (ResizeObserver on the sections), so the 3D camera's hero band
+         * stretches to cover the scene without any change there.
          *
-         * The wordmark travels furthest (it is the deepest layer), the figure
-         * about half that, and the identity plate takes the spec's exact
-         * recede. Reduced motion never mounts this module at all.
+         * SAFETY, same two metrics as ever:
+         *   LCP — every tween holds identity at progress 0, the first paint
+         *   stays byte-identical to the boot shell, and the class only grows
+         *   the document BELOW the fold;
+         *   CLS — transform/opacity only; the section's overflow-hidden
+         *   clips the wordmark's travel.
+         *
+         * `ease: 'none'` throughout — the scrub's damping is the easing.
          */
         const hero = document.querySelector<HTMLElement>('[data-chapter="hero"]')
-        if (hero) {
-          const heroExit = gsap.timeline({
+        if (hero && hero.querySelector('[data-hero-composition]')) {
+          hero.classList.add('hero-morph-scene')
+
+          const morph = gsap.timeline({
+            defaults: { ease: 'none' },
             scrollTrigger: {
               trigger: hero,
               start: 'top top',
-              end: 'bottom top',
+              // 'bottom bottom': progress completes as the scene's last
+              // viewport arrives — which, via the -100svh margin, is exactly
+              // when the next section has fully climbed over the stage.
+              end: 'bottom bottom',
               scrub: 0.6,
               invalidateOnRefresh: true,
             },
           })
-          const wordmark = hero.querySelector('[data-hero-wordmark]')
-          const figure = hero.querySelector('[data-hero-figure]')
-          const plate = hero.querySelector('[data-hero-recede]')
+
+          const wordmark = hero.querySelector<HTMLElement>('[data-hero-wordmark]')
+          const figure = hero.querySelector<HTMLElement>('[data-hero-figure]')
+          const plate = hero.querySelector<HTMLElement>('[data-hero-recede]')
+          const headline = hero.querySelector<HTMLElement>('[data-hero-headline]')
+          const ctas = hero.querySelector<HTMLElement>('[data-hero-ctas]')
+          const aside = hero.querySelector<HTMLElement>('[data-hero-aside]')
+
           /*
-           * Travel is viewport-relative, NOT yPercent: the wordmark and the
-           * figure wrapper have wildly different heights, so equal-feeling
-           * percentages inverted the depth (the foreground figure out-lagged
-           * the background wordmark). Depth order is: wordmark (deepest,
-           * ~14vh of lag), figure (~7vh), text plate (recedes upward).
-           * Function values so invalidateOnRefresh re-derives them on resize.
+           * WORDMARK -> COMPACT MARK. Scale + translate only, measured from
+           * the element's own box at build (and re-measured on refresh), so
+           * every viewport derives its own end state — no hard-coded desktop
+           * pixels. The end scale targets a ~44px-tall mark; the translate
+           * parks its left edge at the content gutter, just under the fixed
+           * header, where the reference parks its logo. transformOrigin is
+           * the element's top-left so the arithmetic is plain rect algebra.
            */
-          if (wordmark)
-            heroExit.to(wordmark, { y: () => window.innerHeight * 0.14, ease: 'none' }, 0)
-          if (figure) heroExit.to(figure, { y: () => window.innerHeight * 0.07, ease: 'none' }, 0)
-          if (plate) heroExit.to(plate, { opacity: 0.15, y: -30, ease: 'none' }, 0)
+          if (wordmark) {
+            gsap.set(wordmark, { transformOrigin: 'left top' })
+            /*
+             * All getters use LAYOUT metrics (offsetHeight, scrollWidth,
+             * viewport size), never getBoundingClientRect: rects are
+             * contaminated by the in-flight transform and the scroll position
+             * when invalidateOnRefresh re-runs these mid-scroll; layout
+             * metrics are transform-independent, so a refresh at any scroll
+             * position derives the same end state.
+             */
+            morph.to(
+              wordmark,
+              {
+                scale: () => Math.min(0.35, 44 / Math.max(1, wordmark.offsetHeight)),
+                x: () => {
+                  // The span is inset-x-0 with centred, overflowing text: its
+                  // painted left edge sits at (viewport - text width) / 2,
+                  // usually negative. Move that edge to the 24px gutter.
+                  const paintedLeft = (window.innerWidth - wordmark.scrollWidth) / 2
+                  return 24 - paintedLeft
+                },
+                // The stage is stuck at the viewport top throughout the
+                // morph, so stage coordinates ARE viewport coordinates: the
+                // wordmark's layout top is 7% of the 100svh stage, and the
+                // mark lands 16px under the 64px fixed header.
+                y: () => 64 + 16 - window.innerHeight * 0.07,
+              },
+              0,
+            )
+            // The mark thins out as the next section arrives so it never
+            // fights the incoming heading, but it never fully leaves —
+            // matching the reference, where the corner logo persists.
+            morph.to(wordmark, { opacity: 0.4, duration: 0.25 }, 0.75)
+          }
+
+          /*
+           * PORTRAIT: scale up through the first half (the reference's figure
+           * grows as the composition empties around it), then fade to an
+           * atmospheric 0.25 as the next section climbs over the stage. No
+           * blur — the recording's blur was a privacy edit, proven against
+           * the Phase 0 stills. transformOrigin bottom-centre keeps the
+           * figure planted on the stage floor while it grows.
+           */
+          if (figure) {
+            gsap.set(figure, { transformOrigin: 'center bottom' })
+            morph.to(figure, { scale: 1.16, duration: 0.55 }, 0)
+            morph.to(figure, { opacity: 0.25, duration: 0.4 }, 0.6)
+          }
+
+          // Identity plate: the spec's §4 ch01 recede, early in the morph.
+          if (plate) morph.to(plate, { opacity: 0.15, y: -30, duration: 0.4 }, 0)
+
+          /*
+           * HEADLINE: participates without vanishing — drifts up and slightly
+           * right, loses dominance (scale 0.94, opacity 0.35) but stays a
+           * legible artefact of the composition until the overlap covers it.
+           * The <p> and its tokens are untouched; transforms only.
+           */
+          if (headline) {
+            morph.to(
+              headline,
+              {
+                y: () => -window.innerHeight * 0.1,
+                x: () => window.innerWidth * 0.02,
+                scale: 0.94,
+                duration: 0.6,
+              },
+              0.1,
+            )
+            morph.to(headline, { opacity: 0.35, duration: 0.35 }, 0.5)
+          }
+
+          /*
+           * CTAs and the right band: autoAlpha, not opacity — at 0 they get
+           * visibility:hidden, which removes them from the tab order and from
+           * pointer reach while the next section scrolls over the stage. They
+           * are fully interactive at rest and through the first half.
+           */
+          if (ctas) morph.to(ctas, { autoAlpha: 0, duration: 0.3 }, 0.55)
+          if (aside) morph.to(aside, { autoAlpha: 0, duration: 0.3 }, 0.55)
         }
 
         const journeyCards = gsap.utils.toArray<HTMLElement>('[data-journey-card]')

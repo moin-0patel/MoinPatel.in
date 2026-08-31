@@ -416,12 +416,33 @@ try {
   const png = testPng(SOURCE_W, SOURCE_H)
 
   await gotoAdmin(page, '/admin/settings')
-  const fileInput = page.locator('input[type="file"]').first()
+  let fileInput = page.locator('input[type="file"]').first()
+
+  /*
+   * Since 2026-08-30 the owner's profile HAS an avatar, and the settings page
+   * renders the avatar-present branch: preview + alt + "Remove photo", with
+   * the uploader (and its file input) only appearing after Remove. Remove
+   * clears LOCAL form state only — nothing is saved — so clicking it here is
+   * side-effect-free, and doing so verifies the branch this check never
+   * exercised before: that the avatar-present UI still leads to the uploader.
+   */
+  if ((await fileInput.count()) === 0) {
+    const removeButton = page.locator('button', { hasText: /^Remove photo$/ }).first()
+    if ((await removeButton.count()) > 0) {
+      await removeButton.click()
+      await page.waitForTimeout(600)
+      fileInput = page.locator('input[type="file"]').first()
+    }
+  }
 
   if ((await fileInput.count()) === 0) {
-    check('the avatar uploader is present on /admin/settings', false, 'no file input found')
+    check(
+      'the avatar uploader is reachable on /admin/settings',
+      false,
+      'no file input found, in either avatar state',
+    )
   } else {
-    check('the avatar uploader is present on /admin/settings', true)
+    check('the avatar uploader is reachable on /admin/settings', true)
 
     await fileInput.setInputFiles({
       name: 'zz Verify Photo.png',

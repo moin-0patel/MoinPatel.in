@@ -100,13 +100,26 @@ img.portrait-matte {
   max-inline-size: none;
 }
 
-/* Inputs inherit type rather than falling back to the browser's default. */
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
+/*
+ * Inputs inherit type rather than falling back to the browser's default.
+ *
+ * IN @layer base ON PURPOSE — the exact opposite decision from the unlayered
+ * `img` rule below, and the difference is the intent. The img cap must beat
+ * utilities; this reset must LOSE to them. Unlayered, `color: inherit` and
+ * `font: inherit` outranked every `text-*` utility on real <button> elements
+ * (anchors styled via `asChild` escaped), which is how the admin's danger
+ * button shipped black-on-#741316 at 1.84:1 the first time an avatar existed
+ * for it to render against. Layered, the reset still covers bare inputs and
+ * loses to any utility the component actually declares.
+ */
+@layer base {
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
 }
 
 /* Long unbroken strings (URLs in case-study prose) must not blow out layout. */
@@ -660,6 +673,37 @@ details[open]::details-content {
   .press-dip:active {
     scale: 0.985;
   }
+}
+
+/* --- Hero morph scene -------------------------------------------------------
+ *
+ * The Phase-6 continuous Hero -> next-section transition (NESH reference).
+ * These rules are INERT until ScrollChoreography adds `hero-morph-scene` to
+ * the hero section at build time — the class is owned by the motion module so
+ * that reduced motion, prerendered HTML, and a failed module load all keep
+ * the plain 100svh hero (the module's standing failure contract).
+ *
+ * Mechanism: the section grows to 250svh while the composition wrapper
+ * becomes a sticky 100svh stage — the composition holds the viewport for 1.5
+ * extra viewport-heights while the scrubbed timeline disassembles it. The
+ * -100svh bottom margin makes the FOLLOWING section climb over the last
+ * stretch of the scene, so the statement enters while the (by then faded)
+ * portrait is still on stage — the overlap that makes the reference read as
+ * one continuous composition rather than a stack of sections.
+ *
+ * Native `position: sticky` rather than a ScrollTrigger pin: no pin-spacer
+ * injection, no transform hoisting, and the geometry is plain CSS the chapter
+ * timeline's observers can measure like any other layout.
+ */
+.hero-morph-scene {
+  min-height: 250svh;
+  margin-bottom: -100svh;
+}
+.hero-morph-scene [data-hero-composition] {
+  position: sticky;
+  top: 0;
+  min-height: unset;
+  height: 100svh;
 }
 
 /* --- Nav weight morph -------------------------------------------------------
