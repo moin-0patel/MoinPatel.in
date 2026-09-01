@@ -90,7 +90,7 @@ export function HeroSection() {
       // killer, and the morph scene pins the composition wrapper below. The
       // clipping the overflowing wordmark needs lives on that wrapper instead,
       // which at rest is this section's exact box.
-      className="relative"
+      className="relative lg:-ml-60"
     >
       {/*
        * THE COMPOSITION WRAPPER — the element the hero-morph scene pins.
@@ -110,7 +110,10 @@ export function HeroSection() {
        * bots, and a failed module load all keep this natural static layout —
        * the same failure contract every other beat in that module obeys.
        */}
-      <div data-hero-composition="" className="relative flex min-h-[100svh] flex-col overflow-hidden">
+      <div
+        data-hero-composition=""
+        className="relative flex min-h-[100svh] flex-col overflow-hidden"
+      >
         {/*
          * LAYER 1 — the wordmark.
          *

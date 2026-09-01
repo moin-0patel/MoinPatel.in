@@ -318,6 +318,24 @@ export function ScrollChoreography() {
         if (hero && hero.querySelector('[data-hero-composition]')) {
           hero.classList.add('hero-morph-scene')
 
+          /*
+           * THE RAIL (Phase 6, owner decision 2026-08-31). From lg the site's
+           * chrome is the reference's persistent left rail, and on Home it
+           * FORMS out of this morph: SiteRail renders `rail-home`
+           * (display:none) so the rest state is the signed-off header-only
+           * composition, this build lifts it, and the timeline below fades
+           * the header out while the rail's items stagger in — the recording's
+           * chrome handoff. Desktop-only: below lg there is no rail and the
+           * header keeps its place through the morph, exactly as shipped.
+           * Breakpoint is sampled at build; crossing 1024px mid-session takes
+           * a reload to re-arm, which matches the module's general contract.
+           */
+          const railDesktop = window.matchMedia('(min-width: 1024px)').matches
+          const rail = document.querySelector<HTMLElement>('[data-rail]')
+          const railLogo = rail?.querySelector<HTMLElement>('[data-rail-logo]') ?? null
+          if (railDesktop && rail) rail.classList.remove('rail-home')
+          const railActive = Boolean(railDesktop && rail)
+
           const morph = gsap.timeline({
             defaults: { ease: 'none' },
             scrollTrigger: {
@@ -358,76 +376,153 @@ export function ScrollChoreography() {
              * metrics are transform-independent, so a refresh at any scroll
              * position derives the same end state.
              */
+            /*
+             * TIMING, retuned 2026-08-31 against a frame-by-frame read of the
+             * reference recording (2fps burst over the transition): the
+             * REORGANISATION IS FAST — the wordmark reaches its compact end
+             * state within roughly the first third of the scene's travel —
+             * and the mark then persists at FULL opacity for the rest of the
+             * scroll (it becomes the reference's permanent corner logo). The
+             * first cut of this timeline spread the shrink across the whole
+             * scene and dimmed the mark to 0.4 at the end; both read wrong
+             * against the recording.
+             */
+            /*
+             * END STATE, two variants. With the rail (lg): the wordmark
+             * shrinks INTO the rail's logo slot — same left, same top, same
+             * height — and the crossfade below swaps them at landing, so the
+             * giant hero name literally becomes the rail logo. The rail is
+             * `position: fixed`, so its rects are scroll-stable and safe in
+             * refresh-time getters. Without the rail (tablet morph): the
+             * legacy corner mark, 24px gutter, 16px under the 64px header.
+             */
             morph.to(
               wordmark,
               {
-                scale: () => Math.min(0.35, 44 / Math.max(1, wordmark.offsetHeight)),
+                scale: () => {
+                  if (railActive && railLogo)
+                    return Math.max(
+                      0.04,
+                      railLogo.offsetHeight / Math.max(1, wordmark.offsetHeight),
+                    )
+                  return Math.min(0.35, 44 / Math.max(1, wordmark.offsetHeight))
+                },
                 x: () => {
                   // The span is inset-x-0 with centred, overflowing text: its
                   // painted left edge sits at (viewport - text width) / 2,
-                  // usually negative. Move that edge to the 24px gutter.
+                  // usually negative.
                   const paintedLeft = (window.innerWidth - wordmark.scrollWidth) / 2
+                  if (railActive && railLogo)
+                    return railLogo.getBoundingClientRect().left - paintedLeft
                   return 24 - paintedLeft
                 },
                 // The stage is stuck at the viewport top throughout the
-                // morph, so stage coordinates ARE viewport coordinates: the
-                // wordmark's layout top is 7% of the 100svh stage, and the
-                // mark lands 16px under the 64px fixed header.
-                y: () => 64 + 16 - window.innerHeight * 0.07,
+                // morph, so stage coordinates ARE viewport coordinates; the
+                // wordmark's layout top is 7% of the 100svh stage.
+                y: () => {
+                  if (railActive && railLogo)
+                    return railLogo.getBoundingClientRect().top - window.innerHeight * 0.07
+                  return 64 + 16 - window.innerHeight * 0.07
+                },
+                duration: 0.38,
               },
               0,
             )
-            // The mark thins out as the next section arrives so it never
-            // fights the incoming heading, but it never fully leaves —
-            // matching the reference, where the corner logo persists.
-            morph.to(wordmark, { opacity: 0.4, duration: 0.25 }, 0.75)
+            // No opacity tween here: the mark never dims. With the rail, the
+            // crossfade below replaces it with the rail's own logo instead.
           }
 
           /*
-           * PORTRAIT: scale up through the first half (the reference's figure
-           * grows as the composition empties around it), then fade to an
-           * atmospheric 0.25 as the next section climbs over the stage. No
-           * blur — the recording's blur was a privacy edit, proven against
-           * the Phase 0 stills. transformOrigin bottom-centre keeps the
-           * figure planted on the stage floor while it grows.
+           * RAIL FORMATION + CHROME HANDOFF (lg only). Items are armed
+           * hidden, stagger in through the reorganisation, and the top
+           * header fades out as they arrive. The logo slot stays empty until
+           * the shrinking wordmark lands on it (0.36-0.45), then the two
+           * crossfade — scrubbed, so scrolling back up hands the chrome
+           * back and reassembles the giant name.
+           */
+          if (railActive && rail) {
+            /*
+             * Armed at the CONTAINER, not per item: the rail's blurb, email
+             * and availability mount only after their queries resolve, and a
+             * per-item gsap.set taken at build time missed whichever of them
+             * arrived late — they floated over the hero at rest. Hiding the
+             * container gates every child, present or future; the per-item
+             * stagger below targets only the nav links, which are static and
+             * guaranteed to exist at build.
+             */
+            gsap.set(rail, { autoAlpha: 0 })
+            if (railLogo) gsap.set(railLogo, { autoAlpha: 0 })
+            const railLinks = gsap.utils.toArray<HTMLElement>(rail.querySelectorAll('nav a'))
+            gsap.set(railLinks, { autoAlpha: 0, y: 12 })
+
+            const headerEl = document.querySelector<HTMLElement>('header')
+            if (headerEl) morph.to(headerEl, { autoAlpha: 0, duration: 0.18 }, 0.08)
+            morph.to(rail, { autoAlpha: 1, duration: 0.2 }, 0.14)
+            morph.to(railLinks, { autoAlpha: 1, y: 0, duration: 0.26, stagger: 0.02 }, 0.18)
+            if (railLogo) {
+              morph.to(railLogo, { autoAlpha: 1, duration: 0.07 }, 0.36)
+              if (wordmark) morph.to(wordmark, { autoAlpha: 0, duration: 0.07 }, 0.38)
+            }
+          }
+
+          /*
+           * PORTRAIT: in the recording it barely moves — no meaningful scale,
+           * no early fade. It holds the centre at full presence while the
+           * rail forms and the About content rolls straight over it, and it
+           * is still clearly visible several sections later. So: a whisper of
+           * scale (1.06) during the reorganisation, and a late, partial fade
+           * to 0.45 — present enough to stay the composition's anchor,
+           * recessed enough that the statement set over it stays legible
+           * (verify:ui's overlay-contrast sweep is the check on that). No
+           * blur — the recording's blur is a privacy edit, proven against
+           * the Phase 0 stills.
            */
           if (figure) {
             gsap.set(figure, { transformOrigin: 'center bottom' })
-            morph.to(figure, { scale: 1.16, duration: 0.55 }, 0)
-            morph.to(figure, { opacity: 0.25, duration: 0.4 }, 0.6)
+            morph.to(figure, { scale: 1.06, duration: 0.4 }, 0)
+            morph.to(figure, { opacity: 0.45, duration: 0.4 }, 0.55)
           }
 
           // Identity plate: the spec's §4 ch01 recede, early in the morph.
-          if (plate) morph.to(plate, { opacity: 0.15, y: -30, duration: 0.4 }, 0)
+          if (plate) morph.to(plate, { opacity: 0.15, y: -30, duration: 0.35 }, 0)
 
           /*
-           * HEADLINE: participates without vanishing — drifts up and slightly
-           * right, loses dominance (scale 0.94, opacity 0.35) but stays a
-           * legible artefact of the composition until the overlap covers it.
-           * The <p> and its tokens are untouched; transforms only.
+           * HEADLINE: the recording's headline never dims in place — it rides
+           * UP to the top band beside the shrinking wordmark, fully legible
+           * (the "NESH® / Applied Differently." title row), and then EXITS
+           * off the top edge as About arrives. Two phases here: the ride
+           * (opacity 1 throughout), then the exit — translate past the top,
+           * fading only as it leaves. The <p> and its tokens are untouched.
            */
           if (headline) {
             morph.to(
               headline,
               {
-                y: () => -window.innerHeight * 0.1,
-                x: () => window.innerWidth * 0.02,
-                scale: 0.94,
-                duration: 0.6,
+                y: () => -window.innerHeight * 0.52,
+                x: () => window.innerWidth * 0.16,
+                scale: 0.55,
+                duration: 0.38,
               },
-              0.1,
+              0.02,
             )
-            morph.to(headline, { opacity: 0.35, duration: 0.35 }, 0.5)
+            // The fade LEADS the travel: opacity reaches 0 while the line is
+            // still in the stage's upper third, so it never crosses the fixed
+            // header half-visible (the reference has no chrome to cross — its
+            // header is the rail the morph is building).
+            morph.to(headline, { y: () => -window.innerHeight * 0.85, duration: 0.3 }, 0.66)
+            morph.to(headline, { autoAlpha: 0, duration: 0.14 }, 0.66)
           }
 
           /*
-           * CTAs and the right band: autoAlpha, not opacity — at 0 they get
-           * visibility:hidden, which removes them from the tab order and from
-           * pointer reach while the next section scrolls over the stage. They
-           * are fully interactive at rest and through the first half.
+           * CTAs and the right band: the reference keeps its call-to-action
+           * alive almost to the end (it migrates into the rail and never
+           * dies). Without a rail to receive them, ours stay interactive
+           * until the incoming section is about to cover the stage, then
+           * autoAlpha out — visibility:hidden at 0 removes them from the tab
+           * order and pointer reach under the overlap.
            */
-          if (ctas) morph.to(ctas, { autoAlpha: 0, duration: 0.3 }, 0.55)
-          if (aside) morph.to(aside, { autoAlpha: 0, duration: 0.3 }, 0.55)
+          if (ctas) morph.to(ctas, { autoAlpha: 0, duration: 0.18 }, 0.8)
+          if (aside) morph.to(aside, { autoAlpha: 0, duration: 0.18 }, 0.8)
         }
 
         const journeyCards = gsap.utils.toArray<HTMLElement>('[data-journey-card]')

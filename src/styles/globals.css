@@ -734,3 +734,8 @@ details[open]::details-content {
       font-weight 0.4s ease;
   }
 }
+
+/* The Home rail is hidden until the hero morph forms it — see SiteRail. */
+.rail-home {
+  display: none;
+}

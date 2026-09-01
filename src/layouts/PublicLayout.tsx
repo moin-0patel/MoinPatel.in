@@ -99,9 +99,10 @@ export function PublicLayout() {
       </a>
 
       <Header />
+      <SiteRail />
 
       {/* A11Y-01 — one <main> landmark, targeted by the skip link. */}
-      <main id="main" className={cn('flex-1', !isHome && 'pt-8 md:pt-0')}>
+      <main id="main" className={cn('flex-1 lg:pl-60', !isHome && 'pt-8 md:pt-0')}>
         <Outlet />
       </main>
 
@@ -127,8 +128,24 @@ function Header() {
    * unusable. Same visual language, out of flow as the reference has it, with
    * the vertical placement as the one deliberate divergence.
    */
+  /*
+   * CHROME HANDOFF, since the Phase-6 rail (2026-08-31, owner decision).
+   *
+   * From lg the SiteRail is the site's chrome — the reference's model, where
+   * a persistent left rail carries logo, navigation and the call-to-action
+   * and there is no top bar. So on every route EXCEPT Home this header is
+   * `lg:hidden`. On Home it stays, because the rail does not exist at rest
+   * there: the recording shows the rail FORMING out of the hero morph, and at
+   * rest the giant wordmark runs full-bleed through the space the rail will
+   * occupy. ScrollChoreography fades this header out as the rail staggers in;
+   * under reduced motion (or with the module unloaded) Home simply keeps this
+   * header for the whole page, which is the signed-off pre-rail behaviour.
+   * Below lg nothing changed anywhere: the bar at 768-1023, the sheet under
+   * 768.
+   */
+  const isHome = useLocation().pathname === '/'
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <header className={cn('fixed inset-x-0 top-0 z-50', !isHome && 'lg:hidden')}>
       {/*
        * FIXED CHROME, NOT A BAR IN FLOW — and that is what makes the 64px
        * token usable at all. Header, MobileNavPanel and the boot shell in
@@ -208,6 +225,157 @@ function Header() {
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * SiteRail — the reference's persistent left rail, Phase 6 (owner decision
+ * 2026-08-31). From lg it IS the chrome: the top header is hidden and this
+ * fixed 240px column carries the wordmark logo, the positioning line, the
+ * SAME six routes plus the Resume action, availability, location, email and
+ * the primary CTA. Everything on it is real, already-published content — the
+ * reference's stat cards, client logos and blurb card have no truthful
+ * equivalent and are simply absent (Mode D, Principle 4).
+ *
+ * On Home the hero morph crossfades the shrinking wordmark into
+ * `data-rail-logo` (ScrollChoreography owns that; without the module the
+ * logo is simply visible). The rail never renders under lg — the mobile
+ * sheet and the 768-1023 header keep their signed-off behaviour.
+ */
+function SiteRail() {
+  const { data: profile } = useProfile()
+  const { data: settings } = useSettings()
+  const availabilityLabel = settings?.availabilityLabel
+  const showAvailability = Boolean(profile?.availableForWork && availabilityLabel)
+
+  /*
+   * On Home the rail is `rail-home` (display:none, globals.css) until
+   * ScrollChoreography lifts it at build and staggers it in during the hero
+   * morph. That keeps every non-motion path coherent: reduced motion and
+   * no-JS Home render the header-only rest state, other routes render the
+   * static rail, and nothing ever shows both chromes at once.
+   */
+  const isHome = useLocation().pathname === '/'
+
+  return (
+    <aside
+      aria-label="Site navigation and contact"
+      data-rail=""
+      className={cn(
+        'fixed inset-y-0 left-0 z-40 hidden w-60 flex-col justify-between overflow-y-auto px-6 pt-6 pb-8 lg:flex',
+        isHome && 'rail-home',
+      )}
+    >
+      <div>
+        <NavLink
+          to="/"
+          data-rail-logo=""
+          className="text-[color:var(--color-accent-word)] font-display inline-block text-lg leading-none font-bold tracking-[-0.02em]"
+          aria-label={`${profile?.fullName ?? 'Moin Patel'} — home`}
+        >
+          {(profile?.fullName ?? 'Moin Patel').toUpperCase()}
+        </NavLink>
+
+        {profile?.positioningLine && (
+          <p className="text-secondary mt-4 text-xs leading-relaxed">{profile.positioningLine}</p>
+        )}
+
+        <nav aria-label="Site" className="mt-8">
+          <ul className="flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => (
+              <li key={item.to}>
+                <RailItem to={item.to} label={item.label} />
+              </li>
+            ))}
+            <RailResumeItem />
+          </ul>
+        </nav>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {showAvailability && (
+          <p className="text-success inline-flex items-center gap-2 font-mono text-xs tracking-(--tracking-mono) uppercase">
+            <span className="bg-success size-1.5 shrink-0 rounded-full" aria-hidden="true" />
+            {availabilityLabel}
+          </p>
+        )}
+
+        {profile?.location && (
+          <p className="text-muted font-mono text-xs tracking-(--tracking-mono) uppercase">
+            {profile.location}
+          </p>
+        )}
+
+        {profile?.emailPublic && (
+          <a
+            href={`mailto:${profile.emailPublic}`}
+            className="text-secondary hover:text-primary truncate font-mono text-xs transition-colors duration-(--duration-hover) ease-(--ease-out)"
+          >
+            {profile.emailPublic}
+          </a>
+        )}
+
+        <Button size="sm" className="w-full rounded-full" asChild>
+          <NavLink to="/contact">Let&rsquo;s Talk</NavLink>
+        </Button>
+      </div>
+    </aside>
+  )
+}
+
+/**
+ * A rail navigation link. Unlike the top header's NavItem (where the
+ * reference marks nothing with a background), the reference's RAIL does
+ * highlight the active route with a filled pill — measured in the recording's
+ * about phase, where ABOUT ME carries the accent plate.
+ */
+function RailItem({ to, label }: { to: string; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      end={to === '/'}
+      data-rail-item=""
+      className={({ isActive }) =>
+        cn(
+          'font-display block rounded-full px-3 py-1.5 text-sm tracking-[0.06em] uppercase',
+          'nav-weight-morph',
+          isActive
+            ? 'bg-accent-soft text-accent font-semibold'
+            : 'text-secondary hover:text-primary hover:bg-surface font-medium',
+        )
+      }
+    >
+      {label}
+    </NavLink>
+  )
+}
+
+/** FR-NAV-01's Resume action, in rail form. Same gates as the header's. */
+function RailResumeItem() {
+  const { data: resume, isPending } = usePublishedResume()
+  const { data: settings } = useSettings()
+
+  if (isPending || !resume || settings?.navResumeVisible === false) return null
+
+  return (
+    <li className="border-subtle mt-2 border-t pt-2">
+      <NavLink
+        to="/resume"
+        data-rail-item=""
+        className={({ isActive }) =>
+          cn(
+            'font-display flex items-center gap-2 rounded-full px-3 py-1.5 text-sm tracking-[0.06em] uppercase',
+            'nav-weight-morph',
+            isActive
+              ? 'bg-accent-soft text-accent font-semibold'
+              : 'text-secondary hover:text-primary hover:bg-surface font-medium',
+          )
+        }
+      >
+        <Download className="size-3.5" aria-hidden="true" />
+        Resume
+      </NavLink>
+    </li>
   )
 }
 
@@ -385,7 +553,7 @@ function Footer() {
   const footerSocials = (socialLinks ?? []).filter((link) => link.showInFooter)
 
   return (
-    <footer className="mt-24" role="contentinfo">
+    <footer className="mt-24 lg:pl-60" role="contentinfo">
       {/*
        * THE CLOSING WORDMARK — the reference's most distinctive sign-off.
        *
