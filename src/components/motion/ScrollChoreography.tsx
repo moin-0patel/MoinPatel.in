@@ -559,9 +559,21 @@ export function ScrollChoreography() {
               ease: 'power2.out',
               scrollTrigger: {
                 trigger: card,
-                start: 'top 92%',
-                end: 'top 55%',
-                scrub: 1.2,
+                /*
+                 * A TIGHT window low in the viewport — retuned 2026-08-31.
+                 * The first cut ran 92% -> 55%: a third of a viewport of
+                 * scroll during which the card lagged its slot, and a
+                 * lagging card SINKS relative to the content around it —
+                 * the owner saw the journey "going downwards" where the
+                 * reference rises. In the recording the ghost enters just
+                 * below its resting place and pops up crisply while still
+                 * in the lower quarter of the screen; 96% -> 78% with
+                 * lighter damping reproduces that read, still fully
+                 * scrubbed and reversible.
+                 */
+                start: 'top 96%',
+                end: 'top 78%',
+                scrub: 0.8,
                 invalidateOnRefresh: true,
               },
             },
